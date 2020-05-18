@@ -1,0 +1,33 @@
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+}
+
+.main-pane {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  overflow: auto;
+}
+
+.left-pane {
+  flex: 1;
+  border-right: 1px solid #e8e8e8;
+  overflow: auto;
+}
+
+.right-pane {
+  flex: 1;
+  overflow: auto;
+}
+
+.app-bar {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.analysis-panel {
+  width: 100%;
+  margin: 10px;
+}

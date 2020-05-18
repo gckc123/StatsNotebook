@@ -1,0 +1,75 @@
+.analysis-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding: 0px;
+    margin: 0px;
+}
+
+.analysis-pane-box {
+    flex: 1;
+    padding: 0px;
+    margin: 0px;
+}
+
+.Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows: 25px 40px 25px 40px 25px 100px 25px 200px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.Variable-Selection-Box > div {
+    padding-bottom: 5px;
+}
+
+.Available-Variable-List-Container {
+    grid-row-start: 2;
+    grid-row-end: 9;
+}
+
+.AvailableVariableList {
+    overflow: auto;
+    border: 1px solid #e8e8e8;
+    background: white;
+    height: 100%;
+}
+
+.OutcomeVariableList {
+    overflow: auto;
+    border: 1px solid #e8e8e8;
+    background: white;
+    height: 40px;
+}
+
+.ExposureVariableList {
+    overflow: auto;
+    border: 1px solid #e8e8e8;
+    background: white;
+    height: 40px;
+}
+
+.MediatorVariableList {
+    overflow: auto;
+    border: 1px solid #e8e8e8;
+    background: white;
+    height: 95px;
+}
+
+.CovariateVariableList {
+    overflow: auto;
+    border: 1px solid #e8e8e8;
+    background: white;
+    height: 100%;
+}
+
+.VariableListItem {
+    height: 22px;
+}
+
+.VariableListText {
+    font-size: 12px;
+}
+

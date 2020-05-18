@@ -1,0 +1,26 @@
+.ROutputText {
+    text-align: left;
+    white-space: pre-wrap;
+    color: dodgerblue;
+  }
+
+.notebook-block {
+  width: 100%;
+  border: 1px solid black;
+}
+
+.active-block {
+    border: 1px solid black;
+}
+
+.inactive-block {
+    border: 1px solid #e8e8e8;
+}
+
+.Normal {
+  color: dimgray;
+}
+
+.Warning {
+  color: hotpink;
+}
