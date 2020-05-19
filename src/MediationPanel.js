@@ -209,7 +209,7 @@ export class MediationPanel extends Component {
 
   render () {
     return (
-      <div className="mt-2" onBlur={this.buildCode}>        
+      <div className="mt-2" onBlur={this.buildCode} onMouseLeave={this.buildCode}>        
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>

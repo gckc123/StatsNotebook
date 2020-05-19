@@ -4,8 +4,10 @@ import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import NativeSelect from '@material-ui/core/NativeSelect';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import InputLabel from '@material-ui/core/InputLabel';
+import TextField from '@material-ui/core/TextField';
+import Checkbox from '@material-ui/core/Checkbox';
+import Divider from '@material-ui/core/Divider';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 
 const StyledNativeSelect = withStyles({
@@ -33,14 +35,13 @@ export class MediationAnalysisSetting extends Component {
         return (
             varList.map((item) => {
                 return (
-                    <tr key={item}>
-                        <td className="ModelSelectionVarCol">    
+                    <>
+                        <div className="ModelSelectionVarCol">    
                             {item}
-                        </td>
-                        <td>
+                        </div>
+                        <div>
                             <FormControl>
-                                <StyledNativeSelect
-                                
+                                <StyledNativeSelect                                
                                 defaultValue={"regression"}
                                 inputProps={{style: {fontSize: 14}}}
                                 variant="filled">
@@ -49,8 +50,8 @@ export class MediationAnalysisSetting extends Component {
                                 <option value={"poisson regression"}>Poisson regression (Count variable)</option>
                                 </StyledNativeSelect>
                             </FormControl>
-                        </td>   
-                    </tr>
+                        </div>   
+                    </>
                 )
             })
         )
@@ -59,25 +60,25 @@ export class MediationAnalysisSetting extends Component {
     render () {
         return (
             <div>
-                <table className="mb-3">
-                    <tr>
-                        <td className="ModelSelectionVarCol">Variables</td>
-                        <td>Models</td>
-                    </tr>
+                <div className="ModelSelectionBox">
+                    <div>Variables</div>
+                    <div>Models</div>
+                    
                     {this.genModelSelection()}
-                </table>
-                <table>
-                    <tr>
-                        <td className="ModelSelectionOptionName">Treatment Level:</td>
-                        <td className="ModelSelectionOptionInput">INPUT</td>
-                        <td className="ModelSelectionOptionName">Control Level:</td>
-                        <td className="ModelSelectionOptionInput">INPUT</td>
-                    </tr>
-                    <tr>
-                        <td>Confidence level:</td>
-                        <td>0.95</td>
-                            <td>Simulation:</td><td>
-                            <FormControl>
+                </div>
+                
+                <Divider className="mt-2 mb-2"/>
+                
+                <div className = "ModelSelectionOptionSet">
+                    <div className="InvisibleBottomBorder">Treatment level:</div>
+                    <div><input className="ModelSelectionInput"/></div>
+                    <div className="InvisibleBottomBorder">Control level:</div>
+                    <div><input className="ModelSelectionInput"/></div>
+                    <div>Confidence Intervel:</div>
+                    <div><input className="ModelSelectionInput"/>%</div>
+                    <div>Simulation:</div>
+                    <div>
+                        <FormControl>
                                 <StyledNativeSelect
                                 defaultValue={1000}
                                 inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
@@ -89,11 +90,16 @@ export class MediationAnalysisSetting extends Component {
                                 <option value={20000}>20000</option>
                                 <option value={50000}>50000</option>
                                 </StyledNativeSelect>
-                            </FormControl>
-                            </td>
-                    </tr>
+                        </FormControl>
+                    </div>
+                </div>
+
+                <Divider className="mt-2 mb-2"/>
+
+                <table>
+                    
                     <tr>
-                        <td colSpan="4">Impute missing data</td>
+                        <td colSpan="4" className="testing1"><Checkbox className="testing1" size="small"/>Impute missing data</td>
                     </tr>    
                 </table>         
             </div>
