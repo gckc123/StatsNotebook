@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { MediationVariableSelection } from './MediationVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
+import { MediationAnalysisSetting } from "./MediationAnalysisSetting";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -64,7 +65,7 @@ export class MediationPanel extends Component {
             Exposure: [],
             Mediator: [],
             Covariate: []
-        },
+        }, 
         Checked: {
             Available: [],
             Outcome: [],
@@ -79,7 +80,18 @@ export class MediationPanel extends Component {
             Covariate: false
         },
         tentativeScript: "",
-        expandedVariableSelection: true,
+        panels: {
+          variableSelection: false,
+          analysisSetting: false,
+        },
+        AnalysisSetting: {
+          Models: {},
+          Treat_lv: 1,
+          Control_lv: 0,
+          Conf_lv: 0.95,
+          Simulation: 1000,
+          Complete_analysis: "true",
+        }
     }
   }
 
@@ -105,8 +117,6 @@ export class MediationPanel extends Component {
         this.setState({Variables:{...VariablesObj}})
         this.setState({Checked: {...CheckedObj}})
     }
-    //Build code
-    this.buildCode()
   }
 
   intersection = (array1, array2) => {
@@ -172,25 +182,38 @@ export class MediationPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
+
+  //This function needs to be updated when more panels are added
+  //Currently this is called in ComponentDidUpdate() 
+  //This is problematic when there are more than 1 panel!
   buildCode = () => {
     let codeString = "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
-    " med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
-    " treat = \""+ this.state.Variables.Exposure[0] + "\",\n"+
+    "med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
+    "treat = \""+ this.state.Variables.Exposure[0] + "\",\n"+
     "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n"+
-    " ymodel = \"logistic regression\",\n"+
+    "ymodel = \"logistic regression\",\n"+
     "mmodel = c(\"logistic regression\", \"logistic regression\"),\n"+
     "treat_lv = 1, control_lv = 0, conf.level = 0.9,\n" +
     "data = currentDataset, sim = 100, digits = 3,\n" + 
-    " HTML_report = FALSE, complete_analysis = TRUE)"
+    "HTML_report = FALSE, complete_analysis = TRUE)"
     this.props.updateTentativeScriptCallback(codeString)
+    console.log("building code!")
+  }
+
+  handlePanelExpansion = (target) => (event, newExpanded) => {
+    let panelsObj = this.state.panels
+    panelsObj[target] = !panelsObj[target]
+    this.setState({panels: panelsObj})
+
   }
 
   render () {
     return (
-      <div className="mt-2">        
-        <ExpansionPanel square expanded={this.state.expandedVariableSelection}>
+      <div className="mt-2" onBlur={this.buildCode}>        
+        <ExpansionPanel square expanded={this.state.panels.variableSelection}
+        onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Mediation analysis</Typography>
+            <Typography>Causal Mediation Analysis - Variables Selection</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <MediationVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
@@ -205,7 +228,16 @@ export class MediationPanel extends Component {
             handleToLeftCallback = {this.handleToLeft}
             />
           </ExpansionPanelDetails>
-        </ExpansionPanel>      
+        </ExpansionPanel>  
+        <ExpansionPanel square expanded={this.state.panels.analysisSetting}
+        onChange = {this.handlePanelExpansion("analysisSetting")}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+            <Typography>Analysis Setting</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <MediationAnalysisSetting Variables = {this.state.Variables}/>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>    
       </div>
     )
   }

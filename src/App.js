@@ -172,12 +172,15 @@ export class App extends Component {
             <TopNavTabs openFileCallback = {this.openFile}/>
             <div className="main-pane">
               <div className="left-pane p-2">
+                <div hidden={false}>
                   <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlk}
                   runScriptCallback = {this.runScript}
                   tentativeScript = {this.state.tentativeScript}/>
                   <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
                   updateTentativeScriptCallback = {this.updateTentativeScript}
                   tentativeScript = {this.state.tentativeScript}/>
+                </div>
+
               </div>
               <div className="right-pane p-2">
                   <Notebook
