@@ -30,7 +30,7 @@ export class NotebookBar extends Component {
                 <StyledButton disableRipple onClick={this.props.runScriptCallback}> 
                     <FontAwesomeIcon icon={faPlay}/><div className="ml-1">Run</div>
                 </StyledButton>
-                <StyledButton disableRipple onClick={ () => this.props.addExtraBlkCallback("")}>
+                <StyledButton disableRipple onClick={ () => this.props.addExtraBlkCallback("",false)}>
                     <FontAwesomeIcon icon={faPlus}/><div className="ml-1">Add</div>
                 </StyledButton>
                 <StyledButton disableRipple onClick={this.props.delBlkCallback}>

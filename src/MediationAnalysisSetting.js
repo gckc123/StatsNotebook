@@ -1,13 +1,11 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
-import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import NativeSelect from '@material-ui/core/NativeSelect';
-import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
-import InputAdornment from '@material-ui/core/InputAdornment';
+
 
 
 const StyledNativeSelect = withStyles({
@@ -24,34 +22,72 @@ const StyledNativeSelect = withStyles({
             outline: "0px",
         }
     }
-    
   })(NativeSelect);
   
 
 export class MediationAnalysisSetting extends Component {
     
+    constructor(props) {
+        super(props)
+        this.state = {
+
+                Models: {},
+                Treat_lv: 1,
+                Control_lv: 0,
+                Conf_lv: 0.95,
+                Simulation: 1000,
+                Complete_analysis: true,
+
+        }
+    }
+
+    updateModelSelection = (event) => {
+        //this.setState({Models:{...this.state.Models,[event.target.name]:event.target.value}})
+        //console.log(Models)
+    }
+
+    updateTreatmentLv = (event) => {
+        this.setState({Treat_lv: event.target.value})
+    }
+
+    updateControlLv = (event) => {
+        this.setState({Control_lv: event.target.value})
+    }
+
+    updateSimulation = (event) => {
+        this.setState({Simulation: event.target.value})
+        //console.log(event.target.value)
+    }
+
+    updateCI = (event) => {
+        this.setState({Conf_lv: event.target.value/100})
+    }
+
     genModelSelection = () => {
         let varList = this.props.Variables.Outcome.concat(this.props.Variables.Mediator)
         return (
             varList.map((item) => {
                 return (
-                    <>
+                    <div className="ModelSelectionBox" key={item}>
                         <div className="ModelSelectionVarCol">    
                             {item}
                         </div>
                         <div>
                             <FormControl>
                                 <StyledNativeSelect                                
-                                defaultValue={"regression"}
+                                defaultValue={""}
                                 inputProps={{style: {fontSize: 14}}}
-                                variant="filled">
+                                variant="filled"
+                                name={item}
+                                onChange={this.updateModelSelection}>
+                                <option value={""}>----- Select Model -----</option>
                                 <option value={"regression"}>Regression (Continuous variable)</option>
                                 <option value={"logistic regression"}>Logistic regression (Dichotomized variable)</option>
                                 <option value={"poisson regression"}>Poisson regression (Count variable)</option>
                                 </StyledNativeSelect>
                             </FormControl>
                         </div>   
-                    </>
+                    </div>
                 )
             })
         )
@@ -63,24 +99,28 @@ export class MediationAnalysisSetting extends Component {
                 <div className="ModelSelectionBox">
                     <div>Variables</div>
                     <div>Models</div>
-                    
-                    {this.genModelSelection()}
-                </div>
+                </div>    
+                {this.genModelSelection()}
+                
                 
                 <Divider className="mt-2 mb-2"/>
                 
                 <div className = "ModelSelectionOptionSet">
                     <div className="InvisibleBottomBorder">Treatment level:</div>
-                    <div><input className="ModelSelectionInput"/></div>
+                    <div><input className="ModelSelectionInput" 
+                    onChange={this.updateTreatmentLv} value={this.state.Treat_lv}/></div>
                     <div className="InvisibleBottomBorder">Control level:</div>
-                    <div><input className="ModelSelectionInput"/></div>
+                    <div><input className="ModelSelectionInput" 
+                    onChange={this.updateControlLv} value={this.state.Control_lv}/></div>
                     <div>Confidence Intervel:</div>
-                    <div><input className="ModelSelectionInput"/>%</div>
+                    <div><input className="ModelSelectionInput"
+                    onChange={this.updateCI} value={this.state.Conf_lv*100}/>%</div>
                     <div>Simulation:</div>
                     <div>
                         <FormControl>
                                 <StyledNativeSelect
-                                defaultValue={1000}
+                                defaultValue={this.state.Simulation}
+                                onChange={this.updateSimulation}
                                 inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
                                 <option value={100}>100</option>
                                 <option value={1000}>1000</option>
@@ -96,12 +136,8 @@ export class MediationAnalysisSetting extends Component {
 
                 <Divider className="mt-2 mb-2"/>
 
-                <table>
+                <Checkbox className="testing1" size="small"/>Impute missing data
                     
-                    <tr>
-                        <td colSpan="4" className="testing1"><Checkbox className="testing1" size="small"/>Impute missing data</td>
-                    </tr>    
-                </table>         
             </div>
         )
     }

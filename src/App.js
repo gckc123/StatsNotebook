@@ -48,10 +48,11 @@ export class App extends Component {
           this.setState({NotebookBlkList:[...tmp]})
         }
       }else if (ResultsJSON.OutputType[0] === "getVariableList") {
+        
         this.setState({CurrentVariableList: ResultsJSON.Output})
       }
     })
-
+    
     ipcRenderer.on('file-opened', (event, directory, filename, ext, os) => {
       if (os === "win32") {
         directory = directory.replace(/\\/g,"\\\\")
@@ -75,8 +76,9 @@ export class App extends Component {
         default:
           break;
       }
-      this.addExtraBlk(script)
-      this.runScript();      
+      //Potential updating pitfall here??
+      this.addExtraBlk(script, true)
+         
     })
   }
 
@@ -85,22 +87,34 @@ export class App extends Component {
     ipcRenderer.removeAllListeners('file-opened')
   }
 
-  addExtraBlk = (script) => {
+  addExtraBlk = (script,runScript) => {
     let tmp = this.state.NotebookBlkList.slice()
     let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.Active)
     if (CurrentActiveIndex >= 0) {
         tmp[CurrentActiveIndex].Active = false;
     }
     let randomID = Math.random().toString(36).substring(2, 15)
-    this.setState({ActiveBlkID: randomID})
-    this.setState({ActiveScript: script})
-    this.setState({NotebookBlkList: [...tmp, {NotebookBlkScript: script, 
-      Active: true, 
-      NotebookBlkID: randomID,
-      NotebookBlkROutput: [],
-      NotebookBlkNote: "",
-      Busy: false
-    }]})
+    if (runScript) {
+        this.setState({ActiveBlkID: randomID,
+        ActiveScript: script,
+        NotebookBlkList: [...tmp, {NotebookBlkScript: script, 
+          Active: true, 
+          NotebookBlkID: randomID,
+          NotebookBlkROutput: [],
+          NotebookBlkNote: "",
+          Busy: false
+        }]}, () => this.runScript())
+    }else{
+        this.setState({ActiveBlkID: randomID,
+          ActiveScript: script,
+          NotebookBlkList: [...tmp, {NotebookBlkScript: script, 
+            Active: true, 
+            NotebookBlkID: randomID,
+            NotebookBlkROutput: [],
+            NotebookBlkNote: "",
+            Busy: false
+          }]})
+    }  
   }
 
   gainFocus = (index) => {

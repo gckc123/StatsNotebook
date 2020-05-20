@@ -23,14 +23,18 @@ const StyledButton = withStyles({
 
 export class AnalysisPanelBar extends Component {
     
+    pasteAndRun = (script) => {
+        this.props.addExtraBlkCallback(script, true);
+        
+    }
+
     render() {
         return (
             <div>
-                <StyledButton disableRipple onClick={() => {this.props.addExtraBlkCallback(this.props.tentativeScript);
-                this.props.runScriptCallback()}}> 
+                <StyledButton disableRipple onClick={() => {this.pasteAndRun(this.props.tentativeScript)}}> 
                     <FontAwesomeIcon icon={faPlay}/><div className="ml-1">Paste and Run</div>
                 </StyledButton>
-                <StyledButton disableRipple onClick={ () => {this.props.addExtraBlkCallback(this.props.tentativeScript)}}>
+                <StyledButton disableRipple onClick={ () => {this.props.addExtraBlkCallback(this.props.tentativeScript, false)}}>
                     <FontAwesomeIcon icon={faShare}/><div className="ml-1">Paste</div>
                 </StyledButton>
             </div>

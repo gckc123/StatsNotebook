@@ -41,6 +41,7 @@ const ExpansionPanelSummary = withStyles({
   },
   content: {
     '&$expanded': {
+
     },
   },
   expanded: {},
@@ -89,7 +90,7 @@ export class MediationPanel extends Component {
           Control_lv: 0,
           Conf_lv: 0.95,
           Simulation: 1000,
-          Complete_analysis: true,
+          Complete_analysis: "true",
         }
     }
   }
@@ -98,7 +99,7 @@ export class MediationPanel extends Component {
     //Update variable list
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
-    let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
+    let CurrentVariableList = this.props.CurrentVariableList
     let allVarsInCurrentList = []
     for (let key in this.state.Variables) {   
         allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -192,7 +193,7 @@ export class MediationPanel extends Component {
     "data = currentDataset, sim = 100, digits = 3,\n" + 
     "HTML_report = FALSE, complete_analysis = TRUE)"
     this.props.updateTentativeScriptCallback(codeString)
-    console.log("Building code")
+    console.log("building code!")
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -204,13 +205,13 @@ export class MediationPanel extends Component {
 
   render () {
     return (
-      <div className="mt-2">        
+      <div className="mt-2" onBlur={this.buildCode} onMouseLeave={this.buildCode}>        
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
             <Typography>Causal Mediation Analysis - Variables Selection</Typography>
           </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode}>
+          <ExpansionPanelDetails>
             <MediationVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
             Variables = {this.state.Variables}
             Checked = {this.state.Checked}
