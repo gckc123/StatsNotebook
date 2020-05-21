@@ -24,7 +24,7 @@ export class AnalysisBar extends Component {
     render () {
         return (
             <div className="app-bar">
-                <StyledButton disableRipple>
+                <StyledButton disableRipple onClick={() => this.props.selectAnalysisPanelCallback("MediationPanel")}>
                 <ChangeHistoryIcon/><div className='ml-1'>Mediation</div>
                 </StyledButton>
             </div>

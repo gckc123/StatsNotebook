@@ -31,7 +31,9 @@ export class App extends Component {
           Busy: false,
           Active: true,
         }
-      ]
+      ],
+      currentActiveAnalysisPanel: "",
+      currentActiveLeftPanel: "",
     };    
   }
   
@@ -76,7 +78,6 @@ export class App extends Component {
         default:
           break;
       }
-      //Potential updating pitfall here??
       this.addExtraBlk(script, true)
          
     })
@@ -85,6 +86,14 @@ export class App extends Component {
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('RecvROutput')
     ipcRenderer.removeAllListeners('file-opened')
+  }
+
+  selectLeftPanel = (panel) => {
+    this.setState({currentActiveLeftPanel: panel})
+  }
+
+  selectAnalysisPanel = (panel) => {
+    this.setState({currentActiveAnalysisPanel: panel})
   }
 
   addExtraBlk = (script,runScript) => {
@@ -183,16 +192,25 @@ export class App extends Component {
 
       return (
           <div className="container-fluid p-2 flex-container">
-            <TopNavTabs openFileCallback = {this.openFile}/>
+            <TopNavTabs openFileCallback = {this.openFile}
+            selectLeftPanelCallback = {this.selectLeftPanel}
+            selectAnalysisPanelCallback = {this.selectAnalysisPanel}/>
             <div className="main-pane">
               <div className="left-pane p-2">
-                <div hidden={false}>
+                <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
+                  Data Panel here!
+                </div>
+                <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
+                  <div>
                   <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlk}
                   runScriptCallback = {this.runScript}
                   tentativeScript = {this.state.tentativeScript}/>
-                  <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
-                  updateTentativeScriptCallback = {this.updateTentativeScript}
-                  tentativeScript = {this.state.tentativeScript}/>
+                  </div>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
+                    <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}/>
+                  </div>
                 </div>
 
               </div>

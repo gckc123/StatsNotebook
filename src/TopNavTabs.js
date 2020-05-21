@@ -62,6 +62,17 @@ export class TopNavTabs extends Component {
     
   handleChange = (event, newValue) => {
       this.setState({CurrentTab: newValue});
+      switch (newValue) {
+        case 1:
+          this.props.selectLeftPanelCallback("DataPanel")
+          break;
+        case 2:
+          this.props.selectLeftPanelCallback("AnalysisPanel")
+          break;
+        default:
+          break;
+      }
+
   };
 
   render () {
@@ -71,7 +82,7 @@ export class TopNavTabs extends Component {
         <FirstTabs value={this.state.CurrentTab} onChange={this.handleChange}>
           <FirstTab icon={<MenuIcon  fontSize="small" />}/>
           <FirstTab label="Data" />
-          <FirstTab label="Analysis" />            
+          <FirstTab label="Analysis"/>            
         </FirstTabs>
         <TabPanel CurrentTab={this.state.CurrentTab} index={0}>
           <SettingBar openFileCallback = {this.props.openFileCallback}/>
@@ -80,7 +91,7 @@ export class TopNavTabs extends Component {
           <DataBar />
         </TabPanel>
         <TabPanel CurrentTab={this.state.CurrentTab} index={2}>
-          <AnalysisBar />
+          <AnalysisBar selectAnalysisPanelCallback = {this.props.selectAnalysisPanelCallback}/>
         </TabPanel>               
       </div>
     )

@@ -129,7 +129,7 @@ export class MediationPanel extends Component {
 
   add2ModelSelection = (CheckedObjAvailable) => {
       let ModelsObj = {...this.state.AnalysisSetting.Models}
-      CheckedObjAvailable.map((item) => {
+      CheckedObjAvailable.forEach((item) => {
         ModelsObj[item] = ""
       })
       this.setState(prevState => ({
@@ -142,7 +142,7 @@ export class MediationPanel extends Component {
 
   removeFromModelSelection = (CheckedObjOrigin) =>  {
     let ModelsObj = {...this.state.AnalysisSetting.Models}
-    CheckedObjOrigin.map((item) => {
+    CheckedObjOrigin.forEach((item) => {
       delete ModelsObj[item]
     })
     this.setState(prevState => ({
@@ -239,7 +239,6 @@ export class MediationPanel extends Component {
     let panelsObj = {...this.state.panels}
     panelsObj[target] = !panelsObj[target]
     this.setState({panels: panelsObj})
-
   }
 
   updateAnalysisSetting = (event,target) => {
@@ -258,6 +257,7 @@ export class MediationPanel extends Component {
         break;
       case "ImputeData":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        break;
       default:
         break;
     }
