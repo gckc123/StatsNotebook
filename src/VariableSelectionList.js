@@ -22,8 +22,7 @@ const OrangeIconButton = withStyles({
     },
 })(IconButton);
 
-class VariableTypeIcon extends Component {
-    
+class VariableTypeIcon extends Component {    
     render () {
         //The first line is needed because of updating pitfall
         //CurrentVariableList is updated but the Variable list is not!
@@ -34,21 +33,21 @@ class VariableTypeIcon extends Component {
             if (this.props.CurrentVariableList[this.props.targetVar][0] === "Numeric") {
             
                 return (
-                    <OrangeIconButton edge="end" disableRipple size="small">
+                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
                         <BarChartIcon />
                     </OrangeIconButton>
                 )
             }
             if (this.props.CurrentVariableList[this.props.targetVar][0] === "Factor") {
                 return (
-                    <OrangeIconButton edge="end" disableRipple size="small">
+                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
                         <FontAwesomeIcon icon={faChartPie} />
                     </OrangeIconButton>
                 )
             }
             if (this.props.CurrentVariableList[this.props.targetVar][0] === "Character") {
                 return (
-                    <OrangeIconButton edge="end" disableRipple size="small">
+                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
                         <TextRotationNoneIcon />
                     </OrangeIconButton>
                 )
@@ -59,17 +58,13 @@ class VariableTypeIcon extends Component {
 }
 
 export class VariableSelectionList extends Component {
-
     render () {
-
         return (
-            <List dense className={`${this.props.listType}VariableList`}>
-                
+            <List dense className={`${this.props.listType}VariableList`}>                
                 {
-                    this.props.VariableList.map((variable, index) => {
- 
+                    this.props.VariableList.map((variable, index) => { 
                         return (
-                            <ListItem button className="VariableListItem" 
+                            <ListItem keys={variable} button className="VariableListItem" 
                                 onClick={() => this.props.handleToggleCallback(variable,this.props.listType)}>
                                 <ListItemIcon>
                                     <Checkbox checked={this.props.checkedList.indexOf(variable) !== -1} size="small" />

@@ -85,11 +85,12 @@ export class MediationPanel extends Component {
         },
         AnalysisSetting: {
           Models: {},
-          Treat_lv: 1,
-          Control_lv: 0,
-          Conf_lv: 0.95,
+          TreatLv: 1,
+          ControlLv: 0,
+          ConfLv: 95,
+          Digits: 3,
           Simulation: 1000,
-          Complete_analysis: true,
+          ImputeData: true,
         }
     }
   }
@@ -126,15 +127,44 @@ export class MediationPanel extends Component {
       return array1.filter((item) => array2.indexOf(item) === -1)
   }
 
+  add2ModelSelection = (CheckedObjAvailable) => {
+      let ModelsObj = {...this.state.AnalysisSetting.Models}
+      CheckedObjAvailable.map((item) => {
+        ModelsObj[item] = ""
+      })
+      this.setState(prevState => ({
+        AnalysisSetting: {
+          ...prevState.AnalysisSetting,
+          Models: ModelsObj,
+        }
+      }))
+  }
+
+  removeFromModelSelection = (CheckedObjOrigin) =>  {
+    let ModelsObj = {...this.state.AnalysisSetting.Models}
+    CheckedObjOrigin.map((item) => {
+      delete ModelsObj[item]
+    })
+    this.setState(prevState => ({
+      AnalysisSetting: {
+        ...prevState.AnalysisSetting,
+        Models: ModelsObj,
+      }
+    }))
+  }
+
   handleToRight = (target, maxElement) => {
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
+        if (target === "Outcome" || target === "Mediator") {
+          this.add2ModelSelection(CheckedObj["Available"])
+        }
         CheckedObj["Available"] = []
         this.setState({Variables: {...VariablesObj}},
-            () => this.setState({Checked: {...CheckedObj}}))
+            () => this.setState({Checked: {...CheckedObj}}))  
     }else{
         if (CheckedObj["Available"].length > 0) {
             alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
@@ -147,6 +177,9 @@ export class MediationPanel extends Component {
       let CheckedObj = {...this.state.Checked}
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
+      if (from === "Outcome" || from === "Mediator") {
+        this.removeFromModelSelection(CheckedObj[from])
+      }
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},
           () => this.setState({Checked: {...CheckedObj}}))
@@ -181,25 +214,54 @@ export class MediationPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
+
+
   buildCode = () => {
+    let mediatorModels = this.state.Variables.Mediator.map((item) => {
+      return this.state.AnalysisSetting.Models[item]
+    }) 
     let codeString = "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
     "med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
     "treat = \""+ this.state.Variables.Exposure[0] + "\",\n"+
     "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n"+
-    "ymodel = \"logistic regression\",\n"+
-    "mmodel = c(\"logistic regression\", \"logistic regression\"),\n"+
-    "treat_lv = 1, control_lv = 0, conf.level = 0.9,\n" +
-    "data = currentDataset, sim = 100, digits = 3,\n" + 
-    "HTML_report = FALSE, complete_analysis = TRUE)"
+    "ymodel = \""+ this.state.AnalysisSetting.Models[this.state.Variables.Outcome[0]] +"\",\n"+
+    "mmodel = c(\"" + mediatorModels.join("\" ,\"") +"\"),\n"+
+    "treat_lv = " + this.state.AnalysisSetting.TreatLv + 
+    ", control_lv = " + this.state.AnalysisSetting.ControlLv +
+    ", conf.level = " + this.state.AnalysisSetting.ConfLv/100 + ",\n" +
+    "data = currentDataset, sim = "+ this.state.AnalysisSetting.Simulation + 
+    ", digits = " + this.state.AnalysisSetting.Digits + ",\n" + 
+    "HTML_report = FALSE, complete_analysis = "+ (!this.state.AnalysisSetting.ImputeData).toString().toUpperCase() +")"
     this.props.updateTentativeScriptCallback(codeString)
-    console.log("Building code")
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
-    let panelsObj = this.state.panels
+    let panelsObj = {...this.state.panels}
     panelsObj[target] = !panelsObj[target]
     this.setState({panels: panelsObj})
 
+  }
+
+  updateAnalysisSetting = (event,target) => {
+    let AnalysisSettingObj = {...this.state.AnalysisSetting}
+    
+    switch (target) {
+      case "ModelSelection":
+        AnalysisSettingObj.Models[event.target.name] = event.target.value
+        break;
+      case "ConfLv":
+      case "TreatLv":
+      case "ControlLv":
+      case "Digits":
+      case "Simulation":
+        AnalysisSettingObj[target] = event.target.value
+        break;
+      case "ImputeData":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+      default:
+        break;
+    }
+    this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
   render () {
@@ -210,7 +272,7 @@ export class MediationPanel extends Component {
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
             <Typography>Causal Mediation Analysis - Variables Selection</Typography>
           </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode}>
+          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
             <MediationVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
             Variables = {this.state.Variables}
             Checked = {this.state.Checked}
@@ -229,8 +291,11 @@ export class MediationPanel extends Component {
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
             <Typography>Analysis Setting</Typography>
           </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <MediationAnalysisSetting Variables = {this.state.Variables} AnalysisSetting = {this.state.AnalysisSetting}/>
+          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+            <MediationAnalysisSetting Variables = {this.state.Variables} 
+            AnalysisSetting = {this.state.AnalysisSetting}
+            updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+            
           </ExpansionPanelDetails>
         </ExpansionPanel>    
       </div>
