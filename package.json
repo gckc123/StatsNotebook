@@ -50,6 +50,7 @@
     "react-simple-code-editor": "^0.11.0",
     "react-split": "^2.0.7",
     "react-split-pane": "^0.1.91",
+    "react-virtualized": "^9.21.2",
     "rescripts": "0.0.1-security",
     "typeface-roboto": "0.0.75",
     "zeromq": "^5.2.0"

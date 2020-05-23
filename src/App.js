@@ -3,10 +3,11 @@
 //”electron-dev”: "set ELECTRON_START_URL=http://localhost:3000 && electron .”
 import React, {Component} from 'react';
 import './App.css';
-import {TopNavTabs} from './TopNavTabs';
+import { TopNavTabs } from './TopNavTabs';
 import { Notebook } from './Notebook';
-import {MediationPanel} from "./MediationPanel"
+import { MediationPanel } from "./MediationPanel"
 import { AnalysisPanelBar } from './AnalysisPanelBar';
+import { DataPanel} from './DataPanel';
 
 
 const electron = window.require('electron');
@@ -22,6 +23,7 @@ export class App extends Component {
       ActiveScript: "",
       ActiveBlkID: "FirstBlk",
       CurrentVariableList: [],
+      CurrentData: [],
       NotebookBlkList: [
         {
           NotebookBlkID: "FirstBlk",
@@ -49,9 +51,12 @@ export class App extends Component {
             Output: ResultsJSON.Output}];
           this.setState({NotebookBlkList:[...tmp]})
         }
-      }else if (ResultsJSON.OutputType[0] === "getVariableList") {
-        
+      }else if (ResultsJSON.OutputType[0] === "getVariableList") {  
         this.setState({CurrentVariableList: ResultsJSON.Output})
+      }else if (ResultsJSON.OutputType[0] === "getData") {
+        console.log("receiving data")
+        console.log(ResultsJSON.Output)
+        this.setState({CurrentData: ResultsJSON.Output})
       }
     })
     
@@ -79,7 +84,6 @@ export class App extends Component {
           break;
       }
       this.addExtraBlk(script, true)
-         
     })
   }
 
@@ -151,6 +155,18 @@ export class App extends Component {
     this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue})
   }
 
+  getData = () => {
+    let ScriptJSON = {
+      RequestType: "getData",
+      Script: "",
+      fromBlk: "",
+      startIndex: 1,
+      endIndex: 500,
+    }
+    let ScriptString = JSON.stringify(ScriptJSON)
+    mainProcess.send2R(ScriptString);
+  }
+
   getVariableList = () => {
     let ScriptJSON = {
       RequestType: "getVariableList",
@@ -176,6 +192,8 @@ export class App extends Component {
       mainProcess.send2R(StriptString);
     }
     this.getVariableList();
+    console.log("Getting data")
+    this.getData();
   }
 
   openFile = () => {
@@ -198,7 +216,8 @@ export class App extends Component {
             <div className="main-pane">
               <div className="left-pane p-2">
                 <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
-                  Data Panel here!
+                  <DataPanel CurrentData = {this.state.CurrentData}
+                  CurrentVariableList = {this.state.CurrentVariableList}/>
                 </div>
                 <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
                   <div>

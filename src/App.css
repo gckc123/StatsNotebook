@@ -31,3 +31,11 @@
   width: 100%;
   margin: 10px;
 }
+
+*:focus {
+  outline: none;
+}
+
+.testing1 {
+  background-color: tomato;
+}
