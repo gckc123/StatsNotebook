@@ -6,56 +6,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Checkbox from '@material-ui/core/Checkbox';
 import "./AnalysisPanelElements.css";
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import IconButton from '@material-ui/core/IconButton';
-import BarChartIcon from '@material-ui/icons/BarChart';
-import TextRotationNoneIcon from '@material-ui/icons/TextRotationNone';
-import {withStyles} from '@material-ui/core';
-import {faChartPie} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {VariableTypeIcon} from "./VariableTypeIcon"
 
-const OrangeIconButton = withStyles({
-    root: {
-        '&:focus': {
-            outline: 'none',
-        },
-        color: "orange",
-    },
-})(IconButton);
 
-class VariableTypeIcon extends Component {    
-    render () {
-        //The first line is needed because of updating pitfall
-        //CurrentVariableList is updated but the Variable list is not!
-        //This probably will not be necessary if the codes in MdeiationPanel is rewritten 
-        //so that the array Available/Outcome/Exposure/Mediator/Covariates now contain information
-        //about the variable type.
-        if (Object.keys(this.props.CurrentVariableList).indexOf(this.props.targetVar) !== -1) {
-            if (this.props.CurrentVariableList[this.props.targetVar][0] === "Numeric") {
-            
-                return (
-                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
-                        <BarChartIcon />
-                    </OrangeIconButton>
-                )
-            }
-            if (this.props.CurrentVariableList[this.props.targetVar][0] === "Factor") {
-                return (
-                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
-                        <FontAwesomeIcon icon={faChartPie} />
-                    </OrangeIconButton>
-                )
-            }
-            if (this.props.CurrentVariableList[this.props.targetVar][0] === "Character") {
-                return (
-                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
-                        <TextRotationNoneIcon />
-                    </OrangeIconButton>
-                )
-            }
-        }
-        return null
-    }
-}
 
 export class VariableSelectionList extends Component {
     render () {

@@ -50,7 +50,7 @@ app.on('ready', () => {
 ReplyFromR.on("message",function() {
   console.log("Received reply from R");
   var args = Array.apply(null, arguments);
-  console.log(args[1].toString());
+  //console.log(args[1].toString());
   showRReply(args[1].toString());
 })
 

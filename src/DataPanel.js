@@ -1,39 +1,26 @@
 import React, {Component} from 'react';
-import {AutoSizer} from 'react-virtualized';
+import {VariableTypeIcon} from './VariableTypeIcon'
 import {MultiGrid} from 'react-virtualized';
 import './App.css';
 
 const STYLE = {
   border: '1px solid #ddd',
-  '&:focus': {
-    color: '#40a9ff',
-    outline: 'none',
-  },
 };
+
 const STYLE_BOTTOM_LEFT_GRID = {
   borderRight: '2px solid #aaa',
   backgroundColor: '#f7f7f7',
-  '&:focus': {
-    color: '#40a9ff',
-    outline: 'none',
-  },
 };
+
 const STYLE_TOP_LEFT_GRID = {
   borderBottom: '2px solid #aaa',
   borderRight: '2px solid #aaa',
   fontWeight: 'bold',
-  '&:focus': {
-    color: '#40a9ff',
-    outline: 'none',
-  },
 };
+
 const STYLE_TOP_RIGHT_GRID = {
   borderBottom: '2px solid #aaa',
   fontWeight: 'bold',
-  '&:focus': {
-    color: '#40a9ff',
-    outline: 'none',
-  },
 };
 
 export class DataPanel extends Component {
@@ -49,49 +36,64 @@ export class DataPanel extends Component {
     };
   }
 
+  //potential bugs here - might need to account for the wide of border? Not 100% sure....
+
   _cellRenderer = ({columnIndex, key, rowIndex, style}) => {
     
+    let customStyle = {...style}
+    let textLineHeight = customStyle["height"] + "px"
+    
+    customStyle = {...customStyle, borderLeft: '1px solid #e8e8e8', overflow: "hidden", 
+    textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "14px"}
+    if (rowIndex%2 === 0) {
+      customStyle = {...customStyle, background: "#f1f1f1"}
+    }else{
+      customStyle = {...customStyle, background: "white"}
+    }
     let variableName = Object.keys(this.props.CurrentVariableList);
-
-    return (
-      <div key={key} style={style}>
-        {variableName[columnIndex]}
-      </div>
-    );
+     
+    if (rowIndex === 0) {
+      return (
+        <div key={key} style={customStyle}>
+          <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
+          targetVar = {variableName[columnIndex]}/>
+          <span style={{lineHeight: textLineHeight, paddingLeft: "2px"}}>{variableName[columnIndex]}</span>
+        </div>
+      )
+    }else 
+    {
+      let dataValue = this.props.CurrentData[rowIndex-1][variableName[columnIndex]]
+      return (
+        <div key={key} style={{...customStyle, paddingLeft: "3px"}}>
+          <span style={{lineHeight: textLineHeight}}>{dataValue}</span>
+        </div>
+      )
+    };
   }
   
-  testing = (cOStartI,cOStopI,cSI,rOSI) => {
-    console.log(cOStartI)
-  }
+
   render () {
     return (
-      <div>
-        Hahaha
-        <AutoSizer disableHeight>
-          {({width}) => (
             <MultiGrid
               {...this.state}
+              {...this.props}
               cellRenderer={this._cellRenderer}
               columnWidth={100}
-              columnCount={100}
+              columnCount={this.props.ncol}
               enableFixedColumnScroll
               enableFixedRowScroll
-              height={500}
-              rowHeight={25}
-              rowCount={300}
+              height={this.props.dataPanelHeight}
+              rowHeight={28}
+              rowCount={this.props.nrow}
               style={STYLE}
               onSectionRendered={this.testing}
               styleBottomLeftGrid={STYLE_BOTTOM_LEFT_GRID}
               styleTopLeftGrid={STYLE_TOP_LEFT_GRID}
               styleTopRightGrid={STYLE_TOP_RIGHT_GRID}
-              width={width}
+              width={this.props.dataPanelWidth}
               hideTopRightGridScrollbar
               hideBottomLeftGridScrollbar
             />
-          )}
-        </AutoSizer>
-        
-      </div>
     )
   }
 }

@@ -36,6 +36,7 @@ const FirstTab = withStyles((theme) => ({
         outline: 'none',
       },
       opacity: 1,
+      
     },
     selected: {},
 }))((props) => <Tab disableRipple {...props} />);

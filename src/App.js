@@ -24,6 +24,8 @@ export class App extends Component {
       ActiveBlkID: "FirstBlk",
       CurrentVariableList: [],
       CurrentData: [],
+      nrow: 0,
+      ncol: 0,
       NotebookBlkList: [
         {
           NotebookBlkID: "FirstBlk",
@@ -36,10 +38,16 @@ export class App extends Component {
       ],
       currentActiveAnalysisPanel: "",
       currentActiveLeftPanel: "",
-    };    
+      dataPanelWidth: 100,
+      dataPanelHeight: 100,
+    }
+    this.DataPanelContainerRef = React.createRef();        
   }
   
   componentDidMount() {
+    this.updateDataPanelDimention();
+    window.addEventListener("resize", this.updateDataPanelDimention);
+
     ipcRenderer.on('RecvROutput', (event, content) => {
       let ResultsJSON = JSON.parse(content)
       if (ResultsJSON.OutputType[0] === "Normal" || ResultsJSON.OutputType[0] === "Warning" || ResultsJSON.OutputType[0] === "Message" || ResultsJSON.OutputType[0] === "Error") {
@@ -55,8 +63,8 @@ export class App extends Component {
         this.setState({CurrentVariableList: ResultsJSON.Output})
       }else if (ResultsJSON.OutputType[0] === "getData") {
         console.log("receiving data")
-        console.log(ResultsJSON.Output)
-        this.setState({CurrentData: ResultsJSON.Output})
+        //console.log(ResultsJSON.Output)
+        this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow, ncol: ResultsJSON.ncol})
       }
     })
     
@@ -87,9 +95,19 @@ export class App extends Component {
     })
   }
 
+  updateDataPanelDimention = () => {
+    if (this.DataPanelContainerRef.current) {
+      this.setState({
+        dataPanelHeight: this.DataPanelContainerRef.current.offsetHeight - 30,
+        dataPanelWidth: this.DataPanelContainerRef.current.offsetWidth - 20,
+      })
+    }
+  }
+
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('RecvROutput')
     ipcRenderer.removeAllListeners('file-opened')
+    window.removeEventListener('resize', this.updateDataPanelDimention)
   }
 
   selectLeftPanel = (panel) => {
@@ -214,10 +232,14 @@ export class App extends Component {
             selectLeftPanelCallback = {this.selectLeftPanel}
             selectAnalysisPanelCallback = {this.selectAnalysisPanel}/>
             <div className="main-pane">
-              <div className="left-pane p-2">
+              <div className="left-pane p-2" ref={this.DataPanelContainerRef}>
                 <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
                   <DataPanel CurrentData = {this.state.CurrentData}
-                  CurrentVariableList = {this.state.CurrentVariableList}/>
+                  CurrentVariableList = {this.state.CurrentVariableList}
+                  nrow = {this.state.nrow}
+                  ncol = {this.state.ncol}
+                  dataPanelHeight = {this.state.dataPanelHeight}
+                  dataPanelWidth = {this.state.dataPanelWidth}/>
                 </div>
                 <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
                   <div>
