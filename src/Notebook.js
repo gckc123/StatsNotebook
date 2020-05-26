@@ -43,6 +43,7 @@ export class Notebook extends Component {
                         <NotebookBlk key={Blk.NotebookBlkID} 
                         index = {index}
                         ElementWidth={this.state.ElementWidth} Active={Blk.Active}
+                        Busy = {Blk.Busy}
                         NotebookBlkID={Blk.NotebookBlkID}
                         gainFocusCallback={this.props.gainFocusCallback}
                         updateAEditorValueCallback={this.props.updateAEditorValueCallback}

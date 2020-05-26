@@ -25,7 +25,8 @@ export class VariableSelectionList extends Component {
                                 <ListItemText primary={<div className="VariableListText">{variable}</div>} />
                                 <ListItemSecondaryAction>                                    
                                 <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
-                                        targetVar = {variable} />
+                                        targetVar = {variable} 
+                                        addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
                                 </ListItemSecondaryAction>
                             </ListItem>
                         )

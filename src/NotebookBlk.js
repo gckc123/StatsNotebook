@@ -3,6 +3,11 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-xcode";
 import './Notebook.css';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { Editor } from 'react-draft-wysiwyg';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faEdit} from '@fortawesome/free-regular-svg-icons'
 
 export class NotebookBlk extends Component {
 
@@ -37,6 +42,8 @@ export class NotebookBlk extends Component {
         this.props.updateAEditorValueCallback(this.props.index, this.state.Script)
     }
 
+
+    //the below function needs to be update - potential updating pitfall
     updateAndRun = () => {
         this.props.updateAEditorValueCallback(this.props.index, this.state.Script);
         this.props.runScriptCallback();
@@ -47,10 +54,16 @@ export class NotebookBlk extends Component {
     }
 
     render() {
-
+        
         return (
             <div className={`pt-2 pb-2 pr-2 pl-5 notebook-block mt-2 ${this.props.Active ? "active-block" : "inactive-block"}`}
-                onClick={() => this.props.gainFocusCallback(this.props.index)}>                        
+                onClick={() => this.props.gainFocusCallback(this.props.index)}>
+                    <div className="notebook-title-grid" style={{width: this.props.ElementWidth}}>
+                        <div><input defaultValue="--- Enter Analysis Title ---" className="titleEdit"/></div>
+                        <div style={{float: "right"}}><CircularProgress style={{color: "#40a9ff"}} 
+                        size={14} hidden={!this.props.Busy}/></div>
+                        <div><FontAwesomeIcon icon={faEdit} /></div>                        
+                    </div>
                     <AceEditor 
                     value = {this.state.Script}
                     onLoad={this.onLoad}
@@ -75,7 +88,15 @@ export class NotebookBlk extends Component {
                                 <code className={output.OutputType} key={index}>{output.Output}</code>                                
                             )
                         }
-                    </div>                        
+                    </div>          
+                    <div style={{width: this.props.ElementWidth}}>
+                        <Editor
+                        toolbarClassName="toolbarClassName"
+                        wrapperClassName="wrapperClassName"
+                        editorClassName="editorTextArea"
+                        onEditorStateChange={this.onEditorStateChange}           
+                        />
+                    </div>              
             </div>
         )
     }

@@ -24,3 +24,21 @@
 .Warning {
   color: hotpink;
 }
+
+.notebook-title-grid {
+  display: grid;
+  grid-template-columns: auto 25px 20px;
+  padding-top: 2px;
+  padding-bottom: 5px;
+}
+
+.titleEdit {
+  border: none;
+  min-width: 300px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.editorTextArea {
+  background: #f1f1f1
+}

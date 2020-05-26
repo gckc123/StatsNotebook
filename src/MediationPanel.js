@@ -283,6 +283,7 @@ export class MediationPanel extends Component {
             changeArrowCallback = {this.changeArrow}
             handleToRightCallback = {this.handleToRight}
             handleToLeftCallback = {this.handleToLeft}
+            addExtraBlkCallback = {this.props.addExtraBlkCallback}
             />
           </ExpansionPanelDetails>
         </ExpansionPanel>  

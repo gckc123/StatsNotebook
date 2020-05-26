@@ -17,19 +17,19 @@ const OrangeIconButton = withStyles({
     },
 })(IconButton);
 
-const StyledMenuItem = withStyles({
-    textTransform: 'none',  
+
+const MenuItemStyle = {
     fontSize: 'small',
-    '&:hover': {
-        color: '#40a9ff',
-        opacity: 1,
-    },
-    '&$selected': {
-        color: '#1890ff',
-    },
-})(MenuItem);
+}
 
 class ChangeVariableTypeMenu extends Component {
+
+    changeVariableType = (targetType) => {
+        let script = "currentDataset$" + this.props.targetVar + " <- " + "as." + targetType + "(currentDataset$" + this.props.targetVar + ")"
+        this.props.addExtraBlkCallback(script, true)
+        this.props.handleClose()
+    }
+
     render () {
         let open= Boolean(this.props.anchorEl)
         return (
@@ -37,16 +37,26 @@ class ChangeVariableTypeMenu extends Component {
                 getContentAnchorEl={null}
                 anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'right',
+                    horizontal: 'left',
                 }}
                 keepMounted
                 transformOrigin ={{
                     vertical: 'top',
-                    horizontal: 'right',
+                    horizontal: 'left',
                 }}
                 open={open}
                 onClose={this.props.handleClose}>
-                <StyledMenuItem onClick={this.props.handleClose} disableRipple>Quantitative</StyledMenuItem>
+                <MenuItem onClick={() => this.changeVariableType("numeric")} disableRipple style={MenuItemStyle}
+                disabled = {this.props.disableItem === "Numeric"}>
+                <BarChartIcon style={{color: "orange", paddingRight: "2px"}}/>Numeric</MenuItem>
+                <MenuItem onClick={() => this.changeVariableType("factor")} disableRipple style={MenuItemStyle}
+                disabled = {this.props.disableItem === "Factor"}>
+                <PieChartIcon style={{color: "orange", paddingRight: "2px"}}/>
+                Categorical (Factor)</MenuItem>
+                <MenuItem onClick={() => this.changeVariableType("character")} disableRipple style={MenuItemStyle}
+                disabled = {this.props.disableItem === "Character"}>
+                <TextRotationNoneIcon style={{color: "orange", paddingRight: "2px"}}/>
+                Text (Character)</MenuItem>
             </Menu>
         )
     }
@@ -80,27 +90,39 @@ export class VariableTypeIcon extends Component {
             
                 return (
                     <>
-                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
+                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
                         <BarChartIcon />
                     </OrangeIconButton>
+                    <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                    disableItem = "Numeric"
+                    addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                    targetVar = {this.props.targetVar}/>
                     </>
                 )
             }
             if (this.props.CurrentVariableList[this.props.targetVar][0] === "Factor") {
                 return (
                     <>
-                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
+                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
                         <PieChartIcon />
                     </OrangeIconButton>
+                    <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                    disableItem = "Factor"
+                    addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                    targetVar = {this.props.targetVar}/>
                     </>
                 )
             }
             if (this.props.CurrentVariableList[this.props.targetVar][0] === "Character") {
                 return (
                     <>
-                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small">
+                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
                         <TextRotationNoneIcon />
                     </OrangeIconButton>
+                    <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                    disableItem = "Character"
+                    addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                    targetVar = {this.props.targetVar}/>
                     </>
                 )
             }

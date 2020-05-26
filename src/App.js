@@ -65,6 +65,14 @@ export class App extends Component {
         console.log("receiving data")
         //console.log(ResultsJSON.Output)
         this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow, ncol: ResultsJSON.ncol})
+      }else if(ResultsJSON.OutputType[0] === "END") {
+        let tmp = this.state.NotebookBlkList.slice()
+        let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
+        if (Reply2BlkIndex >= 0)
+        {
+          tmp[Reply2BlkIndex].Busy = false
+          this.setState({NotebookBlkList:[...tmp]})
+        }
       }
     })
     
@@ -200,7 +208,9 @@ export class App extends Component {
     let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.Active)
     if (CurrentActiveIndex >= 0) {
       tmp[CurrentActiveIndex].NotebookBlkROutput = [];
-      this.setState({NotebookBlkList: [...tmp]})
+      tmp[CurrentActiveIndex].Busy = true;
+      
+      this.setState({NotebookBlkList: [...tmp]}, () => console.log(this.state.NotebookBlkList))
       let ScriptJSON = {
         RequestType: "RCode",
         Script: this.state.ActiveScript,
@@ -239,7 +249,8 @@ export class App extends Component {
                   nrow = {this.state.nrow}
                   ncol = {this.state.ncol}
                   dataPanelHeight = {this.state.dataPanelHeight}
-                  dataPanelWidth = {this.state.dataPanelWidth}/>
+                  dataPanelWidth = {this.state.dataPanelWidth}
+                  addExtraBlkCallback = {this.addExtraBlk}/>
                 </div>
                 <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
                   <div>
@@ -250,7 +261,8 @@ export class App extends Component {
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
                     <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
-                    tentativeScript = {this.state.tentativeScript}/>
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}/>
                   </div>
                 </div>
 

@@ -30,7 +30,8 @@ export class MediationVariableSelection extends Component {
                         checkedList = {this.props.Checked[targetList]}
                         handleToggleCallback = {this.props.handleToggleCallback} 
                         listType = {targetList}
-                        CurrentVariableList = {this.props.CurrentVariableList}/>
+                        CurrentVariableList = {this.props.CurrentVariableList}
+                        addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
         )
     }
 

@@ -56,7 +56,8 @@ export class DataPanel extends Component {
       return (
         <div key={key} style={customStyle}>
           <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
-          targetVar = {variableName[columnIndex]}/>
+          targetVar = {variableName[columnIndex]}
+          addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
           <span style={{lineHeight: textLineHeight, paddingLeft: "2px"}}>{variableName[columnIndex]}</span>
         </div>
       )
