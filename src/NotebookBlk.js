@@ -23,16 +23,13 @@ const StyledIconButton = withStyles({
     },
 })(IconButton);
 
-//NEED TO ADD TITLE AND EDITORHTML TO APP.JS STATE 27.5.2020
-
-
 export class NotebookBlk extends Component {
 
     constructor(props){
         super(props)
         this.state = {
             Script: "",
-            Title: "--- Analysis Title Here ---",
+            Title: "",
             editorHTML: "",
         }
     }
@@ -51,7 +48,11 @@ export class NotebookBlk extends Component {
       }
 
     componentDidMount() {
-        this.setState({Script: this.props.Script})
+        this.setState({
+            Script: this.props.Script,
+            Title: this.props.Title,
+            editorHTML: this.props.editorHTML
+        })
     }
 
     onLoad = (editor) => {
@@ -72,6 +73,10 @@ export class NotebookBlk extends Component {
     
     onAEBlur = (e, editor) => {
         this.props.updateAEditorValueCallback(this.props.index, this.state.Script, false)
+    }
+
+    onBlkBlur = () => {
+        this.props.updateNotebookBlkStateCallback(this.props.index, this.state.Script, this.state.Title, this.state.editorHTML)
     }
 
     updateAndRun = () => {
@@ -97,7 +102,7 @@ export class NotebookBlk extends Component {
                 onClick={() => this.props.gainFocusCallback(this.props.index)}>
                     <div className="notebook-title-grid" style={{width: this.props.ElementWidth}}>
                         <div><input value={this.state.Title} className="titleEdit" onChange={(event) => this.onTitleChange(event)}
-                        /></div>
+                        onBlur = {this.onBlkBlur}/></div>
                         <div style={{float: "right"}}><CircularProgress style={{color: "#40a9ff"}} 
                         size={14} hidden={!this.props.Busy}/></div>
                         <div><StyledIconButton size="small" onClick={()=>{this.props.toggleEditorCallback(this.props.index)}}><FontAwesomeIcon icon={faEdit} /></StyledIconButton></div>                        
@@ -127,7 +132,7 @@ export class NotebookBlk extends Component {
                             )
                         }
                     </div>          
-                    <div style={{width: this.props.ElementWidth}} hidden={!this.props.showEditor}>
+                    <div style={{width: this.props.ElementWidth}} hidden={!this.props.showEditor} onBlur={this.onBlkBlur}>
                         <ReactQuill
                             theme="snow"
                             modules={this.TEditorModules}

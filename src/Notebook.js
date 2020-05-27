@@ -48,10 +48,13 @@ export class Notebook extends Component {
                         gainFocusCallback={this.props.gainFocusCallback}
                         updateAEditorValueCallback={this.props.updateAEditorValueCallback}
                         Script={this.props.NotebookBlkList[index].NotebookBlkScript}
+                        Title={this.props.NotebookBlkList[index].Title}
+                        editorHTML={this.props.NotebookBlkList[index].editorHTML}
                         runScriptCallback={this.props.runScriptCallback}
                         ROutput={this.props.NotebookBlkList[index].NotebookBlkROutput}
                         showEditor = {this.props.NotebookBlkList[index].showEditor}
-                        toggleEditorCallback = {this.props.toggleTEditorCallback}/>                        
+                        toggleEditorCallback = {this.props.toggleTEditorCallback}
+                        updateNotebookBlkStateCallback = {this.props.updateNotebookBlkStateCallback}/>                        
                         )
                 }
                 </div>   

@@ -33,8 +33,8 @@ export class SettingBar extends Component {
                 <StyledButton disableRipple onClick={this.props.openFileCallback}>
                     <FontAwesomeIcon icon={faFolderOpen} /><div className='ml-1'>Open</div>
                 </StyledButton>
-                <StyledButton disableRipple>
-                    <FontAwesomeIcon icon={faSave} /><div className='ml-1'>Save</div>
+                <StyledButton disableRipple onClick={this.props.savingFileCallback}>
+                    <FontAwesomeIcon icon={faSave}/><div className='ml-1'>Save</div>
                 </StyledButton>
             </div>
         )

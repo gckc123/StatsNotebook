@@ -21,24 +21,12 @@ export class App extends Component {
     this.state = {
       tentativeScript: "",
       ActiveScript: "",
-      ActiveBlkID: "FirstBlk",
+      ActiveBlkID: "",
       CurrentVariableList: [],
       CurrentData: [],
       nrow: 0,
       ncol: 0,
-      NotebookBlkList: [
-        {
-          NotebookBlkID: "FirstBlk",
-          NotebookBlkScript: "",
-          NotebookBlkROutput: [],
-          NotebookBlkNote: "",
-          Busy: false,
-          Active: true,
-          showEditor: false,
-          editorHTML: "",
-          Title: "",
-        }
-      ],
+      NotebookBlkList: [],
       currentActiveAnalysisPanel: "",
       currentActiveLeftPanel: "",
       dataPanelWidth: 100,
@@ -47,6 +35,10 @@ export class App extends Component {
     this.DataPanelContainerRef = React.createRef();        
   }
   
+  componentWillMount() {
+    this.addExtraBlk("",false)
+  }
+
   componentDidMount() {
     this.updateDataPanelDimention();
     window.addEventListener("resize", this.updateDataPanelDimention);
@@ -129,6 +121,10 @@ export class App extends Component {
     this.setState({currentActiveAnalysisPanel: panel})
   }
 
+  savingFile = () => {
+    console.log("Saving flie clicked!!")
+  }
+
   addExtraBlk = (script,runScript) => {
     let tmp = this.state.NotebookBlkList.slice()
     let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.Active)
@@ -147,7 +143,7 @@ export class App extends Component {
           Busy: false,
           showEditor: false,
           editorHTML: "",
-          Title: "",
+          Title: "--- Analysis Title Here ---",
         }]}, () => this.runScript())
     }else{
         this.setState({ActiveBlkID: randomID,
@@ -160,7 +156,7 @@ export class App extends Component {
             Busy: false,
             showEditor: false,
             editorHTML: "",
-            Title: "",
+            Title: "--- Analysis Title Here ---",
           }]})
     }  
   }
@@ -189,7 +185,7 @@ export class App extends Component {
     tmp[index].Title = title
     tmp[index].NotebookBlkScript = script
     tmp[index].editorHTML = editorHTML
-    this.setState({NotebookBlkList: [...tmp]})
+    this.setState({NotebookBlkList: [...tmp]}, () => console.log(this.state.NotebookBlkList))
   }
 
   toggleTEditor = (index) => {
@@ -268,7 +264,8 @@ export class App extends Component {
           <div className="container-fluid p-2 flex-container">
             <TopNavTabs openFileCallback = {this.openFile}
             selectLeftPanelCallback = {this.selectLeftPanel}
-            selectAnalysisPanelCallback = {this.selectAnalysisPanel}/>
+            selectAnalysisPanelCallback = {this.selectAnalysisPanel}
+            savingFileCallback = {this.savingFile}/>
             <div className="main-pane">
               <div className="left-pane p-2" ref={this.DataPanelContainerRef}>
                 <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
@@ -304,6 +301,7 @@ export class App extends Component {
                     updateAEditorValueCallback = {this.updateAEditorValue}
                     runScriptCallback={this.runScript}
                     toggleTEditorCallback = {this.toggleTEditor}
+                    updateNotebookBlkStateCallback = {this.updateNotebookBlkState}
                   />  
               </div>
             </div>

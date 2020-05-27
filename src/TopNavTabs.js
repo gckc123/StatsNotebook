@@ -86,7 +86,8 @@ export class TopNavTabs extends Component {
           <FirstTab label="Analysis"/>            
         </FirstTabs>
         <TabPanel CurrentTab={this.state.CurrentTab} index={0}>
-          <SettingBar openFileCallback = {this.props.openFileCallback}/>
+          <SettingBar openFileCallback = {this.props.openFileCallback}
+          savingFileCallback = {this.props.savingFileCallback}/>
         </TabPanel>
         <TabPanel CurrentTab={this.state.CurrentTab} index={1}>
           <DataBar />
