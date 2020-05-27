@@ -17,7 +17,7 @@ export class VariableSelectionList extends Component {
                 {
                     this.props.VariableList.map((variable, index) => { 
                         return (
-                            <ListItem keys={variable} button className="VariableListItem" 
+                            <ListItem key={variable} button className="VariableListItem" 
                                 onClick={() => this.props.handleToggleCallback(variable,this.props.listType)}>
                                 <ListItemIcon>
                                     <Checkbox checked={this.props.checkedList.indexOf(variable) !== -1} size="small" />

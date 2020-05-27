@@ -4,10 +4,27 @@ import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-xcode";
 import './Notebook.css';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Editor } from 'react-draft-wysiwyg';
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faEdit} from '@fortawesome/free-regular-svg-icons'
+import {faEdit} from '@fortawesome/free-regular-svg-icons';
+import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from '@material-ui/core/styles';
+
+const StyledIconButton = withStyles({
+    root: {
+        '&:hover': {
+            color: '#40a9ff',
+            opacity: 1,
+        },
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+})(IconButton);
+
+//NEED TO ADD TITLE AND EDITORHTML TO APP.JS STATE 27.5.2020
+
 
 export class NotebookBlk extends Component {
 
@@ -15,8 +32,23 @@ export class NotebookBlk extends Component {
         super(props)
         this.state = {
             Script: "",
+            Title: "--- Analysis Title Here ---",
+            editorHTML: "",
         }
     }
+
+    TEditorModules = {
+        toolbar: [
+          [{ 'header': [1, 2, false] }],
+          ['bold', 'italic', 'underline','strike'],
+          [{ 'script': 'sub'}, { 'script': 'super' }], 
+          [{'list': 'ordered'}, {'list': 'bullet'}],
+          [{ 'color': [] }, { 'background': [] }],  
+          ['link', 'image'],
+          [{ 'align': [] }],
+          ['clean']    
+        ],
+      }
 
     componentDidMount() {
         this.setState({Script: this.props.Script})
@@ -38,19 +70,24 @@ export class NotebookBlk extends Component {
         AEditor.resize();
     }
     
-    onBlur = (e, editor) => {
-        this.props.updateAEditorValueCallback(this.props.index, this.state.Script)
+    onAEBlur = (e, editor) => {
+        this.props.updateAEditorValueCallback(this.props.index, this.state.Script, false)
     }
 
-
-    //the below function needs to be update - potential updating pitfall
     updateAndRun = () => {
-        this.props.updateAEditorValueCallback(this.props.index, this.state.Script);
-        this.props.runScriptCallback();
+        this.props.updateAEditorValueCallback(this.props.index, this.state.Script, true);
     }
 
-    onChange = (newValue) => {
+    onAEChange = (newValue) => {
         this.setState({Script: newValue})
+    }
+
+    onTitleChange = (event) => {
+        this.setState({Title: event.target.value})
+    }
+
+    onTEChange = (html) => {
+        this.setState({editorHTML: html})
     }
 
     render() {
@@ -59,10 +96,11 @@ export class NotebookBlk extends Component {
             <div className={`pt-2 pb-2 pr-2 pl-5 notebook-block mt-2 ${this.props.Active ? "active-block" : "inactive-block"}`}
                 onClick={() => this.props.gainFocusCallback(this.props.index)}>
                     <div className="notebook-title-grid" style={{width: this.props.ElementWidth}}>
-                        <div><input defaultValue="--- Enter Analysis Title ---" className="titleEdit"/></div>
+                        <div><input value={this.state.Title} className="titleEdit" onChange={(event) => this.onTitleChange(event)}
+                        /></div>
                         <div style={{float: "right"}}><CircularProgress style={{color: "#40a9ff"}} 
                         size={14} hidden={!this.props.Busy}/></div>
-                        <div><FontAwesomeIcon icon={faEdit} /></div>                        
+                        <div><StyledIconButton size="small" onClick={()=>{this.props.toggleEditorCallback(this.props.index)}}><FontAwesomeIcon icon={faEdit} /></StyledIconButton></div>                        
                     </div>
                     <AceEditor 
                     value = {this.state.Script}
@@ -72,8 +110,8 @@ export class NotebookBlk extends Component {
                     fontSize={15}   
                     mode="python"
                     theme="xcode"
-                    onChange={this.onChange}
-                    onBlur={this.onBlur}
+                    onChange={this.onAEChange}
+                    onBlur={this.onAEBlur}
                     commands={[{   
                         name: 'runScript', 
                         bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'}, 
@@ -89,13 +127,15 @@ export class NotebookBlk extends Component {
                             )
                         }
                     </div>          
-                    <div style={{width: this.props.ElementWidth}}>
-                        <Editor
-                        toolbarClassName="toolbarClassName"
-                        wrapperClassName="wrapperClassName"
-                        editorClassName="editorTextArea"
-                        onEditorStateChange={this.onEditorStateChange}           
+                    <div style={{width: this.props.ElementWidth}} hidden={!this.props.showEditor}>
+                        <ReactQuill
+                            theme="snow"
+                            modules={this.TEditorModules}
+                            onChange={this.onTEChange}
+                            value={this.state.editorHTML}
+                            placeholder="--- Your Notes Here ---"                            
                         />
+
                     </div>              
             </div>
         )

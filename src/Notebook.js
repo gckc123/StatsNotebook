@@ -49,7 +49,9 @@ export class Notebook extends Component {
                         updateAEditorValueCallback={this.props.updateAEditorValueCallback}
                         Script={this.props.NotebookBlkList[index].NotebookBlkScript}
                         runScriptCallback={this.props.runScriptCallback}
-                        ROutput={this.props.NotebookBlkList[index].NotebookBlkROutput}/>                        
+                        ROutput={this.props.NotebookBlkList[index].NotebookBlkROutput}
+                        showEditor = {this.props.NotebookBlkList[index].showEditor}
+                        toggleEditorCallback = {this.props.toggleTEditorCallback}/>                        
                         )
                 }
                 </div>   

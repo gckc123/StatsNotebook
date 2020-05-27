@@ -34,6 +34,9 @@ export class App extends Component {
           NotebookBlkNote: "",
           Busy: false,
           Active: true,
+          showEditor: false,
+          editorHTML: "",
+          Title: "",
         }
       ],
       currentActiveAnalysisPanel: "",
@@ -141,7 +144,10 @@ export class App extends Component {
           NotebookBlkID: randomID,
           NotebookBlkROutput: [],
           NotebookBlkNote: "",
-          Busy: false
+          Busy: false,
+          showEditor: false,
+          editorHTML: "",
+          Title: "",
         }]}, () => this.runScript())
     }else{
         this.setState({ActiveBlkID: randomID,
@@ -151,7 +157,10 @@ export class App extends Component {
             NotebookBlkID: randomID,
             NotebookBlkROutput: [],
             NotebookBlkNote: "",
-            Busy: false
+            Busy: false,
+            showEditor: false,
+            editorHTML: "",
+            Title: "",
           }]})
     }  
   }
@@ -175,10 +184,29 @@ export class App extends Component {
     this.setState({ActiveBlkID: null})
   }
 
-  updateAEditorValue = (index, newValue) => {
+  updateNotebookBlkState = (index, script, title, editorHTML) => {
+    let tmp = this.state.NotebookBlkList.slice()
+    tmp[index].Title = title
+    tmp[index].NotebookBlkScript = script
+    tmp[index].editorHTML = editorHTML
+    this.setState({NotebookBlkList: [...tmp]})
+  }
+
+  toggleTEditor = (index) => {
+    let tmp = this.state.NotebookBlkList.slice()
+    tmp[index].showEditor = !tmp[index].showEditor
+    this.setState({NotebookBlkList: [...tmp]})
+  }
+
+  updateAEditorValue = (index, newValue, execute) => {
     let tmp = this.state.NotebookBlkList.slice()
     tmp[index].NotebookBlkScript = newValue
-    this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue})
+    if (execute) {
+      this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue}, () => this.runScript())  
+    }else
+    {
+      this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue})
+    }
   }
 
   getData = () => {
@@ -275,6 +303,7 @@ export class App extends Component {
                     delBlkCallback = {this.delBlk}
                     updateAEditorValueCallback = {this.updateAEditorValue}
                     runScriptCallback={this.runScript}
+                    toggleTEditorCallback = {this.toggleTEditor}
                   />  
               </div>
             </div>
