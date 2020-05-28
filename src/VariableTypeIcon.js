@@ -91,7 +91,7 @@ export class VariableTypeIcon extends Component {
                 return (
                     <>
                     <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
-                        <BarChartIcon />
+                        <BarChartIcon fontSize="small"/>
                     </OrangeIconButton>
                     <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                     disableItem = "Numeric"
@@ -104,7 +104,7 @@ export class VariableTypeIcon extends Component {
                 return (
                     <>
                     <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
-                        <PieChartIcon />
+                        <PieChartIcon fontSize="small"/>
                     </OrangeIconButton>
                     <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                     disableItem = "Factor"
@@ -117,7 +117,7 @@ export class VariableTypeIcon extends Component {
                 return (
                     <>
                     <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
-                        <TextRotationNoneIcon />
+                        <TextRotationNoneIcon fontSize="small"/>
                     </OrangeIconButton>
                     <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                     disableItem = "Character"

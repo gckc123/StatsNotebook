@@ -25,6 +25,58 @@
     padding-bottom: 5px;
 }
 
+.VariableListRow {
+    display: grid;
+    grid-template-columns: 30px auto 30px;
+    padding: 0px;
+    margin: 0px;
+    cursor: pointer;
+}
+
+.VariableListRow:hover {
+    background-color: #f1f1f1;   
+}
+
+
+.VariableListItem {
+    height: 25px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.VariableListText {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 3px;
+    
+}
+
+.VariableListCheckbox {
+    padding-left: 10px;
+}
+
+.VariableListCheckbox > input {
+    height: 12px;
+    width: 12px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    appearance: none;
+    border: 1px solid #b8b8b8;
+    border-radius: 4px;
+    outline: none;
+    transition-duration: 0.3s;
+    background-color:white;
+    cursor: pointer;
+  }
+
+  .VariableListCheckbox > input:checked {
+    background-color: hotpink;
+    border: none;
+  }
+
 .Available-Variable-List-Container {
     grid-row-start: 2;
     grid-row-end: 9;
@@ -65,13 +117,6 @@
     height: 100%;
 }
 
-.VariableListItem {
-    height: 22px;
-}
-
-.VariableListText {
-    font-size: 12px;
-}
 
 .ModelSelectionVarCol {
     width: 190px;

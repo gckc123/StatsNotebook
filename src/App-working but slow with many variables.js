@@ -19,6 +19,7 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      workingDir: "",
       tentativeScript: "",
       ActiveScript: "",
       ActiveBlkID: "",
@@ -94,7 +95,8 @@ export class App extends Component {
         default:
           break;
       }
-      this.addExtraBlk(script, true)
+      this.setState({workingDir: directory}, () => this.addExtraBlk(script, true))
+      console.log(directory)
     })
   }
 
@@ -123,7 +125,7 @@ export class App extends Component {
 
   savingFile = () => {
     console.log("Saving flie clicked!!")
-    mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
+    mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList),this.state.workingDir);
   }
 
   addExtraBlk = (script,runScript) => {
@@ -186,7 +188,7 @@ export class App extends Component {
     tmp[index].Title = title
     tmp[index].NotebookBlkScript = script
     tmp[index].editorHTML = editorHTML
-    this.setState({NotebookBlkList: [...tmp]})
+    this.setState({NotebookBlkList: [...tmp]}, () => console.log(this.state.NotebookBlkList))
   }
 
   toggleTEditor = (index) => {
@@ -199,7 +201,7 @@ export class App extends Component {
     let tmp = this.state.NotebookBlkList.slice()
     tmp[index].NotebookBlkScript = newValue
     if (execute) {
-      this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID}, () => this.runScript())  
+      this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue}, () => this.runScript())  
     }else
     {
       this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue})

@@ -60,10 +60,27 @@ const getFileFromUser = exports.getFileFromUser = () => {
     filters: [
         {name: 'CSV File', extensions: ['csv']},
         {name: 'SPSS File', extensions: ['sav']},
-        {name: 'STATA File', extensions: ['dta']}
+        {name: 'STATA File', extensions: ['dta']}, 
+        {name: 'Notebook File', extensions: ['rnb']}, 
     ]
   });
+  console.log("Opening file")
   if (file) { sendFileName(file) }
+}
+
+const savingFile = exports.savingFile = (content, workingDir) => {
+  const file = dialog.showSaveDialogSync(mainWindow, {
+    title: 'Save Notebook',
+    filters: [
+      {name: 'Notebook Files', extensions: ['rnb']}
+    ]
+  });
+  if (!file) 
+  {
+    console.log("Cannot write to file.")
+    return
+  };
+  fs.writeFileSync(file, content);
 }
 
 const send2R = exports.send2R = (codes) => {

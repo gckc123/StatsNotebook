@@ -105,7 +105,7 @@ export class MediationAnalysisSetting extends Component {
 
                 <Divider className="mt-2 mb-2"/>
 
-                <Checkbox checked ={this.props.AnalysisSetting.ImputeData} 
+                <Checkbox checked ={this.props.AnalysisSetting.ImputeData}
                 onClick = {(event) => this.props.updateAnalysisSettingCallback(event, "ImputeData")} size="small"/>Impute missing data
                     
             </div>

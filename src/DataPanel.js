@@ -40,8 +40,9 @@ export class DataPanel extends Component {
 
   _cellRenderer = ({columnIndex, key, rowIndex, style}) => {
     
-    let customStyle = {...style}
-    let textLineHeight = customStyle["height"] + "px"
+    let customStyle = {...style}    
+    
+    let textLineHeight = customStyle["height"]+"px"
     
     customStyle = {...customStyle, borderLeft: '1px solid #e8e8e8', overflow: "hidden", 
     textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "14px"}
@@ -58,7 +59,7 @@ export class DataPanel extends Component {
           <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
           targetVar = {variableName[columnIndex]}
           addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
-          <span style={{lineHeight: textLineHeight, paddingLeft: "2px"}}>{variableName[columnIndex]}</span>
+          <span style={{paddingLeft: "2px"}}>{variableName[columnIndex]}</span>
         </div>
       )
     }else 

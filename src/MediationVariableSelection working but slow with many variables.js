@@ -26,7 +26,7 @@ export class MediationVariableSelection extends Component {
     
     genVariableSelectionList = (targetList) => {
         return (
-            <VariableSelectionList key={targetList} VariableList = {this.props.Variables[targetList]}
+            <VariableSelectionList VariableList = {this.props.Variables[targetList]}
                         checkedList = {this.props.Checked[targetList]}
                         handleToggleCallback = {this.props.handleToggleCallback} 
                         listType = {targetList}

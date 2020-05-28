@@ -1,38 +1,60 @@
 import React, {Component } from 'react';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Checkbox from '@material-ui/core/Checkbox';
+import {List} from 'react-virtualized';
+import {AutoSizer} from 'react-virtualized';
 import "./AnalysisPanelElements.css";
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+
 import {VariableTypeIcon} from "./VariableTypeIcon"
 
 
 
 export class VariableSelectionList extends Component {
+
+
+    _rowRenderer = ({index, key, style}) => {
+        return (
+        <div key={key} style = {{...style}} className="VariableListRow">
+
+            <div>
+                <label className="VariableListCheckbox">
+                    <input onClick={() => this.props.handleToggleCallback(this.props.VariableList[index],this.props.listType)}
+                    type="checkbox" checked={this.props.checkedList.indexOf(this.props.VariableList[index]) !== -1}/>
+                </label>
+            </div>
+                
+            <div className="VariableListText" onClick={() => this.props.handleToggleCallback(this.props.VariableList[index],this.props.listType)}>
+                {this.props.VariableList[index]}</div>              
+            
+            <div>
+                <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
+                    targetVar = {this.props.VariableList[index]} 
+                    addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
+            </div>
+
+        </div>
+        )
+
+    }
+
     render () {
         return (
-            <List dense className={`${this.props.listType}VariableList`}>                
-                {
-                    this.props.VariableList.map((variable, index) => { 
-                        return (
-                            <ListItem key={variable} button className="VariableListItem" 
-                                onClick={() => this.props.handleToggleCallback(variable,this.props.listType)}>
-                                <ListItemIcon>
-                                    <Checkbox checked={this.props.checkedList.indexOf(variable) !== -1} size="small" />
-                                </ListItemIcon>
-                                <ListItemText primary={<div className="VariableListText">{variable}</div>} />
-                                <ListItemSecondaryAction>                                    
-                                <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
-                                        targetVar = {variable} 
-                                        addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
-                                </ListItemSecondaryAction>
-                            </ListItem>
-                        )
-                    })
-                }         
-            </List>
+            <AutoSizer>
+            {({width, height}) => {
+            return (
+            <List 
+                style={{border: "1px solid #e8e8e8"}}
+                {...this.props}
+                width = {width}
+                height = {height}
+                rowCount = {this.props.VariableList.length}
+                rowHeight= {25}
+                rowRenderer = {this._rowRenderer}
+
+            />)}
+            }
+            </AutoSizer>
+            
+
+            
         )
     }
 }

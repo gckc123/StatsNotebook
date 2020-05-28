@@ -1,7 +1,9 @@
 import React, {Component} from "react";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-python";
+import "ace-builds/src-noconflict/mode-r"
 import "ace-builds/src-noconflict/theme-xcode";
+import "ace-builds/src-noconflict/theme-tomorrow";
 import './Notebook.css';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ReactQuill from 'react-quill';
@@ -113,8 +115,8 @@ export class NotebookBlk extends Component {
                     height="18px"
                     width={`${this.props.ElementWidth}px`}
                     fontSize={15}   
-                    mode="python"
-                    theme="xcode"
+                    mode="r"
+                    theme="tomorrow"
                     onChange={this.onAEChange}
                     onBlur={this.onAEBlur}
                     commands={[{   
