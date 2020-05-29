@@ -42,7 +42,7 @@ export class Notebook extends Component {
                     this.props.NotebookBlkList.map( (Blk, index) =>
                         <NotebookBlk key={Blk.NotebookBlkID} 
                         index = {index}
-                        ElementWidth={this.state.ElementWidth} Active={Blk.Active}
+                        ElementWidth={this.state.ElementWidth} ActiveBlkID={this.props.ActiveBlkID}
                         Busy = {Blk.Busy}
                         NotebookBlkID={Blk.NotebookBlkID}
                         gainFocusCallback={this.props.gainFocusCallback}

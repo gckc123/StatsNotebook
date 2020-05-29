@@ -100,7 +100,7 @@ export class NotebookBlk extends Component {
     render() {
         
         return (
-            <div className={`pt-2 pb-2 pr-2 pl-5 notebook-block mt-2 ${this.props.Active ? "active-block" : "inactive-block"}`}
+            <div className={`pt-2 pb-2 pr-2 pl-5 notebook-block mt-2 ${this.props.ActiveBlkID === this.props.NotebookBlkID ? "active-block" : "inactive-block"}`}
                 onClick={() => this.props.gainFocusCallback(this.props.index)}>
                     <div className="notebook-title-grid" style={{width: this.props.ElementWidth}}>
                         <div><input value={this.state.Title} className="titleEdit" onChange={(event) => this.onTitleChange(event)}

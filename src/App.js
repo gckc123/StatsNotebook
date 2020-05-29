@@ -21,7 +21,7 @@ export class App extends Component {
     this.state = {
       tentativeScript: "",
       ActiveScript: "",
-      ActiveBlkID: "",
+      ActiveBlkID: null,
       CurrentVariableList: [],
       CurrentData: [],
       nrow: 0,
@@ -71,7 +71,7 @@ export class App extends Component {
       }
     })
     
-    ipcRenderer.on('file-opened', (event, directory, filename, ext, os) => {
+    ipcRenderer.on('data-file-opened', (event, directory, filename, ext, os) => {
       if (os === "win32") {
         directory = directory.replace(/\\/g,"\\\\")
       }
@@ -94,14 +94,20 @@ export class App extends Component {
         default:
           break;
       }
-      this.addExtraBlk(script, true)
+      this.addExtraBlk(script, true) 
+    })
+
+    ipcRenderer.on('notebook-file-opened', (event, notebookContent) => {
+      console.log(notebookContent)
+      let contentJSON = JSON.parse(notebookContent)
+      this.setState({NotebookBlkList: contentJSON, ActiveBlkID: null, ActiveScript: ""})
     })
   }
 
   updateDataPanelDimention = () => {
     if (this.DataPanelContainerRef.current) {
       this.setState({
-        dataPanelHeight: this.DataPanelContainerRef.current.offsetHeight - 30,
+        dataPanelHeight: this.DataPanelContainerRef.current.offsetHeight - 40,
         dataPanelWidth: this.DataPanelContainerRef.current.offsetWidth - 20,
       })
     }
@@ -109,7 +115,7 @@ export class App extends Component {
 
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('RecvROutput')
-    ipcRenderer.removeAllListeners('file-opened')
+    ipcRenderer.removeAllListeners('data-file-opened')
     window.removeEventListener('resize', this.updateDataPanelDimention)
   }
 
@@ -128,16 +134,11 @@ export class App extends Component {
 
   addExtraBlk = (script,runScript) => {
     let tmp = this.state.NotebookBlkList.slice()
-    let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.Active)
-    if (CurrentActiveIndex >= 0) {
-        tmp[CurrentActiveIndex].Active = false;
-    }
     let randomID = Math.random().toString(36).substring(2, 15)
     if (runScript) {
         this.setState({ActiveBlkID: randomID,
         ActiveScript: script,
         NotebookBlkList: [...tmp, {NotebookBlkScript: script, 
-          Active: true, 
           NotebookBlkID: randomID,
           NotebookBlkROutput: [],
           NotebookBlkNote: "",
@@ -150,7 +151,6 @@ export class App extends Component {
         this.setState({ActiveBlkID: randomID,
           ActiveScript: script,
           NotebookBlkList: [...tmp, {NotebookBlkScript: script, 
-            Active: true, 
             NotebookBlkID: randomID,
             NotebookBlkROutput: [],
             NotebookBlkNote: "",
@@ -164,21 +164,12 @@ export class App extends Component {
 
   gainFocus = (index) => {
     let tmp = this.state.NotebookBlkList.slice()
-    let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.Active)
-    if (CurrentActiveIndex >= 0) {
-        tmp[CurrentActiveIndex].Active = false;
-    }
-    tmp[index].Active = true;
-    this.setState({ActiveScript: tmp[index].NotebookBlkScript})
-    this.setState({ActiveBlkID: tmp[index].NotebookBlkID})
-    this.setState({NotebookBlkList: [...tmp]})
+    this.setState({ActiveScript: tmp[index].NotebookBlkScript, ActiveBlkID: tmp[index].NotebookBlkID})
   }
 
   delBlk = () => {
-    let tmp = this.state.NotebookBlkList.filter( (item) => !item.Active)
-    this.setState({NotebookBlkList: [...tmp]})
-    this.setState({ActiveScript: ""})
-    this.setState({ActiveBlkID: null})
+    let tmp = this.state.NotebookBlkList.filter( (item) => item.NotebookBlkID !== this.state.ActiveBlkID)
+    this.setState({NotebookBlkList: [...tmp], ActiveScript: "", ActiveBlkID: null})
   }
 
   updateNotebookBlkState = (index, script, title, editorHTML) => {
@@ -202,7 +193,7 @@ export class App extends Component {
       this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID}, () => this.runScript())  
     }else
     {
-      this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue})
+      this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID})
     }
   }
 
@@ -229,13 +220,18 @@ export class App extends Component {
   }
 
   runScript = () => {  
+    console.log("Running Script")
+    console.log(this.state.ActiveBlkID)
+    
     let tmp = this.state.NotebookBlkList.slice()
-    let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.Active)
+    console.log(tmp)
+    let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
+    console.log(CurrentActiveIndex)
     if (CurrentActiveIndex >= 0) {
       tmp[CurrentActiveIndex].NotebookBlkROutput = [];
       tmp[CurrentActiveIndex].Busy = true;
       
-      this.setState({NotebookBlkList: [...tmp]}, () => console.log(this.state.NotebookBlkList))
+      this.setState({NotebookBlkList: [...tmp]})
       let ScriptJSON = {
         RequestType: "RCode",
         Script: this.state.ActiveScript,
@@ -249,8 +245,10 @@ export class App extends Component {
     this.getData();
   }
 
-  openFile = () => {
-    mainProcess.getFileFromUser();
+  openFile = (fileType) => {
+    console.log("Trying to open file")
+    mainProcess.getFileFromUser(fileType);
+   
   }
 
   updateTentativeScript = (codeString) => {
@@ -277,6 +275,7 @@ export class App extends Component {
                   dataPanelHeight = {this.state.dataPanelHeight}
                   dataPanelWidth = {this.state.dataPanelWidth}
                   addExtraBlkCallback = {this.addExtraBlk}/>
+                  <div style={{fontSize: "12px", paddingTop: "2px"}}>** This is a data preview. Only the first 500 rows are shown.</div>
                 </div>
                 <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
                   <div>
@@ -303,6 +302,7 @@ export class App extends Component {
                     runScriptCallback={this.runScript}
                     toggleTEditorCallback = {this.toggleTEditor}
                     updateNotebookBlkStateCallback = {this.updateNotebookBlkState}
+                    ActiveBlkID = {this.state.ActiveBlkID}
                   />  
               </div>
             </div>

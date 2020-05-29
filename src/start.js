@@ -54,18 +54,46 @@ ReplyFromR.on("message",function() {
   showRReply(args[1].toString());
 })
 
-const getFileFromUser = exports.getFileFromUser = () => {
+const getFileFromUser = exports.getFileFromUser = (fileType) => {
+  let fileTypeName = ""
+  let fileExtension = ""
+  switch (fileType) {
+    case "CSV":
+      fileTypeName = "CSV File"
+      fileExtension = ["csv", "CSV"]
+      break;
+    case "SPSS":
+      fileTypeName = "SPSS File"
+      fileExtension = ["sav","SAV"]
+      break;
+    case "STATA":
+      fileTypeName = "STATA File"
+      fileExtension = ["dta","DTA"]
+      break;
+    case "Notebook":
+      fileTypeName = "Notebook file"
+      fileExtension = ["rnb", "RNB"]
+      break;
+    default:
+      break;
+  }
   const file = dialog.showOpenDialogSync(mainWindow, {
     properties: ['openFile'],
     filters: [
-        {name: 'CSV File', extensions: ['csv']},
-        {name: 'SPSS File', extensions: ['sav']},
-        {name: 'STATA File', extensions: ['dta']}, 
-        {name: 'Notebook File', extensions: ['rnb']}, 
+        {name: fileType, extensions: fileExtension},
     ]
   });
   console.log("Opening file")
-  if (file) { sendFileName(file) }
+  if (file) { 
+    if (fileType === "CSV" || fileType === "SPSS" || fileType === "STATA") {
+      sendFileName(file) 
+    }else{
+      if (fileType === "Notebook") {
+        let notebookContent = fs.readFileSync(file[0]).toString();
+        mainWindow.webContents.send('notebook-file-opened', notebookContent);
+      }
+    }
+  }
 }
 
 const savingFile = exports.savingFile = (content, workingDir) => {
@@ -93,7 +121,7 @@ const sendFileName = (file) => {
   let filename = path.basename(file[0])
   let ext = path.extname(file[0])
   let os = process.platform
-  mainWindow.webContents.send('file-opened', directory, filename, ext, os);
+  mainWindow.webContents.send('data-file-opened', directory, filename, ext, os);
 }
 
 const showRReply = (reply) => {

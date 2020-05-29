@@ -27,13 +27,13 @@ export class DataBar extends Component {
     render () {
         return (
             <div className="app-bar">
-                <StyledButton disableRipple>
+                <StyledButton disableRipple disabled>
                     <FontAwesomeIcon icon={faCalculator} /><div className='ml-1'>Compute</div>
                 </StyledButton>
-                <StyledButton disableRipple>
+                <StyledButton disableRipple disabled>
                     <FontAwesomeIcon icon={faFilter} /><div className='ml-1'>Filter</div>
                 </StyledButton>
-                <StyledButton disableRipple>
+                <StyledButton disableRipple disabled>
                     <FontAwesomeIcon icon={faExchangeAlt} /><div className='ml-1'>Recode</div>
                 </StyledButton>
 
