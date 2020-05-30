@@ -36,11 +36,6 @@ export class DataPanel extends Component {
     };
   }
 
-  sectionRenderedInfo = (info) => {
-      console.log(info)
-
-  }
-
   //potential bugs here - might need to account for the wide of border? Not 100% sure....
 
   _cellRenderer = ({columnIndex, key, rowIndex, style}) => {
@@ -93,7 +88,6 @@ export class DataPanel extends Component {
               rowHeight={28}
               rowCount={this.props.nrow}
               style={STYLE}
-              onSectionRendered={this.sectionRenderedInfo}
               styleBottomLeftGrid={STYLE_BOTTOM_LEFT_GRID}
               styleTopLeftGrid={STYLE_TOP_LEFT_GRID}
               styleTopRightGrid={STYLE_TOP_RIGHT_GRID}

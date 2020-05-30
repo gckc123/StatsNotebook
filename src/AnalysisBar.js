@@ -25,6 +25,7 @@ const MenuItemStyle = {
     fontSize: 'small',
 }
 
+
 class RegressionMenu extends Component {
 
     render() {
@@ -85,6 +86,70 @@ class CausalMenu extends Component {
     }
 }
 
+class ExploreMenu extends Component {
+
+    setAnalysisPanel = (target) => {
+        this.props.selectAnalysisPanelCallback(target)
+        this.props.handleClose()
+    }
+
+    render() {
+        let open = Boolean(this.props.anchorEl[this.props.target])
+        return (
+            <Menu anchorEl={this.props.anchorEl[this.props.target]}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                keepMounted
+                transformOrigin = {{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                open = {open}
+                onClose={this.props.handleClose}>
+                <MenuItem disableRipple style = {MenuItemStyle}>Descriptive statistics</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}>
+                    Frequency
+                </MenuItem>                                       
+            </Menu>
+        )
+    }
+}
+
+class MeanMenu extends Component {
+
+    setAnalysisPanel = (target) => {
+        this.props.selectAnalysisPanelCallback(target)
+        this.props.handleClose()
+    }
+
+    render() {
+        let open = Boolean(this.props.anchorEl[this.props.target])
+        return (
+            <Menu anchorEl={this.props.anchorEl[this.props.target]}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                keepMounted
+                transformOrigin = {{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                open = {open}
+                onClose={this.props.handleClose}>
+                <MenuItem disableRipple style = {MenuItemStyle}>Independent sample T-test</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}>Repeated measure T-test</MenuItem>                                       
+                <MenuItem disableRipple style = {MenuItemStyle}>ANOVA</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}>ANCOVA</MenuItem>
+            </Menu>
+        )
+    }
+}
+
 export class AnalysisBar extends Component {
     
     constructor(props) {
@@ -92,7 +157,9 @@ export class AnalysisBar extends Component {
         this.state = {
             anchorEl: {
                 regression: null,
-                causal: null
+                causal: null,
+                explore: null,
+                mean: null,
             }
         }
     }
@@ -115,13 +182,17 @@ export class AnalysisBar extends Component {
     render () {
         return (
             <div className="app-bar">
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Descriptive</div>
+                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "explore")}>
+                <ChangeHistoryIcon/><div className='ml-1'>Explore</div>
                 </StyledButton>
+                <ExploreMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                target = "explore"/>
 
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Means</div>
+                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "mean")}>
+                <ChangeHistoryIcon/><div className='ml-1'>Compare Means</div>
                 </StyledButton>
+                <MeanMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                target = "mean"/>
                 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "causal")}>
                 <ChangeHistoryIcon/><div className='ml-1'>Causal</div>
@@ -136,7 +207,7 @@ export class AnalysisBar extends Component {
                 target = "regression"/>
                 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Mixed</div>
+                <ChangeHistoryIcon/><div className='ml-1'>Mixed Models</div>
                 </StyledButton>
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>

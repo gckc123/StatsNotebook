@@ -44,6 +44,7 @@ export class App extends Component {
     window.addEventListener("resize", this.updateDataPanelDimention);
 
     ipcRenderer.on('RecvROutput', (event, content) => {
+      
       let ResultsJSON = JSON.parse(content)
       if (ResultsJSON.OutputType[0] === "Normal" || ResultsJSON.OutputType[0] === "Warning" || ResultsJSON.OutputType[0] === "Message" || ResultsJSON.OutputType[0] === "Error") {
         let tmp = this.state.NotebookBlkList.slice()
@@ -57,8 +58,6 @@ export class App extends Component {
       }else if (ResultsJSON.OutputType[0] === "getVariableList") {  
         this.setState({CurrentVariableList: ResultsJSON.Output})
       }else if (ResultsJSON.OutputType[0] === "getData") {
-        console.log("receiving data")
-        //console.log(ResultsJSON.Output)
         this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow, ncol: ResultsJSON.ncol})
       }else if(ResultsJSON.OutputType[0] === "END") {
         let tmp = this.state.NotebookBlkList.slice()
@@ -66,6 +65,15 @@ export class App extends Component {
         if (Reply2BlkIndex >= 0)
         {
           tmp[Reply2BlkIndex].Busy = false
+          this.setState({NotebookBlkList:[...tmp]})
+        }
+      }else if(ResultsJSON.OutputType[0] === "Graphics") {
+        let tmp = this.state.NotebookBlkList.slice()
+        let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
+        if (Reply2BlkIndex >= 0)
+        {
+          tmp[Reply2BlkIndex].NotebookBlkROutput = [...tmp[Reply2BlkIndex].NotebookBlkROutput, {OutputType: ResultsJSON.OutputType,
+            Output: ResultsJSON.Output}];
           this.setState({NotebookBlkList:[...tmp]})
         }
       }
@@ -98,7 +106,6 @@ export class App extends Component {
     })
 
     ipcRenderer.on('notebook-file-opened', (event, notebookContent) => {
-      console.log(notebookContent)
       let contentJSON = JSON.parse(notebookContent)
       this.setState({NotebookBlkList: contentJSON, ActiveBlkID: null, ActiveScript: ""})
     })
@@ -128,7 +135,6 @@ export class App extends Component {
   }
 
   savingFile = () => {
-    console.log("Saving flie clicked!!")
     mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
   }
 
@@ -220,13 +226,8 @@ export class App extends Component {
   }
 
   runScript = () => {  
-    console.log("Running Script")
-    console.log(this.state.ActiveBlkID)
-    
     let tmp = this.state.NotebookBlkList.slice()
-    console.log(tmp)
     let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
-    console.log(CurrentActiveIndex)
     if (CurrentActiveIndex >= 0) {
       tmp[CurrentActiveIndex].NotebookBlkROutput = [];
       tmp[CurrentActiveIndex].Busy = true;
@@ -241,12 +242,10 @@ export class App extends Component {
       mainProcess.send2R(StriptString);
     }
     this.getVariableList();
-    console.log("Getting data")
     this.getData();
   }
 
   openFile = (fileType) => {
-    console.log("Trying to open file")
     mainProcess.getFileFromUser(fileType);
    
   }
