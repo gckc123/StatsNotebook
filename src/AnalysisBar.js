@@ -1,10 +1,19 @@
 import React, {Component} from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
 import "./App.css";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
+
+import BoxplotIcon from "./icon/boxplot.svg";
+import RegressionIcon from "./icon/regression.svg";
+import MediationIcon from "./icon/Mediation.svg";
+import MissingDataIcon from "./icon/missingdata.svg";
+import MetaAnalysisIcon from "./icon/Meta_analysis.svg";
+import HistogramIcon from "./icon/histogram.svg";
+import RobotIcon from "./icon/robot.svg";
+
+
 
 const StyledButton = withStyles({
     root: {
@@ -18,13 +27,86 @@ const StyledButton = withStyles({
     },
      label: {
         textTransform: 'none',
-     }   
+        flexDirection: 'column',
+     } , 
+
 })(Button);
 
 const MenuItemStyle = {
     fontSize: 'small',
 }
 
+class MachineLearningMenu extends Component {
+    render() {
+        let open = Boolean(this.props.anchorEl[this.props.target])
+        return (
+            <Menu anchorEl={this.props.anchorEl[this.props.target]}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                keepMounted
+                transformOrigin = {{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                open = {open}
+                onClose={this.props.handleClose}>
+                <MenuItem disableRipple style = {MenuItemStyle}>Super Learner</MenuItem>
+            </Menu>
+        )
+    }
+}
+
+class ImputationMenu extends Component {
+    render() {
+        let open = Boolean(this.props.anchorEl[this.props.target])
+        return (
+            <Menu anchorEl={this.props.anchorEl[this.props.target]}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                keepMounted
+                transformOrigin = {{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                open = {open}
+                onClose={this.props.handleClose}>
+                <MenuItem disableRipple style = {MenuItemStyle}>Multiple Imputation</MenuItem>
+            </Menu>
+        )
+    }
+}
+
+
+class MetaAnalysisMenu extends Component {
+
+    render() {
+        let open = Boolean(this.props.anchorEl[this.props.target])
+        return (
+            <Menu anchorEl={this.props.anchorEl[this.props.target]}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                keepMounted
+                transformOrigin = {{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                open = {open}
+                onClose={this.props.handleClose}>
+                <MenuItem disableRipple style = {MenuItemStyle}>Meta-Analysis</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}>Network Meta-Analysis</MenuItem>
+            </Menu>
+        )
+    }
+}
 
 class RegressionMenu extends Component {
 
@@ -160,6 +242,8 @@ export class AnalysisBar extends Component {
                 causal: null,
                 explore: null,
                 mean: null,
+                metaanalysis: null,
+                imputation: null,
             }
         }
     }
@@ -183,36 +267,53 @@ export class AnalysisBar extends Component {
         return (
             <div className="app-bar">
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "explore")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Explore</div>
+                <img src={HistogramIcon} alt="" height="38px"/>
+                <div style={{fontSize: "12px"}}>Explore</div>
                 </StyledButton>
                 <ExploreMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "explore"/>
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "mean")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Compare Means</div>
+                <img src={BoxplotIcon} alt="" height="38px"/>
+                <div style={{fontSize: "12px"}}>Means</div>
                 </StyledButton>
                 <MeanMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "mean"/>
                 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "causal")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Causal</div>
+                <img src={MediationIcon} alt="" height="38px"/>
+                <div style={{fontSize: "12px"}}>Causal</div>
                 </StyledButton>                
                 <CausalMenu handleClose ={this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "causal" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
                 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Regression</div>
+                <img src={RegressionIcon} alt="" height="38px"/>
+                <div style={{fontSize: "12px"}}>Regression</div>
                 </StyledButton>
                 <RegressionMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "regression"/>
                 
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Mixed Models</div>
+                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "metaanalysis")}>
+                <img src={MetaAnalysisIcon} alt="" height="38px"/>
+                <div style={{fontSize: "12px"}}>Meta-Analysis</div>
                 </StyledButton>
+                <MetaAnalysisMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                target = "metaanalysis"/>
 
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>
-                <ChangeHistoryIcon/><div className='ml-1'>Imputation</div>
+                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "imputation")}>
+                <img src={MissingDataIcon} alt="" height="38px" />
+                <div style={{fontSize: "12px"}}>Imputation</div>
                 </StyledButton>
+                <ImputationMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                target = "imputation"/>
+
+                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "machinelearning")}>
+                <img src={RobotIcon} alt="" height="38px" />
+                <div style={{fontSize: "12px"}}>Learning</div>
+                </StyledButton>
+                <MachineLearningMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                target = "machinelearning"/>
 
             </div>
         )

@@ -26,7 +26,7 @@ export class NotebookBar extends Component {
     
     render() {
         return (
-            <div>
+            <div className="notebook-bar">
                 <StyledButton disableRipple onClick={this.props.runScriptCallback}> 
                     <FontAwesomeIcon icon={faPlay}/><div className="ml-1">Run</div>
                 </StyledButton>

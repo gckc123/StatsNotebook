@@ -12,6 +12,9 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
 
 const StyledIconButton = withStyles({
     root: {
@@ -103,12 +106,19 @@ export class NotebookBlk extends Component {
             <div className={`pt-2 pb-2 pr-2 pl-5 notebook-block mt-2 ${this.props.ActiveBlkID === this.props.NotebookBlkID ? "active-block" : "inactive-block"}`}
                 onClick={() => this.props.gainFocusCallback(this.props.index)}>
                     <div className="notebook-title-grid" style={{width: this.props.ElementWidth}}>
-                        <div><input value={this.state.Title} className="titleEdit" onChange={(event) => this.onTitleChange(event)}
-                        onBlur = {this.onBlkBlur}/></div>
+                        <div>
+                            <StyledIconButton size="small" hidden = {!this.props.Expanded}
+                            onClick = {()=>{this.props.toggleNotebookBlkCallback(this.props.index)}}><ExpandLessIcon /></StyledIconButton>
+                            <StyledIconButton size="small" hidden = {this.props.Expanded}
+                            onClick = {() => {this.props.toggleNotebookBlkCallback(this.props.index)}}><ExpandMoreIcon /></StyledIconButton>
+                            <input value={this.state.Title} className="titleEdit" onChange={(event) => this.onTitleChange(event)}
+                        onBlur = {this.onBlkBlur}/>
+                        </div>
                         <div style={{float: "right"}}><CircularProgress style={{color: "#40a9ff"}} 
                         size={14} hidden={!this.props.Busy}/></div>
                         <div><StyledIconButton size="small" onClick={()=>{this.props.toggleEditorCallback(this.props.index)}}><FontAwesomeIcon icon={faEdit} /></StyledIconButton></div>                        
                     </div>
+                    <div hidden = {!this.props.Expanded}>
                     <AceEditor 
                     value = {this.state.Script}
                     onLoad={this.onLoad}
@@ -132,14 +142,15 @@ export class NotebookBlk extends Component {
                             this.props.ROutput.map( (output, index) =>  {      
                                     if (output.OutputType[0] === "Normal" || output.OutputType[0] === "Warning" || output.OutputType[0] === "Message" || output.OutputType[0] === "Error") {                        
                                         return (
-                                            <code className={output.OutputType} key={index}>{output.Output}</code>                                        
+                                            <div key={index}><code className={output.OutputType} key={index}>{output.Output}</code></div>
                                         )
                                     }else if (output.OutputType[0] === "Graphics")
                                     {
                                         let graphicsData = "data:image/png;base64," + output.Output
                                         {
                                             return (
-                                            <img width={this.props.ElementWidth*0.6} src={graphicsData} />
+                                            <div key={index}><img width={this.props.ElementWidth*0.6} src={graphicsData} /></div>
+                                            
                                             )
                                         }
                                     }
@@ -156,7 +167,7 @@ export class NotebookBlk extends Component {
                             value={this.state.editorHTML}
                             placeholder="--- Your Notes Here ---"                            
                         />
-
+                    </div>
                     </div>              
             </div>
         )

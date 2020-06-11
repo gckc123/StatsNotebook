@@ -50,8 +50,7 @@ app.on('ready', () => {
 ReplyFromR.on("message",function() {
   console.log("Received reply from R");
   var args = Array.apply(null, arguments);
-  //console.log(args[1].toString());
-  showRReply(args[1].toString());
+  showRReply(args[1].toString('utf8'));
 })
 
 const getFileFromUser = exports.getFileFromUser = (fileType) => {
@@ -112,6 +111,8 @@ const savingFile = exports.savingFile = (content, workingDir) => {
 }
 
 const send2R = exports.send2R = (codes) => {
+  console.log("Before replacement", codes)
+  codes = codes.replace(/\\r\\n/g,"\\n").replace(/\\r/g,"\\n")
   console.log("Sending codes to R: ", codes);
   RequestToR.send(codes);
 }

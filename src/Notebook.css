@@ -47,3 +47,18 @@
   background: #f1f1f1
 }
 
+.notebook-bar {
+  position: sticky;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: white;
+  
+  border-bottom: 1px solid #e8e8e8;
+  
+}
+
+.notebook-blk {
+  z-index: 1;
+}

@@ -37,13 +37,14 @@ export class Notebook extends Component {
                 addExtraBlkCallback={this.props.addExtraBlkCallback} 
                 delBlkCallback={this.props.delBlkCallback}
                 runScriptCallback={this.props.runScriptCallback}/>
-                <div>
+                <div className="notebook-blk">
                 {
                     this.props.NotebookBlkList.map( (Blk, index) =>
                         <NotebookBlk key={Blk.NotebookBlkID} 
                         index = {index}
                         ElementWidth={this.state.ElementWidth} ActiveBlkID={this.props.ActiveBlkID}
                         Busy = {Blk.Busy}
+                        Expanded = {Blk.Expanded}
                         NotebookBlkID={Blk.NotebookBlkID}
                         gainFocusCallback={this.props.gainFocusCallback}
                         updateAEditorValueCallback={this.props.updateAEditorValueCallback}
@@ -54,6 +55,7 @@ export class Notebook extends Component {
                         ROutput={this.props.NotebookBlkList[index].NotebookBlkROutput}
                         showEditor = {this.props.NotebookBlkList[index].showEditor}
                         toggleEditorCallback = {this.props.toggleTEditorCallback}
+                        toggleNotebookBlkCallback = {this.props.toggleNotebookBlkCallback}
                         updateNotebookBlkStateCallback = {this.props.updateNotebookBlkStateCallback}/>                        
                         )
                 }

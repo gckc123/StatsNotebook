@@ -45,7 +45,8 @@ export class App extends Component {
 
     ipcRenderer.on('RecvROutput', (event, content) => {
       
-      let ResultsJSON = JSON.parse(content)
+      let ResultsJSON = JSON.parse(content.toString('utf8'))
+      
       if (ResultsJSON.OutputType[0] === "Normal" || ResultsJSON.OutputType[0] === "Warning" || ResultsJSON.OutputType[0] === "Message" || ResultsJSON.OutputType[0] === "Error") {
         let tmp = this.state.NotebookBlkList.slice()
         let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
@@ -58,7 +59,7 @@ export class App extends Component {
       }else if (ResultsJSON.OutputType[0] === "getVariableList") {  
         this.setState({CurrentVariableList: ResultsJSON.Output})
       }else if (ResultsJSON.OutputType[0] === "getData") {
-        this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow, ncol: ResultsJSON.ncol})
+        this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
       }else if(ResultsJSON.OutputType[0] === "END") {
         let tmp = this.state.NotebookBlkList.slice()
         let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
@@ -151,6 +152,7 @@ export class App extends Component {
           Busy: false,
           showEditor: false,
           editorHTML: "",
+          Expanded: true,
           Title: "--- Analysis Title Here ---",
         }]}, () => this.runScript())
     }else{
@@ -163,6 +165,7 @@ export class App extends Component {
             Busy: false,
             showEditor: false,
             editorHTML: "",
+            Expanded: true,
             Title: "--- Analysis Title Here ---",
           }]})
     }  
@@ -189,6 +192,12 @@ export class App extends Component {
   toggleTEditor = (index) => {
     let tmp = this.state.NotebookBlkList.slice()
     tmp[index].showEditor = !tmp[index].showEditor
+    this.setState({NotebookBlkList: [...tmp]})
+  }
+
+  toggleNotebookBlk = (index) => {
+    let tmp = this.state.NotebookBlkList.slice()
+    tmp[index].Expanded = !tmp[index].Expanded
     this.setState({NotebookBlkList: [...tmp]})
   }
 
@@ -265,7 +274,7 @@ export class App extends Component {
             selectAnalysisPanelCallback = {this.selectAnalysisPanel}
             savingFileCallback = {this.savingFile}/>
             <div className="main-pane">
-              <div className="left-pane p-2" ref={this.DataPanelContainerRef}>
+              <div className="left-pane pl-2 pr-2 mb-2" ref={this.DataPanelContainerRef}>
                 <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
                   <DataPanel CurrentData = {this.state.CurrentData}
                   CurrentVariableList = {this.state.CurrentVariableList}
@@ -277,7 +286,7 @@ export class App extends Component {
                   <div style={{fontSize: "12px", paddingTop: "2px"}}>** This is a data preview. Only the first 500 rows are shown.</div>
                 </div>
                 <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
-                  <div>
+                  <div className="notebook-bar">
                   <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlk}
                   runScriptCallback = {this.runScript}
                   tentativeScript = {this.state.tentativeScript}/>
@@ -291,7 +300,7 @@ export class App extends Component {
                 </div>
 
               </div>
-              <div className="right-pane p-2">
+              <div className="right-pane pl-2 pr-2 mb-2">
                   <Notebook
                     NotebookBlkList = {this.state.NotebookBlkList}
                     addExtraBlkCallback={this.addExtraBlk}
@@ -301,6 +310,7 @@ export class App extends Component {
                     runScriptCallback={this.runScript}
                     toggleTEditorCallback = {this.toggleTEditor}
                     updateNotebookBlkStateCallback = {this.updateNotebookBlkState}
+                    toggleNotebookBlkCallback = {this.toggleNotebookBlk}
                     ActiveBlkID = {this.state.ActiveBlkID}
                   />  
               </div>

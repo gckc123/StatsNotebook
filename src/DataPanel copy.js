@@ -53,7 +53,6 @@ export class DataPanel extends Component {
     }
     let variableName = Object.keys(this.props.CurrentVariableList);
 
-
     if (rowIndex === 0) {
       return (
         <div key={key} style={customStyle}>
@@ -65,7 +64,7 @@ export class DataPanel extends Component {
       )
     }else 
     {
-      let dataValue = this.props.CurrentData[rowIndex-1][variableName[columnIndex]] 
+      let dataValue = this.props.CurrentData[rowIndex-1][variableName[columnIndex]]
       return (
         <div key={key} style={{...customStyle, paddingLeft: "3px"}}>
           <span style={{lineHeight: textLineHeight}}>{dataValue}</span>
@@ -76,7 +75,6 @@ export class DataPanel extends Component {
   
 
   render () {
-    
     return (
             <MultiGrid
               {...this.state}
@@ -88,7 +86,7 @@ export class DataPanel extends Component {
               enableFixedRowScroll
               height={this.props.dataPanelHeight}
               rowHeight={28}
-              rowCount={this.props.nrow+1}
+              rowCount={this.props.nrow}
               style={STYLE}
               styleBottomLeftGrid={STYLE_BOTTOM_LEFT_GRID}
               styleTopLeftGrid={STYLE_TOP_LEFT_GRID}
