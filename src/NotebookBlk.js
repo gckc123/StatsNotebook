@@ -139,7 +139,7 @@ export class NotebookBlk extends Component {
                     />
                     <div className="ROutputText p-2">
                         {
-                            this.props.ROutput.map( (output, index) =>  {      
+                            this.props.ROutput.forEach( (output, index) =>  {      
                                     if (output.OutputType[0] === "Normal" || output.OutputType[0] === "Warning" || output.OutputType[0] === "Message" || output.OutputType[0] === "Error") {                        
                                         return (
                                             <div key={index}><code className={output.OutputType} key={index}>{output.Output}</code></div>
@@ -147,12 +147,10 @@ export class NotebookBlk extends Component {
                                     }else if (output.OutputType[0] === "Graphics")
                                     {
                                         let graphicsData = "data:image/png;base64," + output.Output
-                                        {
-                                            return (
-                                            <div key={index}><img width={this.props.ElementWidth*0.6} src={graphicsData} /></div>
+                                        return (
+                                            <div key={index}><img width={this.props.ElementWidth*0.6} src={graphicsData} alt=""/></div>
                                             
-                                            )
-                                        }
+                                        )
                                     }
                                     
                                 }                                

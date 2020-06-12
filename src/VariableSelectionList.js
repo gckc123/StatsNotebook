@@ -16,7 +16,7 @@ export class VariableSelectionList extends Component {
 
             <div>
                 <label className="VariableListCheckbox">
-                    <input onClick={() => this.props.handleToggleCallback(this.props.VariableList[index],this.props.listType)}
+                    <input onChange={() => this.props.handleToggleCallback(this.props.VariableList[index],this.props.listType)}
                     type="checkbox" checked={this.props.checkedList.indexOf(this.props.VariableList[index]) !== -1}/>
                 </label>
             </div>

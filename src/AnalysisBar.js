@@ -85,6 +85,11 @@ class ImputationMenu extends Component {
 
 class MetaAnalysisMenu extends Component {
 
+    setAnalysisPanel = (target) => {
+        this.props.selectAnalysisPanelCallback(target)
+        this.props.handleClose()
+    }
+
     render() {
         let open = Boolean(this.props.anchorEl[this.props.target])
         return (
@@ -102,7 +107,8 @@ class MetaAnalysisMenu extends Component {
                 open = {open}
                 onClose={this.props.handleClose}>
                 <MenuItem disableRipple style = {MenuItemStyle}>Meta-Analysis</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}>Network Meta-Analysis</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("NMAPanel")}>Network Meta-Analysis</MenuItem>
             </Menu>
         )
     }
@@ -251,7 +257,7 @@ export class AnalysisBar extends Component {
     handleMenu = (event, target) => {
         let tmp = {...this.state.anchorEl}
         tmp[target] = event.currentTarget
-        this.setState({anchorEl: {...tmp}}, ()=>console.log(this.state.anchorEl[target]))
+        this.setState({anchorEl: {...tmp}})
         
     }
 
@@ -299,7 +305,7 @@ export class AnalysisBar extends Component {
                 <div style={{fontSize: "12px"}}>Meta-Analysis</div>
                 </StyledButton>
                 <MetaAnalysisMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
-                target = "metaanalysis"/>
+                target = "metaanalysis" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "imputation")}>
                 <img src={MissingDataIcon} alt="" height="38px" />

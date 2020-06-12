@@ -25,7 +25,7 @@ const MenuItemStyle = {
 class ChangeVariableTypeMenu extends Component {
 
     changeVariableType = (targetType) => {
-        let script = "currentDataset$" + this.props.targetVar + " <- " + "as." + targetType + "(currentDataset$" + this.props.targetVar + ")"
+        let script = "currentDataset$" + this.props.targetVar + " <- as." + targetType + "(currentDataset$" + this.props.targetVar + ")"
         this.props.addExtraBlkCallback(script, true)
         this.props.handleClose()
     }

@@ -8,6 +8,7 @@ import { Notebook } from './Notebook';
 import { MediationPanel } from "./MediationPanel"
 import { AnalysisPanelBar } from './AnalysisPanelBar';
 import { DataPanel} from './DataPanel';
+import { NMAPanel } from './NMAPanel';
 
 
 const electron = window.require('electron');
@@ -293,6 +294,12 @@ export class App extends Component {
                   </div>
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
                     <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}/>
+                  </div>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "NMAPanel"}>
+                    <NMAPanel CurrentVariableList = {this.state.CurrentVariableList}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}/>

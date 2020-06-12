@@ -27,6 +27,7 @@ app.on('ready', () => {
     show:false,
     width: 1366,
     height: 768,
+    title: "PandaPIG",
   });
   //mainWindow.removeMenu()
 
