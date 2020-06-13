@@ -190,3 +190,32 @@
     grid-row-start: 2;
     grid-row-end: 11;
 }
+
+.NMA-Analysis-Box {
+    display: grid;
+    grid-template-columns: 250px 250px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.NMAAnalysisSettingInput {
+    width: 150px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #a7a7a7;
+    font-size: 14px;
+}
+
+.NMAAnalysisSettingInput:hover {
+    border-bottom: 2px solid black;
+}
+
+.NMAAnalysisSettingInput:focus {
+    border-bottom: 2px solid black;
+    outline: none;
+}
+
+.NMACheckbox {
+    height: 28px;
+}

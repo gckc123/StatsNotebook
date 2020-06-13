@@ -52,9 +52,6 @@ export class VariableSelectionList extends Component {
             />)}
             }
             </AutoSizer>
-            
-
-            
         )
     }
 }

@@ -87,13 +87,12 @@ export class NMAPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
-          Models: {},
-          TreatLv: 1,
-          ControlLv: 0,
+          ESType: "",
           ConfLv: 95,
-          Digits: 3,
-          Simulation: 1000,
-          ImputeData: true,
+          ForestPlot: true,
+          ForestPlotRef: "",
+          NetworkPlot: true,
+          HeatPlot: true, 
         }
     }
   }
@@ -194,7 +193,8 @@ export class NMAPanel extends Component {
   }
 
   buildCode = () => {
-    
+    console.log(this.state.AnalysisSetting)
+    console.log(this.state.Variables)
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -207,17 +207,14 @@ export class NMAPanel extends Component {
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     
     switch (target) {
-      case "ModelSelection":
-        AnalysisSettingObj.Models[event.target.name] = event.target.value
-        break;
+      case "ESType":
       case "ConfLv":
-      case "TreatLv":
-      case "ControlLv":
-      case "Digits":
-      case "Simulation":
+      case "ForestPlotRef":
         AnalysisSettingObj[target] = event.target.value
         break;
-      case "ImputeData":
+      case "ForestPlot":
+      case "NetworkPlot":
+      case "HeatPlot":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -255,8 +252,9 @@ export class NMAPanel extends Component {
             <Typography>Analysis Setting</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <NMAAnalysisSetting />
-            
+            <NMAAnalysisSetting 
+            AnalysisSetting = {this.state.AnalysisSetting}
+            updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
           </ExpansionPanelDetails>
         </ExpansionPanel>    
       </div>
