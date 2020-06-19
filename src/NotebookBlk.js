@@ -143,7 +143,7 @@ export class NotebookBlk extends Component {
                                     if (output.OutputType[0] === "Normal" || output.OutputType[0] === "Warning" || output.OutputType[0] === "Message" || output.OutputType[0] === "Error") {                        
                                         return (
                                             <div key={index}>
-                                                <div style={{color: "black"}}>#########################################################</div>
+                                                <div style={{color: "black", fontWeight: "bold"}}>#########################################################</div>
                                                 <div><code className={output.OutputType} key={index}>{output.Output}</code></div>
                                             </div>
                                         )
@@ -152,7 +152,7 @@ export class NotebookBlk extends Component {
                                         let graphicsData = "data:image/png;base64," + output.Output
                                         return (
                                             <div key={index}>
-                                                <div style={{color: "black"}}>#########################################################</div>
+                                                <div style={{color: "black", fontWeight: "bold"}}>#########################################################</div>
                                                 <div><img width={this.props.ElementWidth*0.6} src={graphicsData} alt=""/></div>
                                             </div>
                                             

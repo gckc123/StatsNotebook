@@ -66,6 +66,7 @@ export class NMAPanel extends Component {
             EffectSize: [],
             SE: [],
         }, 
+        TreatmentLvs : [], 
         Checked: {
             Available: [],
             Treatment1: [],
@@ -93,6 +94,8 @@ export class NMAPanel extends Component {
           ForestPlotRef: "",
           NetworkPlot: true,
           HeatPlot: true, 
+          FunnelPlot: true,
+          FunnelPlotOrder: []
         }
     }
   }
@@ -119,6 +122,7 @@ export class NMAPanel extends Component {
         this.setState({Variables:{...VariablesObj}})
         this.setState({Checked: {...CheckedObj}})
     }
+    // Need to check if any treatment variable is removed?
   }
 
   intersection = (array1, array2) => {
@@ -133,12 +137,25 @@ export class NMAPanel extends Component {
   handleToRight = (target, maxElement) => {
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
+    
+    console.log(target)
+    console.log(this.props.CurrentVariableList[CheckedObj["Available"][0]])
+
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
+      if ((target === "Treatment1" || target === "Treatment2") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Factor")) {
+        alert("Only factor variable can be entered into Treatment 1 or Treatment 2.")
+      }else if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
+        alert("Only numeric variable can be entered as Effect Size or Standard Error")
+      }else {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
+        if (target === "Treatment1" || target === "Treatment2") {    
+          this.setState({TreatmentLvs: [...this.getTreatmentLv(VariablesObj)]})       
+        }
         CheckedObj["Available"] = []
         this.setState({Variables: {...VariablesObj}},
             () => this.setState({Checked: {...CheckedObj}}))  
+      }      
     }else{
         if (CheckedObj["Available"].length > 0) {
             alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
@@ -146,11 +163,34 @@ export class NMAPanel extends Component {
     }
   }
 
+  getTreatmentLv = (VariablesObj) => {
+    let Treatment1Lvs = []
+    let Treatment2Lvs = []
+    let tmpTreatmentLvs = []
+    if (VariablesObj["Treatment1"].length !== 0) {
+      if (Object.keys(this.props.CategoricalVarLevels).indexOf(VariablesObj["Treatment1"][0]) !== -1) {
+        Treatment1Lvs = [...this.props.CategoricalVarLevels[VariablesObj["Treatment1"][0]]]
+      }
+    }
+    if (VariablesObj["Treatment2"].length !== 0) {
+      if (Object.keys(this.props.CategoricalVarLevels).indexOf(VariablesObj["Treatment2"][0]) !== -1) {
+        Treatment2Lvs = [...this.props.CategoricalVarLevels[VariablesObj["Treatment2"][0]]]
+      }
+    }
+    tmpTreatmentLvs = [...new Set([...Treatment1Lvs, ...Treatment2Lvs])]
+    return tmpTreatmentLvs
+  }
+
   handleToLeft = (from) => {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
+
+      if (from === "Treatment1" || from === "Treatment2") {    
+        this.setState({TreatmentLvs: [...this.getTreatmentLv(VariablesObj)]}, () => console.log(this.state.TreatmentLvs))       
+      }
+
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},
           () => this.setState({Checked: {...CheckedObj}}))
@@ -160,11 +200,6 @@ export class NMAPanel extends Component {
     
     let CheckedObj = {...this.state.Checked}
     let currentIndex = CheckedObj[from].indexOf(varname);
-
-    console.log("Toggle")
-    console.log(varname)
-    console.log(from)
-    console.log(currentIndex)
 
     if (currentIndex === -1) {
         CheckedObj[from].push(varname)
@@ -193,8 +228,28 @@ export class NMAPanel extends Component {
   }
 
   buildCode = () => {
-    console.log(this.state.AnalysisSetting)
-    console.log(this.state.Variables)
+    let codeString = "nma_res <- netmeta::netmeta( TE = " + this.state.Variables.EffectSize + 
+    ",\n seTE = " + this.state.Variables.SE + 
+    ",\ntreat1 = " + this.state.Variables.Treatment1 +
+    ",\ntreat2 = " + this.state.Variables.Treatment2 +
+    ",\nstudlab = " + this.state.Variables.StudyLab + 
+    ",\ndata = currentDataset, \nsm = \"" + this.state.AnalysisSetting.ESType + 
+    "\",\nlevel = " + this.state.AnalysisSetting.ConfLv/100 + 
+    ",\nlevel.comb = " + this.state.AnalysisSetting.ConfLv/100 +")" 
+    codeString = codeString + "\nsummary(nma_res) \nnetsplit(nma_res)"
+    if (this.state.AnalysisSetting.ForestPlot) {
+        codeString = codeString + 
+        "\nforest(netsplit(nma_res, reference.group=\""+ this.state.AnalysisSetting.ForestPlotRef + "\"))"
+    }
+    if (this.state.AnalysisSetting.NetworkPlot) {
+        codeString = codeString +
+        "\nnetgraph(nma_res)"
+    }
+    if (this.state.AnalysisSetting.HeatPlot) {
+        codeString = codeString +
+        "\nnetheat(nma_res)"
+    }
+    this.props.updateTentativeScriptCallback(codeString) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -253,6 +308,9 @@ export class NMAPanel extends Component {
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
             <NMAAnalysisSetting 
+            Variables = {this.state.Variables}
+            CategoricalVarLevels = {this.props.CategoricalVarLevels}
+            TreatmentLvs = {this.state.TreatmentLvs}
             AnalysisSetting = {this.state.AnalysisSetting}
             updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
           </ExpansionPanelDetails>

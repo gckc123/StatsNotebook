@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {VariableTypeIcon} from './VariableTypeIcon'
 import {MultiGrid} from 'react-virtualized';
 import './App.css';
+import Tooltip from '@material-ui/core/Tooltip';
+import {withStyles} from '@material-ui/core';
 
 const STYLE = {
   border: '1px solid #ddd',
@@ -22,6 +24,13 @@ const STYLE_TOP_RIGHT_GRID = {
   borderBottom: '2px solid #aaa',
   fontWeight: 'bold',
 };
+
+const StyledTooltip = withStyles({
+  tooltip: {
+    fontSize: "12px"
+  }
+})(Tooltip);
+
 
 export class DataPanel extends Component {
 
@@ -60,7 +69,9 @@ export class DataPanel extends Component {
           <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
           targetVar = {variableName[columnIndex]}
           addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
-          <span style={{paddingLeft: "2px"}}>{variableName[columnIndex]}</span>
+          <StyledTooltip title={variableName[columnIndex]}>
+            <span style={{paddingLeft: "2px"}}>{variableName[columnIndex]}</span>
+          </StyledTooltip>
         </div>
       )
     }else 
@@ -68,7 +79,7 @@ export class DataPanel extends Component {
       let dataValue = this.props.CurrentData[rowIndex-1][variableName[columnIndex]] 
       return (
         <div key={key} style={{...customStyle, paddingLeft: "3px"}}>
-          <span style={{lineHeight: textLineHeight}}>{dataValue}</span>
+          <StyledTooltip title={dataValue}><span style={{lineHeight: textLineHeight}}>{dataValue}</span></StyledTooltip>
         </div>
       )
     };

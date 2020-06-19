@@ -4,7 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import Checkbox from '@material-ui/core/Checkbox';
-
+import Divider from '@material-ui/core/Divider';
 
 const StyledNativeSelect = withStyles({
     root: {
@@ -25,26 +25,22 @@ const StyledNativeSelect = withStyles({
 export class NMAAnalysisSetting extends Component {
     
     genForestPlotRef = () => {
-        if (this.props.TreatmentLvs.length !==0) {
+        console.log(this.props.CategoricalVarLevels[this.props.Variables.Treatment1])
+        let treatment1Lvs = []
+        let treatment2Lvs = []
+        let treatmentLvs = []
+        if (this.props.Variables.Treatment1.length !==0 || this.props.Variables.Treatment2.length !== 0) {
+            if (this.props.Variables.Treatment1.length !== 0) {
+                treatment1Lvs = [...this.props.CategoricalVarLevels[this.props.Variables.Treatment1]]
+            }
+            if (this.props.Variables.Treatment2.length !== 0) {
+                treatment2Lvs = [...this.props.CategoricalVarLevels[this.props.Variables.Treatment2]]
+            }
+            treatmentLvs = [... new Set([...treatment1Lvs, ...treatment2Lvs])]
             return (
-                    <FormControl>
-                            <StyledNativeSelect
-                            key="ForestPlotRef"
-                            value={this.props.AnalysisSetting.ForestPlotRef}
-                            onChange={(event) => this.props.updateAnalysisSettingCallback(event, "ForestPlotRef")}
-                            inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
-                                <option value = "" key="default">--- Select Reference Level ---</option>
-                                {
-                                    this.props.TreatmentLvs.map((item) => {
-                                        return (
-                                            <React.Fragment key={item}>
-                                                <option value={item} key={item}>{item}</option>
-                                            </React.Fragment>
-                                        )
-                                    })
-                                }
-                            </StyledNativeSelect>
-                        </FormControl>
+                <div>
+                {treatmentLvs}
+                </div>
             )
         }
     }
@@ -79,8 +75,12 @@ export class NMAAnalysisSetting extends Component {
                     onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"ForestPlot")}/>Forest plot 
                     <span hidden= {!this.props.AnalysisSetting.ForestPlot}> - Reference: </span>
                     </div>
-                    <div hidden= {!this.props.AnalysisSetting.ForestPlot}>
-                        {this.genForestPlotRef()}
+                    <div>
+                    <input className="NMAAnalysisSettingInput" hidden= {!this.props.AnalysisSetting.ForestPlot}
+                    onBlur = {(event) => this.props.updateAnalysisSettingCallback(event,"ForestPlotRef")}
+                    onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event,"ForestPlotRef")}></input>
+                        
+                    
                     </div>
                 </div>
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.HeatPlot} size="small"

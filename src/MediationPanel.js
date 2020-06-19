@@ -190,11 +190,6 @@ export class MediationPanel extends Component {
     let CheckedObj = {...this.state.Checked}
     let currentIndex = CheckedObj[from].indexOf(varname);
 
-    console.log("Toggle")
-    console.log(varname)
-    console.log(from)
-    console.log(currentIndex)
-
     if (currentIndex === -1) {
         CheckedObj[from].push(varname)
     }else {

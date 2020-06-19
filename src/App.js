@@ -24,6 +24,7 @@ export class App extends Component {
       ActiveScript: "",
       ActiveBlkID: null,
       CurrentVariableList: [],
+      CategoricalVarLevels: {},
       CurrentData: [],
       nrow: 0,
       ncol: 0,
@@ -58,7 +59,7 @@ export class App extends Component {
           this.setState({NotebookBlkList:[...tmp]})
         }
       }else if (ResultsJSON.OutputType[0] === "getVariableList") {  
-        this.setState({CurrentVariableList: ResultsJSON.Output})
+        this.setState({CurrentVariableList: ResultsJSON.Output,CategoricalVarLevels: ResultsJSON.CategoricalVarLevels})
       }else if (ResultsJSON.OutputType[0] === "getData") {
         this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
       }else if(ResultsJSON.OutputType[0] === "END") {
@@ -300,6 +301,7 @@ export class App extends Component {
                   </div>
                   <div hidden={this.state.currentActiveAnalysisPanel !== "NMAPanel"}>
                     <NMAPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}/>
