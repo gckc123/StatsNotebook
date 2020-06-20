@@ -102,25 +102,27 @@ export class NMAPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
-    let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
-    let allVarsInCurrentList = []
-    for (let key in this.state.Variables) {   
-        allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
-    }
+    if (this.props.currentActiveAnalysisPanel === "NMAPanel") {
+      let VariablesObj = {...this.state.Variables}
+      let CheckedObj = {...this.state.Checked}
+      let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
+      let allVarsInCurrentList = []
+      for (let key in this.state.Variables) {   
+          allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
+      }
 
-    if (JSON.stringify(CurrentVariableList.sort()) !== JSON.stringify(allVarsInCurrentList.sort())) {
-        for (let key in this.state.Variables) {
-            VariablesObj[key] = this.intersection(VariablesObj[key], CurrentVariableList)
-            CheckedObj[key] = this.intersection(CheckedObj[key],VariablesObj[key])
-        }
+      if (JSON.stringify(CurrentVariableList.sort()) !== JSON.stringify(allVarsInCurrentList.sort())) {
+          for (let key in this.state.Variables) {
+              VariablesObj[key] = this.intersection(VariablesObj[key], CurrentVariableList)
+              CheckedObj[key] = this.intersection(CheckedObj[key],VariablesObj[key])
+          }
 
-        let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
-        VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
+          let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
+          VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-        this.setState({Variables:{...VariablesObj}})
-        this.setState({Checked: {...CheckedObj}})
+          this.setState({Variables:{...VariablesObj}})
+          this.setState({Checked: {...CheckedObj}})
+      }
     }
     // Need to check if any treatment variable is removed?
   }
@@ -146,6 +148,8 @@ export class NMAPanel extends Component {
         alert("Only factor variable can be entered into Treatment 1 or Treatment 2.")
       }else if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
         alert("Only numeric variable can be entered as Effect Size or Standard Error")
+      }else if ((target === "StudyLab") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Numeric")) {
+        alert("Study Labels must not be a numeric variable.")
       }else {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
@@ -227,6 +231,26 @@ export class NMAPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
+  reorderTreatmentLv = (direction,index) => {
+    let TreatmentLvsObj = [...this.state.TreatmentLvs]
+    let tmp = ""
+    if (direction === "Up") {
+      if (index !== 0) {
+          tmp = TreatmentLvsObj[index-1]
+          TreatmentLvsObj[index-1] = TreatmentLvsObj[index]
+          TreatmentLvsObj[index] = tmp
+          this.setState({TreatmentLvs: [...TreatmentLvsObj]})
+        }
+    }else {
+      if (index !== this.state.TreatmentLvs.length-1) {
+          tmp = TreatmentLvsObj[index+1]
+          TreatmentLvsObj[index+1] = TreatmentLvsObj[index]
+          TreatmentLvsObj[index] = tmp
+          this.setState({TreatmentLvs: [...TreatmentLvsObj]})
+      }
+    }
+  }
+
   buildCode = () => {
     let codeString = "nma_res <- netmeta::netmeta( TE = " + this.state.Variables.EffectSize + 
     ",\n seTE = " + this.state.Variables.SE + 
@@ -249,6 +273,10 @@ export class NMAPanel extends Component {
         codeString = codeString +
         "\nnetheat(nma_res)"
     }
+    if (this.state.AnalysisSetting.FunnelPlot) {
+      codeString = codeString + "\nfunnel(nma_res, order = c(\"" + this.state.TreatmentLvs.join("\", \"") +
+      "\"), linreg = TRUE)\n"
+    }
     this.props.updateTentativeScriptCallback(codeString) 
   }
 
@@ -270,6 +298,7 @@ export class NMAPanel extends Component {
       case "ForestPlot":
       case "NetworkPlot":
       case "HeatPlot":
+      case "FunnelPlot":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -312,7 +341,8 @@ export class NMAPanel extends Component {
             CategoricalVarLevels = {this.props.CategoricalVarLevels}
             TreatmentLvs = {this.state.TreatmentLvs}
             AnalysisSetting = {this.state.AnalysisSetting}
-            updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+            updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+            reorderTreatmentLvCallback = {this.reorderTreatmentLv}/>
           </ExpansionPanelDetails>
         </ExpansionPanel>    
       </div>

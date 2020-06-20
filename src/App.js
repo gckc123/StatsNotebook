@@ -297,14 +297,16 @@ export class App extends Component {
                     <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
-                    addExtraBlkCallback = {this.addExtraBlk}/>
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
                   <div hidden={this.state.currentActiveAnalysisPanel !== "NMAPanel"}>
                     <NMAPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
-                    addExtraBlkCallback = {this.addExtraBlk}/>
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
                 </div>
 

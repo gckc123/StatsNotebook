@@ -4,7 +4,25 @@ import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import Checkbox from '@material-ui/core/Checkbox';
+import {faArrowUp} from '@fortawesome/free-solid-svg-icons';
+import {faArrowDown} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import IconButton from '@material-ui/core/IconButton';
 
+const StyledButton = withStyles({
+    root: {
+        '&:hover': {
+            color: '#40a9ff',
+            opacity: 1,
+        },
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+     label: {
+        textTransform: 'none',
+     }   
+})(IconButton);
 
 const StyledNativeSelect = withStyles({
     root: {
@@ -49,6 +67,8 @@ export class NMAAnalysisSetting extends Component {
         }
     }
 
+
+
     render () {
         return (
             <div>
@@ -87,6 +107,25 @@ export class NMAAnalysisSetting extends Component {
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"HeatPlot")}/>Heat plot</div>     
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.NetworkPlot} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"NetworkPlot")}/>Network plot</div>
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.FunnelPlot} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"FunnelPlot")}/>Funnel plot</div>
+                <div hidden={!this.props.AnalysisSetting.FunnelPlot}><div className="pl-2 mt-1 mb-1">Funnel plot order:</div>
+                {
+                    this.props.TreatmentLvs.map((item, index) => {
+                        return (
+                            <div className="pl-3" key={item}>
+                            <StyledButton size="small"
+                            onClick={() => this.props.reorderTreatmentLvCallback("Up",index)} disableRipple><FontAwesomeIcon icon={faArrowUp}></FontAwesomeIcon></StyledButton>
+                            <StyledButton size="small"
+                            onClick={() => this.props.reorderTreatmentLvCallback("Down",index)} disableRipple><FontAwesomeIcon icon={faArrowDown}></FontAwesomeIcon></StyledButton>
+                            <span className="pl-2">{item}</span>
+                            </div>                            
+                        )
+                    })
+                }
+                </div>
+
+
             </div>
         )
     }
