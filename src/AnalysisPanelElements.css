@@ -25,9 +25,18 @@
     padding-bottom: 5px;
 }
 
-.VariableListRow {
+.VariableListRow3Items {
     display: grid;
     grid-template-columns: 30px auto 30px;
+    padding: 0px;
+    margin: 0px;
+    cursor: pointer;
+}
+
+
+.VariableListRow2Items {
+    display: grid;
+    grid-template-columns: 30px auto;
     padding: 0px;
     margin: 0px;
     cursor: pointer;
@@ -218,4 +227,25 @@
 
 .NMACheckbox {
     height: 30px;
+}
+
+.MA-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows: 25px 40px 25px 40px 25px 40px 25px 200px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.MA-Available-Variable-List-Container {
+    grid-row-start: 2;
+    grid-row-end: 9;
+}
+
+.AddInteraction-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows:25px 200px;
+    margin: 0px;
+    padding: 0px;
 }

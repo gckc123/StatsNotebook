@@ -5,10 +5,10 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { MediationVariableSelection } from './MediationVariableSelection';
+import { MAVariableSelection } from './MAVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { MediationAnalysisSetting } from "./MediationAnalysisSetting";
+import { MAAnalysisSetting } from "./MAAnalysisSetting";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -53,30 +53,30 @@ const ExpansionPanelDetails = withStyles((theme) => ({
 }))(MuiExpansionPanelDetails);
 
 
-export class MediationPanel extends Component {
+export class MAPanel extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
         Variables: {
             Available: [],
-            Outcome: [],
-            Exposure: [],
-            Mediator: [],
-            Covariate: []
+            StudyLab: [],
+            EffectSize: [],
+            SE: [],
+            Covariates: [],
         }, 
         Checked: {
             Available: [],
-            Outcome: [],
-            Exposure: [],
-            Mediator: [],
-            Covariate: []
+            StudyLab: [],
+            EffectSize: [],
+            SE: [],
+            Covariates: [],
         },
         hideToRight: {
-            Outcome: false,
-            Exposure: false,
-            Mediator: false,
-            Covariate: false
+            StudyLab: false,
+            EffectSize: false,
+            SE: false,
+            Covariates: [],
         },
         tentativeScript: "",
         panels: {
@@ -84,20 +84,19 @@ export class MediationPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
-          Models: {},
-          TreatLv: 1,
-          ControlLv: 0,
+          ESType: "",
           ConfLv: 95,
-          Digits: 3,
-          Simulation: 1000,
-          ImputeData: true,
+          Leave1Out: true,
+          TrimAndFill: true,
+          ForestPlot: true,
+          FunnelPlot: true,
         }
     }
   }
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "MediationPanel") {
+    if (this.props.currentActiveAnalysisPanel === "MAPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -119,6 +118,7 @@ export class MediationPanel extends Component {
           this.setState({Checked: {...CheckedObj}})
       }
     }
+    // Need to check if any treatment variable is removed?
   }
 
   intersection = (array1, array2) => {
@@ -129,44 +129,23 @@ export class MediationPanel extends Component {
       return array1.filter((item) => array2.indexOf(item) === -1)
   }
 
-  add2ModelSelection = (CheckedObjAvailable) => {
-      let ModelsObj = {...this.state.AnalysisSetting.Models}
-      CheckedObjAvailable.forEach((item) => {
-        ModelsObj[item] = ""
-      })
-      this.setState(prevState => ({
-        AnalysisSetting: {
-          ...prevState.AnalysisSetting,
-          Models: ModelsObj,
-        }
-      }))
-  }
-
-  removeFromModelSelection = (CheckedObjOrigin) =>  {
-    let ModelsObj = {...this.state.AnalysisSetting.Models}
-    CheckedObjOrigin.forEach((item) => {
-      delete ModelsObj[item]
-    })
-    this.setState(prevState => ({
-      AnalysisSetting: {
-        ...prevState.AnalysisSetting,
-        Models: ModelsObj,
-      }
-    }))
-  }
 
   handleToRight = (target, maxElement) => {
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
+
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
+      if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
+        alert("Only numeric variable can be entered as Effect Size or Standard Error")
+      }else if ((target === "StudyLab") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Numeric")) {
+        alert("Study Labels must not be a numeric variable.")
+      }else {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
-        if (target === "Outcome" || target === "Mediator") {
-          this.add2ModelSelection(CheckedObj["Available"])
-        }
         CheckedObj["Available"] = []
         this.setState({Variables: {...VariablesObj}},
             () => this.setState({Checked: {...CheckedObj}}))  
+      }      
     }else{
         if (CheckedObj["Available"].length > 0) {
             alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
@@ -179,9 +158,7 @@ export class MediationPanel extends Component {
       let CheckedObj = {...this.state.Checked}
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
-      if (from === "Outcome" || from === "Mediator") {
-        this.removeFromModelSelection(CheckedObj[from])
-      }
+
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},
           () => this.setState({Checked: {...CheckedObj}}))
@@ -218,25 +195,10 @@ export class MediationPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
-
-
   buildCode = () => {
-    let mediatorModels = this.state.Variables.Mediator.map((item) => {
-      return this.state.AnalysisSetting.Models[item]
-    }) 
-    let codeString = "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
-    "med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
-    "treat = \""+ this.state.Variables.Exposure[0] + "\",\n"+
-    "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n"+
-    "ymodel = \""+ this.state.AnalysisSetting.Models[this.state.Variables.Outcome[0]] +"\",\n"+
-    "mmodel = c(\"" + mediatorModels.join("\" ,\"") +"\"),\n"+
-    "treat_lv = " + this.state.AnalysisSetting.TreatLv + 
-    ", control_lv = " + this.state.AnalysisSetting.ControlLv +
-    ", conf.level = " + this.state.AnalysisSetting.ConfLv/100 + ",\n" +
-    "data = currentDataset, sim = "+ this.state.AnalysisSetting.Simulation + 
-    ", digits = " + this.state.AnalysisSetting.Digits + ",\n" + 
-    "HTML_report = FALSE, complete_analysis = "+ (!this.state.AnalysisSetting.ImputeData).toString().toUpperCase() +")"
-    this.props.updateTentativeScriptCallback(codeString)
+    let codeString = ""
+    
+    this.props.updateTentativeScriptCallback(codeString) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -249,17 +211,15 @@ export class MediationPanel extends Component {
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     
     switch (target) {
-      case "ModelSelection":
-        AnalysisSettingObj.Models[event.target.name] = event.target.value
-        break;
+      case "ESType":
       case "ConfLv":
-      case "TreatLv":
-      case "ControlLv":
-      case "Digits":
-      case "Simulation":
+      case "ForestPlotRef":
         AnalysisSettingObj[target] = event.target.value
         break;
-      case "ImputeData":
+      case "ForestPlot":
+      case "NetworkPlot":
+      case "HeatPlot":
+      case "FunnelPlot":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -274,10 +234,10 @@ export class MediationPanel extends Component {
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Causal Mediation Analysis - Variables Selection</Typography>
+            <Typography>Meta-Analysis/ Meta-Regression</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <MediationVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+            <MAVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
             Variables = {this.state.Variables}
             Checked = {this.state.Checked}
             hideToRight = {this.state.hideToRight}
@@ -297,10 +257,12 @@ export class MediationPanel extends Component {
             <Typography>Analysis Setting</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <MediationAnalysisSetting Variables = {this.state.Variables} 
+            <MAAnalysisSetting 
+            Variables = {this.state.Variables}
+            CategoricalVarLevels = {this.props.CategoricalVarLevels}
+            TreatmentLvs = {this.state.TreatmentLvs}
             AnalysisSetting = {this.state.AnalysisSetting}
             updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
-            
           </ExpansionPanelDetails>
         </ExpansionPanel>    
       </div>

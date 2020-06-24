@@ -12,7 +12,7 @@ export class VariableSelectionList extends Component {
 
     _rowRenderer = ({index, key, style}) => {
         return (
-        <div key={key} style = {{...style}} className="VariableListRow">
+        <div key={key} style = {{...style}} className={this.props.needTypeIcon ? "VariableListRow3Items" : "VariableListRow2Items"}>
 
             <div>
                 <label className="VariableListCheckbox">
@@ -22,13 +22,15 @@ export class VariableSelectionList extends Component {
             </div>
                 
             <div className="VariableListText" onClick={() => this.props.handleToggleCallback(this.props.VariableList[index],this.props.listType)}>
-                {this.props.VariableList[index]}</div>              
-            
-            <div>
-                <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
-                    targetVar = {this.props.VariableList[index]} 
-                    addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
-            </div>
+                {this.props.VariableList[index]}</div>       
+
+            {this.props.needTypeIcon &&
+                <div>
+                    <VariableTypeIcon CurrentVariableList = {this.props.CurrentVariableList}
+                        targetVar = {this.props.VariableList[index]} 
+                        addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
+                </div>
+            }
 
         </div>
         )
@@ -40,16 +42,16 @@ export class VariableSelectionList extends Component {
             <AutoSizer>
             {({width, height}) => {
             return (
-            <List 
-                style={{border: "1px solid #e8e8e8"}}
-                {...this.props}
-                width = {width}
-                height = {height}
-                rowCount = {this.props.VariableList.length}
-                rowHeight= {25}
-                rowRenderer = {this._rowRenderer}
+                <List 
+                    style={{border: "1px solid #e8e8e8"}}
+                    {...this.props}
+                    width = {width}
+                    height = {height}
+                    rowCount = {this.props.VariableList.length}
+                    rowHeight= {25}
+                    rowRenderer = {this._rowRenderer}
 
-            />)}
+                />)}
             }
             </AutoSizer>
         )

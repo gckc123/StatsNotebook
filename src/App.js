@@ -9,6 +9,8 @@ import { MediationPanel } from "./MediationPanel"
 import { AnalysisPanelBar } from './AnalysisPanelBar';
 import { DataPanel} from './DataPanel';
 import { NMAPanel } from './NMAPanel';
+import { MAPanel } from './MAPanel';
+import { VarsReferencePanel } from './VarsReferencePanel';
 
 
 const electron = window.require('electron');
@@ -30,6 +32,7 @@ export class App extends Component {
       ncol: 0,
       NotebookBlkList: [],
       currentActiveAnalysisPanel: "",
+      currentActiveDataPanel: "",
       currentActiveLeftPanel: "",
       dataPanelWidth: 100,
       dataPanelHeight: 100,
@@ -42,8 +45,8 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    this.updateDataPanelDimention();
-    window.addEventListener("resize", this.updateDataPanelDimention);
+    this.updateDataPanelDimension();
+    window.addEventListener("resize", this.updateDataPanelDimension);
 
     ipcRenderer.on('RecvROutput', (event, content) => {
       
@@ -112,9 +115,10 @@ export class App extends Component {
       let contentJSON = JSON.parse(notebookContent)
       this.setState({NotebookBlkList: contentJSON, ActiveBlkID: null, ActiveScript: ""})
     })
+
   }
 
-  updateDataPanelDimention = () => {
+  updateDataPanelDimension = () => {
     if (this.DataPanelContainerRef.current) {
       this.setState({
         dataPanelHeight: this.DataPanelContainerRef.current.offsetHeight - 40,
@@ -123,14 +127,41 @@ export class App extends Component {
     }
   }
 
+  reorderNotebookBlk = (direction) => {
+    let NotebookBlkObj = [...this.state.NotebookBlkList]
+    let CurrentActiveIndex = NotebookBlkObj.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
+    if (direction === "Up") {
+      if (CurrentActiveIndex > 0) {
+        let tmpNotebookBlk = {...NotebookBlkObj[CurrentActiveIndex - 1]}
+        NotebookBlkObj[CurrentActiveIndex - 1] = {...NotebookBlkObj[CurrentActiveIndex]}
+        NotebookBlkObj[CurrentActiveIndex] = {...tmpNotebookBlk}
+        this.setState({NotebookBlkList : [...NotebookBlkObj]})
+      }
+    }else if (direction === "Down") {
+      if (CurrentActiveIndex < NotebookBlkObj.length) {
+        let tmpNotebookBlk = {...NotebookBlkObj[CurrentActiveIndex + 1]}
+        NotebookBlkObj[CurrentActiveIndex + 1] = {...NotebookBlkObj[CurrentActiveIndex]}
+        NotebookBlkObj[CurrentActiveIndex] = {...tmpNotebookBlk}
+        this.setState({NotebookBlkList: [...NotebookBlkObj]})
+      }
+    }
+  }
+
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('RecvROutput')
     ipcRenderer.removeAllListeners('data-file-opened')
-    window.removeEventListener('resize', this.updateDataPanelDimention)
+    window.removeEventListener('resize', this.updateDataPanelDimension)
   }
 
   selectLeftPanel = (panel) => {
     this.setState({currentActiveLeftPanel: panel})
+    if (panel === "DataPanel") {
+      this.setState({currentActiveDataPanel: panel})
+    }
+  }
+
+  selectDataPanel = (panel) => {
+    this.setState({currentActiveDataPanel: panel})
   }
 
   selectAnalysisPanel = (panel) => {
@@ -258,7 +289,7 @@ export class App extends Component {
 
   openFile = (fileType) => {
     mainProcess.getFileFromUser(fileType);
-   
+    this.setState({currentActiveLeftPanel: "DataPanel", currentActiveDataPanel: "DataPanel"})
   }
 
   updateTentativeScript = (codeString) => {
@@ -267,6 +298,7 @@ export class App extends Component {
     }
   }
   
+
   render() {
 
       return (
@@ -274,18 +306,30 @@ export class App extends Component {
             <TopNavTabs openFileCallback = {this.openFile}
             selectLeftPanelCallback = {this.selectLeftPanel}
             selectAnalysisPanelCallback = {this.selectAnalysisPanel}
+            selectDataPanelCallback = {this.selectDataPanel}
             savingFileCallback = {this.savingFile}/>
             <div className="main-pane">
               <div className="left-pane pl-2 pr-2 mb-2" ref={this.DataPanelContainerRef}>
                 <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
-                  <DataPanel CurrentData = {this.state.CurrentData}
-                  CurrentVariableList = {this.state.CurrentVariableList}
-                  nrow = {this.state.nrow}
-                  ncol = {this.state.ncol}
-                  dataPanelHeight = {this.state.dataPanelHeight}
-                  dataPanelWidth = {this.state.dataPanelWidth}
-                  addExtraBlkCallback = {this.addExtraBlk}/>
-                  <div style={{fontSize: "12px", paddingTop: "2px"}}>** This is a data preview. Only the first 500 rows are shown.</div>
+                  <div hidden={this.state.currentActiveDataPanel !== "DataPanel"}>
+                    <DataPanel CurrentData = {this.state.CurrentData}
+                    CurrentVariableList = {this.state.CurrentVariableList}
+                    nrow = {this.state.nrow}
+                    ncol = {this.state.ncol}
+                    dataPanelHeight = {this.state.dataPanelHeight}
+                    dataPanelWidth = {this.state.dataPanelWidth}
+                    addExtraBlkCallback = {this.addExtraBlk}/>
+                    <div style={{fontSize: "12px", paddingTop: "2px"}}>** This is a data preview. Only the first 500 rows are shown.</div>
+                  </div>
+                  <div hidden={this.state.currentActiveDataPanel !== "VarsReferencePanel"}>
+                    <VarsReferencePanel CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    CurrentVariableList = {this.state.CurrentVariableList}
+                    nrow = {Object.keys(this.state.CategoricalVarLevels).length+1}
+                    ncol = {this.state.ncol}
+                    dataPanelHeight = {this.state.dataPanelHeight}
+                    dataPanelWidth = {this.state.dataPanelWidth}
+                    addExtraBlkCallback = {this.addExtraBlk}/>
+                  </div>
                 </div>
                 <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
                   <div className="notebook-bar">
@@ -308,6 +352,14 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "MAPanel"}>
+                    <MAPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                  </div>
                 </div>
 
               </div>
@@ -317,6 +369,7 @@ export class App extends Component {
                     addExtraBlkCallback={this.addExtraBlk}
                     gainFocusCallback={this.gainFocus}
                     delBlkCallback = {this.delBlk}
+                    reorderNotebookBlkCallback = {this.reorderNotebookBlk}
                     updateAEditorValueCallback = {this.updateAEditorValue}
                     runScriptCallback={this.runScript}
                     toggleTEditorCallback = {this.toggleTEditor}

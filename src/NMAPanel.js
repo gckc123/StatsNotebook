@@ -145,9 +145,9 @@ export class NMAPanel extends Component {
 
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       if ((target === "Treatment1" || target === "Treatment2") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Factor")) {
-        alert("Only factor variable can be entered into Treatment 1 or Treatment 2.")
+        alert("Only factor variable(s) can be entered as Treatment 1 or Treatment 2.")
       }else if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
-        alert("Only numeric variable can be entered as Effect Size or Standard Error")
+        alert("Only numeric variable(s) can be entered as Effect Size or Standard Error")
       }else if ((target === "StudyLab") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Numeric")) {
         alert("Study Labels must not be a numeric variable.")
       }else {

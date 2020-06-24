@@ -14,6 +14,7 @@ const StyledTooltip = withStyles({
       fontSize: "12px"
     }
   })(Tooltip);
+  
 
 const StyledButton = withStyles({
     root: {
@@ -30,7 +31,7 @@ const StyledButton = withStyles({
      }   
 })(Button);
 
-export class NMAVariableSelection extends Component {
+export class MAVariableSelection extends Component {
     
     genVariableSelectionList = (targetList) => {
         return (
@@ -62,38 +63,23 @@ export class NMAVariableSelection extends Component {
     render () {
         return (
             <div className="analysis-pane">
-                <div className="NMA-Variable-Selection-Box">
-                    <div >Variables</div>
-                    <div ></div>
-                    <div>Treatment 1</div>
-                    <div className="NMA-Available-Variable-List-Container" 
-                    onClick={() => this.props.changeArrowCallback("Available")}>
-                        {this.genVariableSelectionList("Available")}
-                    </div>
-                    <div><center>
-                        {this.genArrowButton("Treatment1", 1)}
-                    </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Treatment1")}>
-                        {this.genVariableSelectionList("Treatment1")}
-                    </div>
-                    <div></div>
-                    <div>Treatment 2</div>
-                    <div><center>
-                        {this.genArrowButton("Treatment2", 1)}
-                    </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Treatment2")}>
-                        {this.genVariableSelectionList("Treatment2")}
-                    </div>
+                <div className="MA-Variable-Selection-Box">
+                    <div> Variables</div>
                     <div></div>
                     <div>Effect size 
                     <StyledTooltip title="For Risk/ Odds/ Hazard ratio, enter the log-effect size here.">
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
+                    <div className="MA-Available-Variable-List-Container" 
+                    onClick={() => this.props.changeArrowCallback("Available")}>
+                        {this.genVariableSelectionList("Available")}
+                    </div>
                     <div><center>
                         {this.genArrowButton("EffectSize", 1)}
                     </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("EffectSize")}> 
+                    <div onClick={() => this.props.changeArrowCallback("EffectSize")}>
                         {this.genVariableSelectionList("EffectSize")}
                     </div>
+
                     <div></div>
                     <div>Standard Error</div>
                     <div><center>
@@ -102,6 +88,7 @@ export class NMAVariableSelection extends Component {
                     <div onClick={() => this.props.changeArrowCallback("SE")}>
                         {this.genVariableSelectionList("SE")}
                     </div>
+
                     <div></div>
                     <div>Study Label</div>
                     <div><center>
@@ -109,6 +96,15 @@ export class NMAVariableSelection extends Component {
                     </center></div>
                     <div onClick={() => this.props.changeArrowCallback("StudyLab")}>
                         {this.genVariableSelectionList("StudyLab")}
+                    </div>
+
+                    <div></div>
+                    <div>Covariates</div>
+                    <div><center>
+                        {this.genArrowButton("Covariates", 100000)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("Covariates")}>
+                        {this.genVariableSelectionList("Covariates")}
                     </div>
                 </div>
             </div>

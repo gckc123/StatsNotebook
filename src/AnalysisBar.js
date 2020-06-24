@@ -106,7 +106,8 @@ class MetaAnalysisMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Meta-Analysis</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("MAPanel")}>Meta-Analysis/ Meta-Regression</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick = {() => this.setAnalysisPanel("NMAPanel")}>Network Meta-Analysis</MenuItem>
             </Menu>

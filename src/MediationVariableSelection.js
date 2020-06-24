@@ -31,7 +31,8 @@ export class MediationVariableSelection extends Component {
                         handleToggleCallback = {this.props.handleToggleCallback} 
                         listType = {targetList}
                         CurrentVariableList = {this.props.CurrentVariableList}
-                        addExtraBlkCallback = {this.props.addExtraBlkCallback}/>
+                        addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                        needTypeIcon = {true}/>
         )
     }
 

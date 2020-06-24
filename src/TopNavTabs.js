@@ -71,6 +71,7 @@ export class TopNavTabs extends Component {
           this.props.selectLeftPanelCallback("AnalysisPanel")
           break;
         default:
+          this.props.selectLeftPanelCallback("")
           break;
       }
 
@@ -90,7 +91,7 @@ export class TopNavTabs extends Component {
           savingFileCallback = {this.props.savingFileCallback}/>
         </TabPanel>
         <TabPanel CurrentTab={this.state.CurrentTab} index={1}>
-          <DataBar />
+          <DataBar selectDataPanelCallback = {this.props.selectDataPanelCallback}/>
         </TabPanel>
         <TabPanel CurrentTab={this.state.CurrentTab} index={2}>
           <AnalysisBar selectAnalysisPanelCallback = {this.props.selectAnalysisPanelCallback}/>

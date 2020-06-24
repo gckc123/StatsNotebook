@@ -35,6 +35,7 @@ export class Notebook extends Component {
             <div ref={this.ContainerRef}>
                 <NotebookBar 
                 addExtraBlkCallback={this.props.addExtraBlkCallback} 
+                reorderNotebookBlkCallback = {this.props.reorderNotebookBlkCallback}
                 delBlkCallback={this.props.delBlkCallback}
                 runScriptCallback={this.props.runScriptCallback}/>
                 <div className="notebook-blk">

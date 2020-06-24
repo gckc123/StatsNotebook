@@ -4,7 +4,9 @@ import Button from '@material-ui/core/Button';
 import {faCalculator} from '@fortawesome/free-solid-svg-icons';
 import {faFilter} from '@fortawesome/free-solid-svg-icons';
 import {faExchangeAlt} from '@fortawesome/free-solid-svg-icons';
+import {faBook} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faTable} from '@fortawesome/free-solid-svg-icons';
 import "./App.css";
 
 const StyledButton = withStyles({
@@ -26,7 +28,13 @@ export class DataBar extends Component {
     
     render () {
         return (
-            <div className="app-bar">
+            <div className="app-bar" >
+                <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("DataPanel")}>
+                    <FontAwesomeIcon icon={faTable} /><div className='ml-1'>Data</div>
+                </StyledButton>
+                <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("VarsReferencePanel")}>
+                    <FontAwesomeIcon icon={faBook}/><div className='ml-1'>Reference</div>
+                </StyledButton>
                 <StyledButton disableRipple disabled>
                     <FontAwesomeIcon icon={faCalculator} /><div className='ml-1'>Compute</div>
                 </StyledButton>
