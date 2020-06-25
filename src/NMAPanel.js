@@ -252,7 +252,7 @@ export class NMAPanel extends Component {
   }
 
   buildCode = () => {
-    let codeString = "nma_res <- netmeta::netmeta( TE = " + this.state.Variables.EffectSize + 
+    let codeString = "library(netmeta)\nnma_res <- netmeta::netmeta( TE = " + this.state.Variables.EffectSize + 
     ",\n seTE = " + this.state.Variables.SE + 
     ",\ntreat1 = " + this.state.Variables.Treatment1 +
     ",\ntreat2 = " + this.state.Variables.Treatment2 +

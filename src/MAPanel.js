@@ -9,15 +9,7 @@ import { MAVariableSelection } from './MAVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
 import { MAAnalysisSetting } from "./MAAnalysisSetting";
-import Tooltip from '@material-ui/core/Tooltip';
 import { AddInteraction } from './AddInteractions';
-
-const StyledTooltip = withStyles({
-    tooltip: {
-      fontSize: "12px"
-    }
-  })(Tooltip);
-  
 
 const ExpansionPanel = withStyles({
   root: {
@@ -73,7 +65,6 @@ export class MAPanel extends Component {
             EffectSize: [],
             SE: [],
             Covariates: [],
-            Interaction: [],
         }, 
         Checked: {
             Available: [],
@@ -81,8 +72,10 @@ export class MAPanel extends Component {
             EffectSize: [],
             SE: [],
             Covariates: [],
-            Interaction: [],
+            CovariatesIntSelection: [],
         },
+        interaction: [],
+        checkedInteraction: [],
         hideToRight: {
             StudyLab: false,
             EffectSize: false,
@@ -194,7 +187,25 @@ export class MAPanel extends Component {
             CheckedObj[key] = [];
         }
     }        
-    this.setState({Checked: {...CheckedObj}})
+    this.setState({Checked: {...CheckedObj}, checkedInteraction: []})
+  }
+
+  handleToggleInteraction = (varname, from) => {
+    let CheckedObj = {...this.state.Checked}
+    let CheckedIntObj = [...this.state.checkedInteraction]
+    let currentIndex = CheckedIntObj.indexOf(varname)
+    
+    if (currentIndex === -1) {
+      CheckedIntObj.push(varname)
+    }else {
+      CheckedIntObj.splice(currentIndex, 1)
+    }
+
+    for (let key in CheckedObj) {
+      CheckedObj[key] = []
+    }
+
+    this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}})
   }
 
   changeArrow = (target) => {
@@ -209,9 +220,25 @@ export class MAPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
+  addInteractionTerm = () => {
+    let interactionObj = [...this.state.interaction]
+    let CheckedObj = {...this.state.Checked}
+    if (CheckedObj["CovariatesIntSelection"].length <= 1) {
+      alert("Please select at least two variables.")
+    }else {
+      interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
+      CheckedObj["CovariatesIntSelection"] = []
+      this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
+    }
+  }
+
+  delInteractionTerm = () => {
+    let interactionObj = this.not(this.state.interaction, this.state.checkedInteraction)
+    this.setState({interaction: interactionObj, checkedInteraction: []})
+  }
+
   buildCode = () => {
-    let codeString = ""
-    
+    let codeString = ""    
     this.props.updateTentativeScriptCallback(codeString) 
   }
 
@@ -283,6 +310,11 @@ export class MAPanel extends Component {
             handleToRightCallback = {this.handleToRight}
             handleToLeftCallback = {this.handleToLeft}
             addExtraBlkCallback = {this.props.addExtraBlkCallback}
+            interaction = {this.state.interaction}
+            checkedInteraction = {this.state.checkedInteraction}
+            addInteractionTermCallback = {this.addInteractionTerm}
+            handleToggleInteractionCallback = {this.handleToggleInteraction}
+            delInteractionTermCallback = {this.delInteractionTerm}
             />
           </ExpansionPanelDetails>
         </ExpansionPanel>    

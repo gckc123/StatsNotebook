@@ -3,19 +3,9 @@ import "./AnalysisPanelElements.css";
 import {VariableSelectionList} from './VariableSelectionList';
 import Button from '@material-ui/core/Button';
 import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
-import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
-import Tooltip from '@material-ui/core/Tooltip';
-
-const StyledTooltip = withStyles({
-    tooltip: {
-      fontSize: "12px"
-    }
-  })(Tooltip);
-  
 
 const StyledButton = withStyles({
     root: {
@@ -41,12 +31,12 @@ export class AddInteraction extends Component {
         }
     }
 
-    genVariableSelectionList = (targetList, needTypeIcon) => {
+    genVariableSelectionList = (targetVarList, targetCheckedList, needTypeIcon) => {
         return (
-            <VariableSelectionList key={targetList} VariableList = {this.props.Variables[targetList]}
-                        checkedList = {this.props.Checked[targetList]}
+            <VariableSelectionList key={targetVarList} VariableList = {this.props.Variables[targetVarList]}
+                        checkedList = {this.props.Checked[targetCheckedList]}
                         handleToggleCallback = {this.props.handleToggleCallback} 
-                        listType = {targetList}
+                        listType = {targetCheckedList}
                         CurrentVariableList = {this.props.CurrentVariableList}
                         addExtraBlkCallback = {this.props.addExtraBlkCallback}
                         needTypeIcon = {needTypeIcon}/>
@@ -56,17 +46,16 @@ export class AddInteraction extends Component {
     genInteractionArrowButton = () => {
         return (
             <>
-            <StyledButton disableRipple hidden={this.state.arrowDelBtn != "arrow"}
-            onClick = {() => console.log("right")}> 
+            <StyledButton disableRipple hidden={this.state.arrowDelBtn !== "arrow"}
+            onClick = {() => this.props.addInteractionTermCallback()}> 
                 <FontAwesomeIcon icon={faArrowRight}/>
             </StyledButton>
-            <StyledButton disableRipple hidden={this.state.arrowDelBtn != "del"}
-            onClick = {() => console.log("Del")}> 
+            <StyledButton disableRipple hidden={this.state.arrowDelBtn !== "del"}
+            onClick = {() => this.props.delInteractionTermCallback()}> 
                 <FontAwesomeIcon icon={faTrashAlt}/>
             </StyledButton>
             </>
         )
-
     }
 
     render () {
@@ -77,13 +66,20 @@ export class AddInteraction extends Component {
                     <div></div>
                     <div>Interaction terms</div>
                     <div onClick={() => this.setState({arrowDelBtn: "arrow"})}>
-                        {this.genVariableSelectionList("Covariates", true)}
+                        {this.genVariableSelectionList("Covariates","CovariatesIntSelection", true)}
                     </div>
                     <div><center>
-                        <FontAwesomeIcon icon={faArrowRight}/>
+                        {this.genInteractionArrowButton()}
                     </center></div>
                     <div onClick={() => this.setState({arrowDelBtn: "del"})}>
-                        {this.genVariableSelectionList("Interaction", false)}
+                        <VariableSelectionList VariableList = {this.props.interaction}
+                        checkedList = {this.props.checkedInteraction}
+                        handleToggleCallback = {this.props.handleToggleInteractionCallback} 
+                        listType = {"Interaction"}
+                        CurrentVariableList = {null}
+                        addExtraBlkCallback = {null}
+                        needTypeIcon = {false}/>
+                        
                     </div>
                 </div>
             </div>

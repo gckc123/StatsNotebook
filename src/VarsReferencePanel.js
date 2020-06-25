@@ -1,11 +1,6 @@
 import React, {Component} from 'react';
-import {VariableTypeIcon} from './VariableTypeIcon'
 import {MultiGrid} from 'react-virtualized';
 import './App.css';
-import Tooltip from '@material-ui/core/Tooltip';
-import {withStyles, FormControl} from '@material-ui/core';
-import NativeSelect from '@material-ui/core/NativeSelect';
-
 
 const STYLE = {
   border: '1px solid #ddd',
@@ -27,28 +22,6 @@ const STYLE_TOP_RIGHT_GRID = {
   fontWeight: 'bold',
 };
 
-const StyledTooltip = withStyles({
-  tooltip: {
-    fontSize: "12px"
-  }
-})(Tooltip);
-
-
-const StyledNativeSelect = withStyles({
-  root: {
-      '&:focus': {
-          outline: 'none',
-      },
-  },
-  select: {
-      paddingLeft: '5px',
-      "&:focus": {
-          border: "0px",
-          outline: "0px",
-      }
-  }
-})(NativeSelect);
-
 export class VarsReferencePanel extends Component {
 
   constructor(props, context) {
@@ -63,7 +36,7 @@ export class VarsReferencePanel extends Component {
   }
 
   setReferenceLevel = (event, target) => {
-    let script = "currentDataset$" + target + " <- " + "relevel(currentDataset$" + target +", ref=\"" + event.target.value + "\")"
+    let script = "currentDataset$" + target + " <- relevel(currentDataset$" + target +", ref=\"" + event.target.value + "\")"
     this.props.addExtraBlkCallback(script, true)
   }
 
@@ -107,19 +80,19 @@ export class VarsReferencePanel extends Component {
       )
     }else{
     //content
-      if (columnIndex == 0) {
+      if (columnIndex === 0) {
         return (
           <div key={key} style={customStyle}>
             <span style={{lineHeight: textLineHeight}}>{Object.keys(this.props.CategoricalVarLevels)[rowIndex-1]}</span>
           </div>
         )
-      }else if (columnIndex == 1) {
+      }else if (columnIndex === 1) {
         return (
           <div key={key} style={customStyle}>
             <span style={{lineHeight: textLineHeight}}>{this.props.CategoricalVarLevels[Object.keys(this.props.CategoricalVarLevels)[rowIndex-1]][0]}</span>
           </div>
         )
-      }else if (columnIndex == 2) {
+      }else if (columnIndex === 2) {
         return (
           <div key={key} style={{...customStyle,lineHeight: textLineHeight}}>
             

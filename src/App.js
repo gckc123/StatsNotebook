@@ -138,7 +138,7 @@ export class App extends Component {
         this.setState({NotebookBlkList : [...NotebookBlkObj]})
       }
     }else if (direction === "Down") {
-      if (CurrentActiveIndex < NotebookBlkObj.length) {
+      if (CurrentActiveIndex < NotebookBlkObj.length-1) {
         let tmpNotebookBlk = {...NotebookBlkObj[CurrentActiveIndex + 1]}
         NotebookBlkObj[CurrentActiveIndex + 1] = {...NotebookBlkObj[CurrentActiveIndex]}
         NotebookBlkObj[CurrentActiveIndex] = {...tmpNotebookBlk}
