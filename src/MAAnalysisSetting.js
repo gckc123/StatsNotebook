@@ -19,21 +19,44 @@ export class MAAnalysisSetting extends Component {
             <div>
                 <div className="NMA-Analysis-Box">
                     <div className="InvisibleBottomBorder">Confidence Interval:</div>
-                    <div><input className="NMAAnalysisSettingInput"></input>%</div>
-                </div>               
-                <div className="NMACheckbox"><Checkbox size="small" />Fixed Effect Model
+                    <div><input defaultValue={this.props.AnalysisSetting.ConfLv}
+                    className="NMAAnalysisSettingInput"
+                    onBlur = {(event) => this.props.updateAnalysisSettingCallback(event,"ConfLv")}
+                    onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event,"ConfLv")}></input>%</div>
+                </div> 
+
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.FixedEffect} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"FixedEffect")} />Fixed Effect Model
                     <StyledTooltip title="Random effect model is used by default.">
                     <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                 </div> 
-                <div className="NMACheckbox"><Checkbox size="small" />Leave one out</div> 
-                <div className="NMACheckbox"><Checkbox size="small" />Trim and Fill</div> 
-                <div className="NMACheckbox"><Checkbox size="small" />Forest Plot</div>
-                <div className="NMACheckbox"><Checkbox size="small" />Exponentiate Effect Size
+
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.Leave1Out} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"Leave1Out")}
+                disabled = {this.props.Variables.Covariates.length > 0}/>Leave one out 
+                <StyledTooltip title="Leave one out analysis is only available for meta-analysis (with no covariate).">
+                    <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div> 
+
+                <div className="NMACheckbox" ><Checkbox checked = {this.props.AnalysisSetting.TrimAndFill} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"TrimAndFill")} 
+                disabled = {this.props.Variables.Covariates.length > 0}/>Trim and Fill
+                <StyledTooltip title="Trim and Fill analysis is only available for meta-analysis (with no covariate).">
+                    <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div> 
+
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.ForestPlot} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"ForestPlot")} />Forest Plot</div>
+
+                <div className="NMACheckbox pl-3" hidden = {!this.props.AnalysisSetting.ForestPlot}><Checkbox checked = {this.props.AnalysisSetting.Exponentiate} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"Exponentiate")} />Exponentiate Effect Size in the Forest Plot
                     <StyledTooltip title="Exponentiate the estimates for Risk/Odds/Hazard ratio">
                     <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                 </div> 
-                <div className="NMACheckbox"><Checkbox size="small" />Funnel Plot with Test of Asymmetry</div> 
-                <div className="NMACheckbox"><Checkbox size="small" />Diagnostic and Residual Plot</div> 
+
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.FunnelPlot} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"FunnelPlot")}/>Funnel Plot with Test of Asymmetry</div> 
+
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.DiagnosticPlot} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"DiagnosticPlot")} />Diagnostic and Residual Plot</div> 
             </div>
         )
     }

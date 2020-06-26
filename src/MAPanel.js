@@ -238,7 +238,21 @@ export class MAPanel extends Component {
   }
 
   buildCode = () => {
-    let codeString = ""    
+    let codeString = "ma_res <- rma( yi = " + this.state.Variables.EffectSize + 
+    ",\n vi = " + this.state.Variables.SE + 
+    (this.state.Variables.Covariates.length > 0 ? (",\n mod = ~ " + this.state.Variables.Covariates.join(" + ") +
+     (this.state.interaction.length > 0 ?  (" + " + this.state.interaction.join(" + ")): "") ) : "") + 
+    ",\n data = currentDataset,\n level = " + this.state.AnalysisSetting.ConfLv/100 +
+    ",\n " + (this.state.AnalysisSetting.FixedEffect ? "method=\"FE\"" : "") + ")" +
+    "\nsummary(ma_res) \n" +
+    (this.state.AnalysisSetting.ForestPlot ? ("\nforest(ma_res" + 
+    (this.state.Variables.StudyLab.length > 0 ? (", slab = currentDataset$" + this.state.Variables.StudyLab) : "") + 
+    (this.state.AnalysisSetting.Exponentiate ? ", atransf = exp)": ")")) : "") +
+    (this.state.AnalysisSetting.FunnelPlot ? ("\n\nfunnel(ma_res)\nregtest(ma_res)") : "") +
+    (this.state.AnalysisSetting.DiagnosticPlot ? ("\n\nqqnorm(ma_res)\ninf <- influence(ma_res) \nplot(inf)") : "") + 
+    (this.state.AnalysisSetting.Leave1Out && this.state.Variables.Covariates.length === 0 ? ("\n\nleave1out(ma_res)") : "") +
+    (this.state.AnalysisSetting.TrimAndFill && this.state.Variables.Covariates.length === 0 ? ("\n\nma_res_tf <- trimfill(ma_res)\nsummary(ma_res_tf)\nfunnel(ma_res_tf)") : "")
+    
     this.props.updateTentativeScriptCallback(codeString) 
   }
 
