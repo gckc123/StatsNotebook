@@ -5,10 +5,11 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { MAVariableSelection } from './MAVariableSelection';
+import { MIVariableSelection } from './MIVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { MAAnalysisSetting } from "./MAAnalysisSetting";
+import { MIAnalysisSetting } from "./MIAnalysisSetting";
+import { AddInteraction } from './AddInteractions';
 
 const ExpansionPanel = withStyles({
   root: {
@@ -53,50 +54,42 @@ const ExpansionPanelDetails = withStyles((theme) => ({
 }))(MuiExpansionPanelDetails);
 
 
-export class MAPanel extends Component {
+export class MIPanel extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
         Variables: {
             Available: [],
-            StudyLab: [],
-            EffectSize: [],
-            SE: [],
             Covariates: [],
         }, 
         Checked: {
             Available: [],
-            StudyLab: [],
-            EffectSize: [],
-            SE: [],
-            Covariates: [],
+            SelectedVars: [],
+            CovariatesIntSelection: [],
         },
+        interaction: [],
+        checkedInteraction: [],
+        formula: [],
+        method: [],
         hideToRight: {
-            StudyLab: false,
-            EffectSize: false,
-            SE: false,
-            Covariates: [],
+            SelectedVars: false,
         },
         tentativeScript: "",
         panels: {
           variableSelection: false,
+          modelSpec: false,
           analysisSetting: false,
         },
         AnalysisSetting: {
-          ESType: "",
-          ConfLv: 95,
-          Leave1Out: true,
-          TrimAndFill: true,
-          ForestPlot: true,
-          FunnelPlot: true,
+          ImputationM: 95,
         }
     }
   }
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "MAPanel") {
+    if (this.props.currentActiveAnalysisPanel === "MIPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -180,7 +173,25 @@ export class MAPanel extends Component {
             CheckedObj[key] = [];
         }
     }        
-    this.setState({Checked: {...CheckedObj}})
+    this.setState({Checked: {...CheckedObj}, checkedInteraction: []})
+  }
+
+  handleToggleInteraction = (varname, from) => {
+    let CheckedObj = {...this.state.Checked}
+    let CheckedIntObj = [...this.state.checkedInteraction]
+    let currentIndex = CheckedIntObj.indexOf(varname)
+    
+    if (currentIndex === -1) {
+      CheckedIntObj.push(varname)
+    }else {
+      CheckedIntObj.splice(currentIndex, 1)
+    }
+
+    for (let key in CheckedObj) {
+      CheckedObj[key] = []
+    }
+
+    this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}})
   }
 
   changeArrow = (target) => {
@@ -195,9 +206,25 @@ export class MAPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
+  addInteractionTerm = () => {
+    let interactionObj = [...this.state.interaction]
+    let CheckedObj = {...this.state.Checked}
+    if (CheckedObj["CovariatesIntSelection"].length <= 1) {
+      alert("Please select at least two variables.")
+    }else {
+      interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
+      CheckedObj["CovariatesIntSelection"] = []
+      this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
+    }
+  }
+
+  delInteractionTerm = () => {
+    let interactionObj = this.not(this.state.interaction, this.state.checkedInteraction)
+    this.setState({interaction: interactionObj, checkedInteraction: []})
+  }
+
   buildCode = () => {
     let codeString = ""
-    
     this.props.updateTentativeScriptCallback(codeString) 
   }
 
@@ -211,15 +238,16 @@ export class MAPanel extends Component {
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     
     switch (target) {
-      case "ESType":
       case "ConfLv":
-      case "ForestPlotRef":
         AnalysisSettingObj[target] = event.target.value
         break;
+      case "Exponentiate":
+      case "FixedEffect":
+      case "Leave1Out":
+      case "TrimAndFill":
       case "ForestPlot":
-      case "NetworkPlot":
-      case "HeatPlot":
       case "FunnelPlot":
+      case "DiagnosticPlot":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -234,10 +262,10 @@ export class MAPanel extends Component {
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Meta-Analysis/ Meta-Regression</Typography>
+            <Typography>Multiple Imputation</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <MAVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+            <MIVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
             Variables = {this.state.Variables}
             Checked = {this.state.Checked}
             hideToRight = {this.state.hideToRight}
@@ -251,16 +279,39 @@ export class MAPanel extends Component {
             />
           </ExpansionPanelDetails>
         </ExpansionPanel>  
+        <ExpansionPanel square expanded={this.state.panels.modelSpec}
+        onChange = {this.handlePanelExpansion("modelSpec")}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+            <Typography>Model builder - Add interaction terms</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+            <AddInteraction CurrentVariableList = {this.props.CurrentVariableList}
+            Variables = {this.state.Variables}
+            Checked = {this.state.Checked}
+            hideToRight = {this.state.hideToRight}
+            intersectionCallback = {this.intersection}
+            notCallback = {this.not}
+            handleToggleCallback = {this.handleToggle}
+            changeArrowCallback = {this.changeArrow}
+            handleToRightCallback = {this.handleToRight}
+            handleToLeftCallback = {this.handleToLeft}
+            addExtraBlkCallback = {this.props.addExtraBlkCallback}
+            interaction = {this.state.interaction}
+            checkedInteraction = {this.state.checkedInteraction}
+            addInteractionTermCallback = {this.addInteractionTerm}
+            handleToggleInteractionCallback = {this.handleToggleInteraction}
+            delInteractionTermCallback = {this.delInteractionTerm}
+            />
+          </ExpansionPanelDetails>
+        </ExpansionPanel>    
         <ExpansionPanel square expanded={this.state.panels.analysisSetting}
         onChange = {this.handlePanelExpansion("analysisSetting")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
             <Typography>Analysis Setting</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <MAAnalysisSetting 
+            <MIAnalysisSetting 
             Variables = {this.state.Variables}
-            CategoricalVarLevels = {this.props.CategoricalVarLevels}
-            TreatmentLvs = {this.state.TreatmentLvs}
             AnalysisSetting = {this.state.AnalysisSetting}
             updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
           </ExpansionPanelDetails>

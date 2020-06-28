@@ -10,6 +10,7 @@ import { AnalysisPanelBar } from './AnalysisPanelBar';
 import { DataPanel} from './DataPanel';
 import { NMAPanel } from './NMAPanel';
 import { MAPanel } from './MAPanel';
+import { MIPanel } from './MIPanel';
 import { VarsReferencePanel } from './VarsReferencePanel';
 
 
@@ -354,6 +355,14 @@ export class App extends Component {
                   </div>
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MAPanel"}>
                     <MAPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                  </div>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "MIPanel"}>
+                    <MIPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}

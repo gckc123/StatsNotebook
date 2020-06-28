@@ -249,3 +249,11 @@
     margin: 0px;
     padding: 0px;
 }
+
+.MI-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows: 25px 400px;
+    margin: 0px;
+    padding: 0px;
+}

@@ -60,6 +60,12 @@ class MachineLearningMenu extends Component {
 }
 
 class ImputationMenu extends Component {
+
+    setAnalysisPanel = (target) => {
+        this.props.selectAnalysisPanelCallback(target)
+        this.props.handleClose()
+    }
+
     render() {
         let open = Boolean(this.props.anchorEl[this.props.target])
         return (
@@ -76,7 +82,8 @@ class ImputationMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Multiple Imputation</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick={() => this.setAnalysisPanel("MIPanel")}>Multiple Imputation</MenuItem>
             </Menu>
         )
     }
@@ -313,7 +320,7 @@ export class AnalysisBar extends Component {
                 <div style={{fontSize: "12px"}}>Imputation</div>
                 </StyledButton>
                 <ImputationMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
-                target = "imputation"/>
+                target = "imputation" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "machinelearning")}>
                 <img src={RobotIcon} alt="" height="38px" />
