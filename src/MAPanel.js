@@ -117,12 +117,24 @@ export class MAPanel extends Component {
               VariablesObj[key] = this.intersection(VariablesObj[key], CurrentVariableList)
               CheckedObj[key] = this.intersection(CheckedObj[key],VariablesObj[key])
           }
+          
+          let interactionObj = this.state.interaction.filter((item) => {
+            let terms = item.split("*")
+            let match = this.intersection(terms, VariablesObj["Covariates"])
+            if (match.length === terms.length)
+              return true
+            else
+              return false
+          })
 
+          let checkedInteractionObj = this.intersection(this.state.checkedInteraction, interactionObj)
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-          this.setState({Variables:{...VariablesObj}})
-          this.setState({Checked: {...CheckedObj}})
+          this.setState({Variables:{...VariablesObj}, 
+            Checked: {...CheckedObj}, 
+            interaction: [...interactionObj],
+            checkedInteraction: [...checkedInteractionObj]})      
       }
     }
     // Need to check if any treatment variable is removed?

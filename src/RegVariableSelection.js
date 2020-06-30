@@ -31,7 +31,7 @@ const StyledButton = withStyles({
      }   
 })(Button);
 
-export class MIVariableSelection extends Component {
+export class RegVariableSelection extends Component {
     
     genVariableSelectionList = (targetList) => {
         return (
@@ -64,27 +64,48 @@ export class MIVariableSelection extends Component {
         
         return (
             <div className="analysis-pane">
-                <div className="MI-Variable-Selection-Box">
+                <div className="Reg-Variable-Selection-Box">
                     <div> Variables</div>
                     <div></div>
-                    <div>Variables used for imputation 
-                    <StyledTooltip title={<div>Variables to included in the imputed dataset.
-                    <br/><br/>Methods for imputation
-                    <br/>Numeric: Predictive Mean Matching
-                    <br/>Binary: Logistic regression
-                    <br/>Unordered categorical: Polytomous regression
-                    <br/>Ordered categorical: Ordinal logistic regression</div>}>
-                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    <div>Outcome
                     </div>
 
-                    <div onClick={() => this.props.changeArrowCallback("Available")}>
+                    <div className="Reg-Available-Variable-List-Container" 
+                    onClick={() => this.props.changeArrowCallback("Available")}>
                         {this.genVariableSelectionList("Available")}
                     </div>
+                    <div><center>
+                        {this.genArrowButton("Outcome", 1)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("Outcome")}>
+                        {this.genVariableSelectionList("Outcome")}
+                    </div>
+
+                    <div></div>
+                    <div>Covariates</div>
                     <div><center>
                         {this.genArrowButton("Covariates", 100000)}
                     </center></div>
                     <div onClick={() => this.props.changeArrowCallback("Covariates")}>
                         {this.genVariableSelectionList("Covariates")}
+                    </div>
+
+                    <div></div>
+                    <div>Random Effect</div>
+                    <div><center>
+                        {this.genArrowButton("RandomEffect", 100000)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("RandomEffect")}>
+                        {this.genVariableSelectionList("RandomEffect")}
+                    </div>
+
+                    <div></div>
+                    <div>Weight</div>
+                    <div><center>
+                        {this.genArrowButton("Weight", 1)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("Weight")}>
+                        {this.genVariableSelectionList("Weight")}
                     </div>
                 </div>
             </div>

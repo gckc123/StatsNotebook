@@ -18,6 +18,7 @@ RequestToR.identity = "NodejsClient"
 RequestToR.connect("tcp://localhost:5556");
 ReplyFromR.bind("tcp://*:5555")
 
+
 app.on('ready', () => {
   
   mainWindow = new BrowserWindow({
@@ -53,6 +54,12 @@ ReplyFromR.on("message",function() {
   var args = Array.apply(null, arguments);
   showRReply(args[1].toString('utf8'));
 })
+
+const getCPUCount = exports.getCPUCount = () => {
+  let os = require('os')
+  let cpuCount = os.cpus().length
+  mainWindow.webContents.send('cpuCount', cpuCount);
+}
 
 const getFileFromUser = exports.getFileFromUser = (fileType) => {
   let fileTypeName = ""

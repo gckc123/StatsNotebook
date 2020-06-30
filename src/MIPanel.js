@@ -71,9 +71,6 @@ export class MIPanel extends Component {
         interaction: [],
         checkedInteraction: [],
         hideToRight: {
-            StudyLab: false,
-            EffectSize: false,
-            SE: false,
             Covariates: false,
         },
         tentativeScript: "",
@@ -83,21 +80,14 @@ export class MIPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
-          ConfLv: 95,
-          Exponentiate: false,
-          FixedEffect: false,
-          Leave1Out: true,
-          TrimAndFill: true,
-          ForestPlot: true,
-          FunnelPlot: true,
-          DiagnosticPlot: true,
+          M: 20,
         }
     }
   }
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "MAPanel") {
+    if (this.props.currentActiveAnalysisPanel === "MIPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -112,11 +102,23 @@ export class MIPanel extends Component {
               CheckedObj[key] = this.intersection(CheckedObj[key],VariablesObj[key])
           }
 
+          let interactionObj = this.state.interaction.filter((item) => {
+            let terms = item.split("*")
+            let match = this.intersection(terms, VariablesObj["Covariates"])
+            if (match.length === terms.length)
+              return true
+            else
+              return false
+          })
+
+          let checkedInteractionObj = this.intersection(this.state.checkedInteraction, interactionObj)
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-          this.setState({Variables:{...VariablesObj}})
-          this.setState({Checked: {...CheckedObj}})
+          this.setState({Variables:{...VariablesObj}, 
+            Checked: {...CheckedObj}, 
+            interaction: [...interactionObj],
+            checkedInteraction: [...checkedInteractionObj]})      
       }
     }
     // Need to check if any treatment variable is removed?
@@ -130,23 +132,31 @@ export class MIPanel extends Component {
       return array1.filter((item) => array2.indexOf(item) === -1)
   }
 
+  notInInt = (term, intArray) => {
+    let pattern = "^"+term+"\\*|\\*"+term+"\\*|"+"\\*"+term+"$"
+    return intArray.filter((item) => item.search(pattern) === -1)
+  }
 
   handleToRight = (target, maxElement) => {
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
-
+    let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
-      if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
-        alert("Only numeric variable can be entered as Effect Size or Standard Error")
-      }else if ((target === "StudyLab") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Numeric")) {
-        alert("Study Labels must not be a numeric variable.")
-      }else {
-        VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
-        VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
-        CheckedObj["Available"] = []
-        this.setState({Variables: {...VariablesObj}},
-            () => this.setState({Checked: {...CheckedObj}}))  
-      }      
+      
+      toRightVars = CheckedObj["Available"].filter((item) =>
+        this.props.CurrentVariableList[item][0] !== "Character"
+      )
+
+      if (toRightVars.length !== CheckedObj["Available"].length) {
+        alert("Character variables will not be added. These variables need to be firstly converted into factor variables.")
+      }
+
+      VariablesObj["Available"] = this.not(VariablesObj["Available"],toRightVars)
+      VariablesObj[target] = VariablesObj[target].concat(toRightVars)
+      CheckedObj["Available"] = []
+      this.setState({Variables: {...VariablesObj}},
+        () => this.setState({Checked: {...CheckedObj}}))  
+
     }else{
         if (CheckedObj["Available"].length > 0) {
             alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
@@ -232,7 +242,34 @@ export class MIPanel extends Component {
   }
 
   buildCode = () => {
-    let codeString = ""
+    let codeString = "library(mice)\n"
+    let formula = []
+    let method = []
+    
+    let formulaCode = "formulas <- make.formulas(currentDataset)\n"
+
+    this.state.Variables.Covariates.forEach((variable) => {
+      let intTerm = this.notInInt(variable, this.state.interaction)
+      let predictor = this.state.Variables.Covariates.filter((item) => item !== variable)      
+      formula.push("formulas$"+variable+" =" + variable + " ~ " + 
+        predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
+        intTerm.join(" + "))
+    })
+
+    let notIncludedVars = this.not(this.state.Variables.Available, this.state.Variables.Covariates)
+    notIncludedVars.forEach((variable) => {
+      method.push("meth[\""+variable+"\"] <- \"\"")
+    })
+
+    formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
+    console.log(formulaCode)
+    let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
+    console.log(methodCode)
+    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\ncurrentDataset <- complete(mice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
+    this.state.AnalysisSetting.M + "), action = \"long\")"
+
+    
+
     this.props.updateTentativeScriptCallback(codeString) 
   }
 
@@ -246,17 +283,8 @@ export class MIPanel extends Component {
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     
     switch (target) {
-      case "ConfLv":
+      case "M":
         AnalysisSettingObj[target] = event.target.value
-        break;
-      case "Exponentiate":
-      case "FixedEffect":
-      case "Leave1Out":
-      case "TrimAndFill":
-      case "ForestPlot":
-      case "FunnelPlot":
-      case "DiagnosticPlot":
-        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
         break;

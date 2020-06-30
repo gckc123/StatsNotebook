@@ -124,6 +124,11 @@ class MetaAnalysisMenu extends Component {
 
 class RegressionMenu extends Component {
 
+    setAnalysisPanel = (target) => {
+        this.props.selectAnalysisPanelCallback(target)
+        this.props.handleClose()
+    }
+
     render() {
         let open = Boolean(this.props.anchorEl[this.props.target])
         return (
@@ -140,10 +145,8 @@ class RegressionMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Regression (Continuous outcome)</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}>Binary logistic regression (Binary outcome)</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}>Ordinal logistic regression (Ordinal outcome)</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}>Multinomial logistic regression (Categorical outcome)</MenuItem>                        
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("RegPanel")}>Regression</MenuItem>                        
             </Menu>
         )
     }
@@ -306,7 +309,7 @@ export class AnalysisBar extends Component {
                 <div style={{fontSize: "12px"}}>Regression</div>
                 </StyledButton>
                 <RegressionMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
-                target = "regression"/>
+                target = "regression" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
                 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "metaanalysis")}>
                 <img src={MetaAnalysisIcon} alt="" height="38px"/>

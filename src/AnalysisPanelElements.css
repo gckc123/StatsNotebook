@@ -257,3 +257,21 @@
     margin: 0px;
     padding: 0px;
 }
+
+.Analysis-Setting-TextField {
+    width: 100px;
+    font-size: 14px;
+}
+
+.Reg-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows: 25px 40px 25px 150px 25px 100px 25px 40px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.Reg-Available-Variable-List-Container {
+    grid-row-start: 2;
+    grid-row-end: 9;
+}

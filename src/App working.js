@@ -125,9 +125,6 @@ export class App extends Component {
       this.setState({NotebookBlkList: contentJSON, ActiveBlkID: null, ActiveScript: ""})
     })
 
-    ipcRenderer.on('cpuCount', (event, cpuCount) => {
-      console.log(cpuCount)
-    })
   }
 
   updateDataPanelDimension = () => {

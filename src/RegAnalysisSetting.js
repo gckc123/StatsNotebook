@@ -7,7 +7,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-export class MIAnalysisSetting extends Component {
+export class RegAnalysisSetting extends Component {
     
     render () {
         return (
