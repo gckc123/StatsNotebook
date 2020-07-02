@@ -33,6 +33,7 @@ export class App extends Component {
       imputedData: false,
       nrow: 0,
       ncol: 0,
+      CPU: 1,
       NotebookBlkList: [],
       currentActiveAnalysisPanel: "",
       currentActiveDataPanel: "",
@@ -43,10 +44,6 @@ export class App extends Component {
     this.DataPanelContainerRef = React.createRef();        
   }
   
-  componentWillMount() {
-    this.addExtraBlk("",false)
-  }
-
   componentDidMount() {
     this.updateDataPanelDimension();
     window.addEventListener("resize", this.updateDataPanelDimension);
@@ -127,6 +124,10 @@ export class App extends Component {
 
     ipcRenderer.on('cpuCount', (event, cpuCount) => {
       console.log(cpuCount)
+      if (cpuCount >= 2)
+        this.setState({CPU: cpuCount - 1}, () => console.log(this.state.CPU))
+        
+      
     })
   }
 
@@ -279,6 +280,10 @@ export class App extends Component {
     mainProcess.send2R(StriptString);
   }
 
+  getCPUCount = () => {
+    mainProcess.getCPUCount();
+  }
+
   runScript = () => {  
     let tmp = this.state.NotebookBlkList.slice()
     let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
@@ -310,6 +315,10 @@ export class App extends Component {
     }
   }
   
+  newNotebook = () => {
+    console.log("New Notebook")
+    this.setState({tentativeScript: "", ActiveScript: "", ActiveScript: null, NotebookBlkList: []})
+  }
 
   render() {
 
@@ -319,7 +328,9 @@ export class App extends Component {
             selectLeftPanelCallback = {this.selectLeftPanel}
             selectAnalysisPanelCallback = {this.selectAnalysisPanel}
             selectDataPanelCallback = {this.selectDataPanel}
-            savingFileCallback = {this.savingFile}/>
+            savingFileCallback = {this.savingFile}
+            getCPUCountCallback = {this.getCPUCount}
+            newNotebookCallback = {this.newNotebook}/>
             <div className="main-pane">
               <div className="left-pane pl-2 pr-2 mb-2" ref={this.DataPanelContainerRef}>
                 <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
@@ -378,9 +389,10 @@ export class App extends Component {
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
+                    CPU = {this.state.CPU}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
-                  <div hidden={this.state.currentActiveAnalysisPanel !== "RegPanel"}>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "LRPanel"}>
                     <RegPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
@@ -389,7 +401,7 @@ export class App extends Component {
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
                 </div>
-
+                
               </div>
               <div className="right-pane pl-2 pr-2 mb-2">
                   <Notebook

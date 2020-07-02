@@ -88,13 +88,15 @@ export class TopNavTabs extends Component {
         </FirstTabs>
         <TabPanel CurrentTab={this.state.CurrentTab} index={0}>
           <SettingBar openFileCallback = {this.props.openFileCallback}
-          savingFileCallback = {this.props.savingFileCallback}/>
+          savingFileCallback = {this.props.savingFileCallback}
+          newNotebookCallback = {this.props.newNotebookCallback}/>
         </TabPanel>
         <TabPanel CurrentTab={this.state.CurrentTab} index={1}>
           <DataBar selectDataPanelCallback = {this.props.selectDataPanelCallback}/>
         </TabPanel>
         <TabPanel CurrentTab={this.state.CurrentTab} index={2}>
-          <AnalysisBar selectAnalysisPanelCallback = {this.props.selectAnalysisPanelCallback}/>
+          <AnalysisBar selectAnalysisPanelCallback = {this.props.selectAnalysisPanelCallback}
+          getCPUCountCallback = {this.props.getCPUCountCallback}/>
         </TabPanel>               
       </div>
     )

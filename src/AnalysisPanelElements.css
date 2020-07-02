@@ -275,3 +275,16 @@
     grid-row-start: 2;
     grid-row-end: 9;
 }
+
+.Random-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 20px 220px 20px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.Random-Variable-Label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

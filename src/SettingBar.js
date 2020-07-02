@@ -82,7 +82,7 @@ export class SettingBar extends Component {
     render () {
         return (
             <div className="app-bar">
-                <StyledButton disableRipple disabled>
+                <StyledButton disableRipple onClick={this.props.newNotebookCallback}>
                     <FontAwesomeIcon icon={faFile}/><div className='ml-1'>New</div>
                 </StyledButton>
                 <StyledButton disableRipple onClick={this.handleMenu}>

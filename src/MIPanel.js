@@ -262,11 +262,10 @@ export class MIPanel extends Component {
     })
 
     formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
-    console.log(formulaCode)
     let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
-    console.log(methodCode)
-    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\ncurrentDataset <- complete(mice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
-    this.state.AnalysisSetting.M + "), action = \"long\")"
+    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\nimputedDataset <- parlmice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
+    this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
+    ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE) "
 
     
 

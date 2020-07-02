@@ -146,7 +146,13 @@ class RegressionMenu extends Component {
                 open = {open}
                 onClose={this.props.handleClose}>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick = {() => this.setAnalysisPanel("RegPanel")}>Regression</MenuItem>                        
+                onClick = {() => this.setAnalysisPanel("LRPanel")}>Linear Regression (For numeric outcome)</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("LogitPanel")}>Logistic Regression (For binary outcome)</MenuItem>                        
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("PoiPanel")}>Poisson Regression (For count outcome)</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("MLRPanel")}>Multinomial logistic Regression (For categorical outcome with more than two levels)</MenuItem>
             </Menu>
         )
     }
@@ -318,7 +324,12 @@ export class AnalysisBar extends Component {
                 <MetaAnalysisMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "metaanalysis" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "imputation")}>
+                <StyledButton disableRipple onClick={(event) => 
+                    {
+                        this.props.getCPUCountCallback()
+                        this.handleMenu(event, "imputation")
+                    }
+                }>
                 <img src={MissingDataIcon} alt="" height="38px" />
                 <div style={{fontSize: "12px"}}>Imputation</div>
                 </StyledButton>

@@ -1,11 +1,27 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import {VariableSelectionList} from './VariableSelectionList';
+import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
+import {faArrowAltCircleLeft} from '@fortawesome/free-regular-svg-icons';
+import {faArrowAltCircleRight} from '@fortawesome/free-regular-svg-icons';
+
+const StyledIconButton = withStyles({
+    root: {
+        '&:hover': {
+            color: '#40a9ff',
+            opacity: 1,
+        },
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+})(IconButton);
 
 const StyledButton = withStyles({
     root: {
@@ -22,12 +38,22 @@ const StyledButton = withStyles({
      }   
 })(Button);
 
-export class AddInteraction extends Component {
+export class RandomEffectPanel extends Component {
     
     constructor(props) {
         super(props)
         this.state = {
-            arrowDelBtn: "arrow"
+            arrowDelBtn: "arrow",
+            currentREVar: ""
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.props.Variables.RandomEffect.length > 0 && 
+            this.props.Variables.RandomEffect.findIndex( (item) => item === this.state.currentREVar) === -1)  {
+                this.setState({currentREVar: this.props.Variables.RandomEffect[0]})
+        }else if (this.props.Variables.RandomEffect.length === 0 && this.state.currentREVar !== "") {
+            this.setState({currentREVar: ""})
         }
     }
 
@@ -58,16 +84,38 @@ export class AddInteraction extends Component {
         )
     }
 
+    nextRandomEffect = (direction) => {
+        let currentREVarIndex = this.props.Variables.RandomEffect.findIndex((item) => item === this.state.currentREVar)        
+        if (direction === "next" && currentREVarIndex != (this.props.Variables.RandomEffect.length - 1)) {
+            this.setState({currentREVar: this.props.Variables.RandomEffect[currentREVarIndex+1]})
+        }else if (direction === "previous" && currentREVarIndex != 0) {
+            this.setState({currentREVar: this.props.Variables.RandomEffect[currentREVarIndex-1]})
+        }
+    }
+
     render () {
         return (
-            
-            <div className="analysis-pane">
+            <div className="analysis-pane" hidden={this.props.Variables.RandomEffect.length == 0}>
+                <div className="Random-Variable-Selection-Box">
+                    <div><StyledIconButton size="small" 
+                        onClick={()=>this.nextRandomEffect("previous")}><FontAwesomeIcon icon={faArrowLeft} size="xs"/></StyledIconButton></div>
+                    <div className="pl-1 pr-1 Random-Variable-Label"><b>{this.state.currentREVar}</b></div>
+                    <div><StyledIconButton size="small"
+                        onClick={()=>this.nextRandomEffect("next")}><FontAwesomeIcon icon={faArrowRight} size="xs"/></StyledIconButton></div>
+                    
+                </div>
                 <div className="AddInteraction-Variable-Selection-Box">
                     <div>Covariates</div>
                     <div></div>
-                    <div>Interaction terms</div>
+                    <div>Random Slope</div>
                     <div onClick={() => this.setState({arrowDelBtn: "arrow"})}>
-                        {this.genVariableSelectionList("Covariates","CovariatesIntSelection", true)}
+                        <VariableSelectionList key={"Covariates"} VariableList = {this.props.Variables["Covariates"]}
+                        checkedList = {this.props.Checked["CovariatesRESelection"]}
+                        handleToggleCallback = {this.props.handleToggleCallback} 
+                        listType = {"CovariatesIntSelection"}
+                        CurrentVariableList = {this.props.CurrentVariableList}
+                        addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                        needTypeIcon = {true}/>                        
                     </div>
                     <div><center>
                         {this.genInteractionArrowButton()}

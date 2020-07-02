@@ -10,6 +10,7 @@ import "./App.css";
 import "./AnalysisPanelElements.css";
 import { RegAnalysisSetting } from "./RegAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
+import { RandomEffectPanel } from './RandomEffectPanel';
 
 const ExpansionPanel = withStyles({
   root: {
@@ -73,7 +74,10 @@ export class RegPanel extends Component {
             RandomEffect: [],
             Weight: [],
             CovariatesIntSelection: [],
+            CovariatesRESelection: [],
         },
+        RandomSlopes: {},
+        CheckedRandomSlopes: [],
         interaction: [],
         checkedInteraction: [],
         hideToRight: {
@@ -83,6 +87,7 @@ export class RegPanel extends Component {
         panels: {
           variableSelection: false,
           modelSpec: false,
+          randomEffect: false,
           analysisSetting: false,
         },
         AnalysisSetting: {
@@ -93,7 +98,7 @@ export class RegPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "RegPanel") {
+    if (this.props.currentActiveAnalysisPanel === "LRPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -146,6 +151,7 @@ export class RegPanel extends Component {
   handleToRight = (target, maxElement) => {
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
+    let RandomSlopesObj = {...this.state.RandomSlopes}
     let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       
@@ -159,9 +165,18 @@ export class RegPanel extends Component {
 
       VariablesObj["Available"] = this.not(VariablesObj["Available"],toRightVars)
       VariablesObj[target] = VariablesObj[target].concat(toRightVars)
+
+      if (target === "RandomEffect") {
+        toRightVars.forEach((item) => {
+          RandomSlopesObj[item] = []
+        })
+      }
+
       CheckedObj["Available"] = []
-      this.setState({Variables: {...VariablesObj}},
-        () => this.setState({Checked: {...CheckedObj}}))  
+      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}},
+        () => this.setState({Checked: {...CheckedObj}}, () => console.log(this.state.RandomSlopes)))  
+      
+      
 
     }else{
         if (CheckedObj["Available"].length > 0) {
@@ -173,12 +188,22 @@ export class RegPanel extends Component {
   handleToLeft = (from) => {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
+      let RandomSlopesObj = {...this.state.RandomSlopes}
+      let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
+      if (from === "RandomEffect") {
+        CheckedObj[from].forEach( (item) => {
+          delete RandomSlopesObj[item]
+          delete CheckedRandomSlopesObj[item]
+        })
+        
+      }
+
       CheckedObj[from] = []
-      this.setState({Variables: {...VariablesObj}},
-          () => this.setState({Checked: {...CheckedObj}}))
+      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}, CheckedRandomSlopes: {...CheckedRandomSlopesObj}},
+          () => this.setState({Checked: {...CheckedObj}}, ()=> console.log(this.state.RandomSlopes)))
   }
   
   handleToggle = (varname, from) => {
@@ -216,6 +241,32 @@ export class RegPanel extends Component {
     }
 
     this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}})
+  }
+
+  handleToggleSecondary = (varname, from) => {
+    let CheckedObj = {...this.state.Checked}
+    let CheckedTargetObj = [...this.state[from]]
+    let currentIndex = CheckedTargetObj.indexOf(varname)
+    
+    if (currentIndex === -1) {
+      CheckedTargetObj.push(varname)
+    }else {
+      CheckedTargetObj.splice(currentIndex, 1)
+    }
+
+    for (let key in CheckedObj) {
+      CheckedObj[key] = []
+    }
+    switch (from) {
+      case "checkedInteraction":
+        this.setState({checkedInteraction: CheckedTargetObj, Checked: {...CheckedObj}})
+        break;
+      case "CheckedRandomSlopes":
+        this.setState({CheckedRandomSlopes: CheckedTargetObj, Checked: {...CheckedObj}})
+      default:
+        break;
+    }
+    
   }
 
   changeArrow = (target) => {
@@ -268,9 +319,9 @@ export class RegPanel extends Component {
     })
 
     formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
-    console.log(formulaCode)
+
     let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
-    console.log(methodCode)
+
     codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\ncurrentDataset <- complete(mice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
     this.state.AnalysisSetting.M + "), action = \"long\")"
 
@@ -345,6 +396,35 @@ export class RegPanel extends Component {
             delInteractionTermCallback = {this.delInteractionTerm}
             />
           </ExpansionPanelDetails>
+        </ExpansionPanel>
+        <ExpansionPanel square expanded={this.state.panels.randomEffect}
+        onChange = {this.handlePanelExpansion("randomEffect")}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+            <Typography>Random Effect</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+            <RandomEffectPanel CurrentVariableList = {this.props.CurrentVariableList}
+            Variables = {this.state.Variables}
+            Checked = {this.state.Checked}
+            hideToRight = {this.state.hideToRight}
+            intersectionCallback = {this.intersection}
+            notCallback = {this.not}
+            handleToggleCallback = {this.handleToggle}
+            changeArrowCallback = {this.changeArrow}
+            handleToRightCallback = {this.handleToRight}
+            handleToLeftCallback = {this.handleToLeft}
+            addExtraBlkCallback = {this.props.addExtraBlkCallback}
+
+            RandomSlopes = {this.state.RandomSlopes}
+            CheckedRandomSlopes = {this.state.CheckedRandomSlopes}
+
+            interaction = {this.state.interaction}
+            checkedInteraction = {this.state.checkedInteraction}
+            addInteractionTermCallback = {this.addInteractionTerm}
+            handleToggleInteractionCallback = {this.handleToggleInteraction}
+            delInteractionTermCallback = {this.delInteractionTerm}
+            />
+          </ExpansionPanelDetails>
         </ExpansionPanel>    
         <ExpansionPanel square expanded={this.state.panels.analysisSetting}
         onChange = {this.handlePanelExpansion("analysisSetting")}>
@@ -354,6 +434,7 @@ export class RegPanel extends Component {
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
             <RegAnalysisSetting 
             Variables = {this.state.Variables}
+            currentActiveAnalysisPanel = {this.props.currentActiveAnalysisPanel}
             AnalysisSetting = {this.state.AnalysisSetting}
             updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
           </ExpansionPanelDetails>

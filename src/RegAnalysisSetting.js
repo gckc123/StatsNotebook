@@ -10,21 +10,18 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 export class RegAnalysisSetting extends Component {
     
     render () {
+        if (this.props.currentActiveAnalysisPanel === "LRPanel") {
+            return (
+                <div>
+                    <div className="NMACheckbox"><Checkbox  size="small"/>Robust Regression
+                    </div>
+                    <div className="NMACheckbox"><Checkbox  size="small"/>Imputed Dataset
+                    </div>
+                </div>
+            )
+        }
         return (
-            <div>
-                <div className="NMA-Analysis-Box">
-                    <div className="InvisibleBottomBorder">Number of imputation:</div>
-                    <div><TextField 
-                    type="number"
-                    inputProps={{
-                        style: {fontSize: 15} 
-                      }}
-                    className="Analysis-Setting-TextField"
-                    defaultValue={this.props.AnalysisSetting.M}
-                    onBlur = {(event) => this.props.updateAnalysisSettingCallback(event,"M")}
-                    onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event,"M")}/></div>
-                </div> 
-            </div>
+            null
         )
     }
 }
