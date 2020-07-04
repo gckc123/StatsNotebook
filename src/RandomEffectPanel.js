@@ -69,15 +69,15 @@ export class RandomEffectPanel extends Component {
         )
     }
 
-    genInteractionArrowButton = () => {
+    genREArrowButton = () => {
         return (
             <>
             <StyledButton disableRipple hidden={this.state.arrowDelBtn !== "arrow"}
-            onClick = {() => this.props.addInteractionTermCallback()}> 
+            onClick = {() => this.props.addRandomSlopesCallback(this.state.currentREVar)}> 
                 <FontAwesomeIcon icon={faArrowRight}/>
             </StyledButton>
             <StyledButton disableRipple hidden={this.state.arrowDelBtn !== "del"}
-            onClick = {() => this.props.delInteractionTermCallback()}> 
+            onClick = {() => this.props.delRandomSlopesCallback(this.state.currentREVar)}> 
                 <FontAwesomeIcon icon={faTrashAlt}/>
             </StyledButton>
             </>
@@ -95,7 +95,7 @@ export class RandomEffectPanel extends Component {
 
     render () {
         return (
-            <div className="analysis-pane" hidden={this.props.Variables.RandomEffect.length == 0}>
+            <div className="analysis-pane" hidden={!(this.state.currentREVar in this.props.RandomSlopes)}>
                 <div className="Random-Variable-Selection-Box">
                     <div><StyledIconButton size="small" 
                         onClick={()=>this.nextRandomEffect("previous")}><FontAwesomeIcon icon={faArrowLeft} size="xs"/></StyledIconButton></div>
@@ -109,26 +109,27 @@ export class RandomEffectPanel extends Component {
                     <div></div>
                     <div>Random Slope</div>
                     <div onClick={() => this.setState({arrowDelBtn: "arrow"})}>
-                        <VariableSelectionList key={"Covariates"} VariableList = {this.props.Variables["Covariates"]}
-                        checkedList = {this.props.Checked["CovariatesRESelection"]}
+                        <VariableSelectionList VariableList = {this.state.currentREVar in this.props.RandomSlopes ? this.props.Variables["Covariates"] : []}
+                        checkedList = {this.state.currentREVar in this.props.RandomSlopes ? this.props.Checked["CovariatesRESelection"] : []}
                         handleToggleCallback = {this.props.handleToggleCallback} 
-                        listType = {"CovariatesIntSelection"}
+                        listType = {"CovariatesRESelection"}
                         CurrentVariableList = {this.props.CurrentVariableList}
                         addExtraBlkCallback = {this.props.addExtraBlkCallback}
                         needTypeIcon = {true}/>                        
                     </div>
                     <div><center>
-                        {this.genInteractionArrowButton()}
+                        {this.genREArrowButton()}
                     </center></div>
                     <div onClick={() => this.setState({arrowDelBtn: "del"})}>
-                        <VariableSelectionList VariableList = {this.props.interaction}
-                        checkedList = {this.props.checkedInteraction}
-                        handleToggleCallback = {this.props.handleToggleInteractionCallback} 
-                        listType = {"Interaction"}
-                        CurrentVariableList = {null}
-                        addExtraBlkCallback = {null}
-                        needTypeIcon = {false}/>
-                        
+                        {
+                            <VariableSelectionList VariableList = {this.state.currentREVar !== "" && this.state.currentREVar in this.props.RandomSlopes ? this.props.RandomSlopes[this.state.currentREVar]: []}
+                            checkedList = {this.state.currentREVar !== "" && this.state.currentREVar in this.props.RandomSlopes ? this.props.CheckedRandomSlopes[this.state.currentREVar] : []}
+                            handleToggleCallback = {this.props.handleToggleRECallback} 
+                            listType = {this.state.currentREVar}
+                            CurrentVariableList = {null}
+                            addExtraBlkCallback = {null}
+                            needTypeIcon = {false}/>
+                        }
                     </div>
                 </div>
             </div>

@@ -77,7 +77,7 @@ export class RegPanel extends Component {
             CovariatesRESelection: [],
         },
         RandomSlopes: {},
-        CheckedRandomSlopes: [],
+        CheckedRandomSlopes: {},
         interaction: [],
         checkedInteraction: [],
         hideToRight: {
@@ -91,7 +91,9 @@ export class RegPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
-          M: 20,
+          RobustReg: false,
+          ImputedDataset: false,
+          
         }
     }
   }
@@ -152,6 +154,7 @@ export class RegPanel extends Component {
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
     let RandomSlopesObj = {...this.state.RandomSlopes}
+    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
     let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       
@@ -169,12 +172,13 @@ export class RegPanel extends Component {
       if (target === "RandomEffect") {
         toRightVars.forEach((item) => {
           RandomSlopesObj[item] = []
+          CheckedRandomSlopesObj[item] = []
         })
       }
 
       CheckedObj["Available"] = []
-      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}},
-        () => this.setState({Checked: {...CheckedObj}}, () => console.log(this.state.RandomSlopes)))  
+      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}, CheckedRandomSlopes: {...CheckedRandomSlopesObj}},
+        () => this.setState({Checked: {...CheckedObj}}))  
       
       
 
@@ -243,30 +247,23 @@ export class RegPanel extends Component {
     this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}})
   }
 
-  handleToggleSecondary = (varname, from) => {
+  handleToggleRE = (varname, from) => {
     let CheckedObj = {...this.state.Checked}
-    let CheckedTargetObj = [...this.state[from]]
-    let currentIndex = CheckedTargetObj.indexOf(varname)
-    
+    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+    let currentIndex = CheckedRandomSlopesObj[from].indexOf(varname)
+
     if (currentIndex === -1) {
-      CheckedTargetObj.push(varname)
+      CheckedRandomSlopesObj[from].push(varname)
     }else {
-      CheckedTargetObj.splice(currentIndex, 1)
+      CheckedRandomSlopesObj[from].splice(currentIndex, 1)
     }
 
     for (let key in CheckedObj) {
       CheckedObj[key] = []
     }
-    switch (from) {
-      case "checkedInteraction":
-        this.setState({checkedInteraction: CheckedTargetObj, Checked: {...CheckedObj}})
-        break;
-      case "CheckedRandomSlopes":
-        this.setState({CheckedRandomSlopes: CheckedTargetObj, Checked: {...CheckedObj}})
-      default:
-        break;
-    }
-    
+
+    this.setState({CheckedRandomSlopes: CheckedRandomSlopesObj, Checked: {...CheckedObj}}, 
+      () => console.log(this.state.CheckedRandomSlopes))
   }
 
   changeArrow = (target) => {
@@ -279,6 +276,41 @@ export class RegPanel extends Component {
           }
       }
       this.setState({hideToRight:{...hideToRightObj}})
+  }
+
+  addRandomSlopes = (target) => {
+    let RandomSlopesObj = {...this.state.RandomSlopes}
+    let CheckedObj = {...this.state.Checked}
+
+    
+
+    let newTerm = this.not(CheckedObj["CovariatesRESelection"], RandomSlopesObj[target])
+
+    console.log("Target")
+    console.log(target)
+    console.log("Current RandomSlopes Object")
+    console.log(RandomSlopesObj)
+    console.log("Selected RE")
+    console.log(CheckedObj["CovariatesRESelection"])
+    console.log("Terms to be added")
+    console.log(newTerm)
+
+    RandomSlopesObj[target] = RandomSlopesObj[target].concat(newTerm)
+
+    console.log(RandomSlopesObj)
+
+    CheckedObj["CovariatesRESelection"] = []
+    this.setState({RandomSlopes: RandomSlopesObj, Checked: CheckedObj}, () => console.log(this.state.RandomSlopes))
+  }
+
+  delRandomSlopes = (from) => {
+    console.log("Deleting...")
+    let RandomSlopesObj = {...this.state.RandomSlopes}
+    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+    RandomSlopesObj[from] = this.not(RandomSlopesObj[from], CheckedRandomSlopesObj[from])
+    CheckedRandomSlopesObj[from] = []
+    this.setState({RandomSlopes: RandomSlopesObj, CheckedRandomSlopes: CheckedRandomSlopesObj})
+    
   }
 
   addInteractionTerm = () => {
@@ -297,6 +329,8 @@ export class RegPanel extends Component {
     let interactionObj = this.not(this.state.interaction, this.state.checkedInteraction)
     this.setState({interaction: interactionObj, checkedInteraction: []})
   }
+
+
 
   buildCode = () => {
     let codeString = "library(mice)\n"
@@ -417,12 +451,11 @@ export class RegPanel extends Component {
 
             RandomSlopes = {this.state.RandomSlopes}
             CheckedRandomSlopes = {this.state.CheckedRandomSlopes}
+            handleToggleSecondaryCallback = {this.handleToggleSecondary}
+            addRandomSlopesCallback = {this.addRandomSlopes}
+            handleToggleRECallback = {this.handleToggleRE}
+            delRandomSlopesCallback = {this.delRandomSlopes}
 
-            interaction = {this.state.interaction}
-            checkedInteraction = {this.state.checkedInteraction}
-            addInteractionTermCallback = {this.addInteractionTerm}
-            handleToggleInteractionCallback = {this.handleToggleInteraction}
-            delInteractionTermCallback = {this.delInteractionTerm}
             />
           </ExpansionPanelDetails>
         </ExpansionPanel>    

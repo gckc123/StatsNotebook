@@ -15,7 +15,7 @@ export class RegAnalysisSetting extends Component {
                 <div>
                     <div className="NMACheckbox"><Checkbox  size="small"/>Robust Regression
                     </div>
-                    <div className="NMACheckbox"><Checkbox  size="small"/>Imputed Dataset
+                    <div className="NMACheckbox"><Checkbox  size="small"/>This is an Imputed Dataset.
                     </div>
                 </div>
             )
