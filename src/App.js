@@ -30,7 +30,7 @@ export class App extends Component {
       CurrentVariableList: [],
       CategoricalVarLevels: {},
       CurrentData: [],
-      imputedData: false,
+      imputedDataset: false,
       nrow: 0,
       ncol: 0,
       CPU: 1,
@@ -62,13 +62,13 @@ export class App extends Component {
           this.setState({NotebookBlkList:[...tmp]})
         }
       }else if (ResultsJSON.OutputType[0] === "getVariableList") {  
-        let imputedData = false
+        let imputedDataset = false
         if (Object.keys(ResultsJSON.Output).findIndex((item) => item === ".imp") !== -1) {
-          imputedData = true
+          imputedDataset = true
         }
         this.setState({CurrentVariableList: ResultsJSON.Output,
           CategoricalVarLevels: ResultsJSON.CategoricalVarLevels,
-          imputedData: imputedData})
+          imputedDataset: imputedDataset})
       }else if (ResultsJSON.OutputType[0] === "getData") {
         this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
       }else if(ResultsJSON.OutputType[0] === "END") {
@@ -123,11 +123,8 @@ export class App extends Component {
     })
 
     ipcRenderer.on('cpuCount', (event, cpuCount) => {
-      console.log(cpuCount)
       if (cpuCount >= 2)
-        this.setState({CPU: cpuCount - 1}, () => console.log(this.state.CPU))
-        
-      
+        this.setState({CPU: cpuCount - 1})
     })
   }
 
@@ -392,13 +389,19 @@ export class App extends Component {
                     CPU = {this.state.CPU}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
-                  <div hidden={this.state.currentActiveAnalysisPanel !== "LRPanel"}>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "LRPanel" &&
+                  this.state.currentActiveAnalysisPanel !== "LogitPanel" &&
+                  this.state.currentActiveAnalysisPanel !== "PoiPanel" &&
+                  this.state.currentActiveAnalysisPanel !== "NbPanel" &&
+                  this.state.currentActiveAnalysisPanel !== "MultinomPanel"}>
                     <RegPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
+                    imputedDataset = {this.state.imputedDataset}
+                    CPU = {this.state.CPU}/>
                   </div>
                 </div>
                 

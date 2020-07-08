@@ -91,16 +91,52 @@ export class RegPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
-          RobustReg: false,
-          ImputedDataset: false,
-          
+          M : 20,
+          LRPanel: {
+            robustReg: false,
+            imputedDataset: false,
+            imputeMissing: false,
+            diagnosticPlot: true,
+            confLv: 95,
+          },
+          LogitPanel: {
+            robustReg: false,
+            imputedDataset: false,
+            imputeMissing: false,
+            diagnosticPlot: true,
+            expCoeff: true,
+            confLv: 95,
+          },
+          PoiPanel: {
+            robustReg: false,
+            imputedDataset: false,
+            imputeMissing: false,
+            diagnosticPlot: true,
+            expCoeff: true,
+            confLv: 95,
+          },
+          NbPanel: {
+            imputedDataset: false,
+            imputeMissing: false,
+            diagnosticPlot: true,
+            expCoeff: true,
+            confLv: 95,
+          },
+          MultinomPanel: {
+            imputedDataset: false,
+            imputeMissing: false,
+            diagnosticPlot: true,
+            expCoeff: true,
+            confLv: 95,
+          }
         }
     }
   }
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "LRPanel") {
+    if (this.props.currentActiveAnalysisPanel === "LRPanel" ||
+    this.props.currentActiveAnalysisPanel === "LogitPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -155,6 +191,7 @@ export class RegPanel extends Component {
     let CheckedObj = {...this.state.Checked}
     let RandomSlopesObj = {...this.state.RandomSlopes}
     let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+    let AnalysisSettingObj = {...this.state.AnalysisSetting}
     let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       
@@ -174,10 +211,14 @@ export class RegPanel extends Component {
           RandomSlopesObj[item] = []
           CheckedRandomSlopesObj[item] = []
         })
+        if (this.props.currentActiveAnalysisPanel === "LRPanel") {
+          AnalysisSettingObj[this.props.currentActiveAnalysisPanel]["robustReg"] = false
+        }
       }
 
       CheckedObj["Available"] = []
-      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}, CheckedRandomSlopes: {...CheckedRandomSlopesObj}},
+      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}, 
+        CheckedRandomSlopes: {...CheckedRandomSlopesObj}, AnalysisSetting: {...AnalysisSettingObj}},
         () => this.setState({Checked: {...CheckedObj}}))  
       
       
@@ -333,33 +374,183 @@ export class RegPanel extends Component {
 
 
   buildCode = () => {
-    let codeString = "library(mice)\n"
-    let formula = []
-    let method = []
-    
-    let formulaCode = "formulas <- make.formulas(currentDataset)\n"
 
-    this.state.Variables.Covariates.forEach((variable) => {
-      let intTerm = this.notInInt(variable, this.state.interaction)
-      let predictor = this.state.Variables.Covariates.filter((item) => item !== variable)      
-      formula.push("formulas$"+variable+" =" + variable + " ~ " + 
-        predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
-        intTerm.join(" + "))
-    })
+    let codeString =""
 
-    let notIncludedVars = this.not(this.state.Variables.Available, this.state.Variables.Covariates)
-    notIncludedVars.forEach((variable) => {
-      method.push("meth[\""+variable+"\"] <- \"\"")
-    })
+    if (this.state.AnalysisSetting.LRPanel.imputeMissing) {
 
-    formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
+      if (Object.keys(this.props.CurrentVariableList).indexOf(".imp") !== -1) {
+        codeString = codeString + "currentDataset <- currentDataset[which(currentDataset$.imp == 0),]\n" +
+        "currentDataset <- currentDataset[!(names(currentDataset) %in% c(\".id\", \".imp\"))]\n\n"
+      }   
 
+      codeString = codeString + "library(mice)\n"
+      let formula = []
+      let method = []
+      let formulaCode = "formula <- make.formulas(currentDataset)\n"
+
+      let analysisVars = this.state.Variables.Covariates.concat(this.state.Variables.Outcome)
+
+      analysisVars.forEach((variable) => {
+        let intTerm = this.notInInt(variable, this.state.interaction)
+        let predictor = analysisVars.filter((item) => item !== variable)      
+        formula.push("formulas$"+variable+" =" + variable + " ~ " + 
+          predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
+          intTerm.join(" + "))
+      })
+  
+      let notIncludedVars = this.not(this.state.Variables.Available, analysisVars)
+      notIncludedVars.forEach((variable) => {
+        if (variable !== ".id" && variable !== ".imp") {
+          method.push("meth[\""+variable+"\"] <- \"\"")
+        }
+      })
+
+      formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
     let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
+    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\nimputedDataset <- parlmice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
+    this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
+    ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE)\n\n"
 
-    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\ncurrentDataset <- complete(mice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
-    this.state.AnalysisSetting.M + "), action = \"long\")"
+    }
 
+    let currentPanel = this.props.currentActiveAnalysisPanel
+
+    let formulaFixedPart = this.state.Variables.Outcome[0] +
+    " ~ " + this.state.Variables.Covariates.join(" + ") + ( this.state.interaction.length > 0 ? " + " + this.state.interaction.join(" + "): "" )
     
+    let formulaRandompart = ""
+    if (this.state.Variables.RandomEffect.length > 0) {
+      this.state.Variables.RandomEffect.forEach((item) => {
+        formulaRandompart = formulaRandompart + " + (1" + (this.state.RandomSlopes[item].length > 0 ? " + " + this.state.RandomSlopes[item].join(" + "): "") +
+        " | " + item + ")"
+      })
+    }
+
+    switch(currentPanel) {
+      case "LRPanel":
+        if (this.state.AnalysisSetting[currentPanel].robustReg) {
+          codeString = codeString + "library(tidyverse)\n\n" + "glance.lmrob <- function(x, ...) {" +
+          "\n  with(\n    summary(x),\n    tibble(\n      r.squared = r.squared," + 
+          "\n      adj.r.squared = adj.r.squared,\n      df = df[[1]],\n      df.residual = df.residual(x),"+
+          "\n      nobs = stats::nobs(x),\n      sigma = scale\n    )\n  )\n}" + 
+          "\n\n tidy.lmrob <- function(x, ...) {" +
+          "\n  y <- summary(x)\n  tibble(\n    term = rownames(y$coefficients),\n    estimate = y$coefficients[,\"Estimate\"]," +
+          "\n    std.error = y$coefficients[,\"Std. Error\"],\n    statistics = y$coefficients[,\"t value\"]," + 
+          "\n    p.value = y$coefficients[,\"Pr(>|t|)\"]\n  )\n}\n\n" 
+          codeString = codeString + "library(robustbase) \n"
+          if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+            codeString = codeString + 
+            "\nres <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmrob(" + formulaFixedPart + 
+            (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + "\n))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " +
+            this.state.AnalysisSetting[currentPanel].confLv/100 +")\n\n"
+          }else {
+            codeString = codeString + "res <- lmrob(" + this.state.Variables.Outcome[0] + " ~ " + this.state.Variables.Covariates.join(" + ") +
+              ( this.state.interaction.length > 0 ? " + " + this.state.interaction.join(" + "): "" ) + 
+              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + ",\n  data=currentDataset)\nsummary(res)"+
+              "\nconfint(res, level = "+ this.state.AnalysisSetting[currentPanel].confLv/100 +")\n\n"
+          }
+
+        }else {
+
+          if (this.state.Variables.RandomEffect.length > 0) {
+            codeString = codeString + "\nlibrary(lme4)\n\n"
+            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+              codeString = codeString +
+              "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmer(" + formulaFixedPart + 
+              formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+              "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                codeString = codeString + "res1 <- res$analyses[[1]]\n" +
+                "library(car)\n\nplot(res1, ylab=\"Standardized Residuals\")" +
+                "\noutlierTest(res1)\ninfIndexPlot(res1)\nqqnorm(residuals(res1))\nqqline(residuals(res1))\nvif(res1)"
+              }
+
+            }else{
+              codeString = codeString + "res <- lmer(" + formulaFixedPart + 
+                formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                codeString = codeString + "library(car)\n\nplot(res, ylab=\"Standardized Residuals\")" +
+                "\noutlierTest(res)\ninfIndexPlot(res)\nqqnorm(residuals(res))\nqqline(residuals(res))\nvif(res)"
+              }
+            }
+
+          }else {
+            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+              codeString = codeString + 
+              "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lm(" + formulaFixedPart + 
+              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+              "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                codeString = codeString + "res1 <- res$analyses[[1]]\n" +
+                "library(car)\n\nres1.std <- rstandard(res1)\nplot(res1.std, ylab=\"Standardized Residuals\")" +
+                "\noutlierTest(res1)\ninfIndexPlot(res1)\nresidualPlots(res1)\nqqnorm(res1$resid)\nqqline(res1$resid)\nvif(res1)"
+              }
+
+            }else {
+              codeString = codeString + "res <- lm(" + formulaFixedPart + 
+              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+              ",\n  data=currentDataset)\nsummary(res)\nconfint(res, level = " +
+              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                codeString = codeString + "library(car)\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                "\noutlierTest(res)\ninfIndexPlot(res)\nresidualPlots(res)\nqqnorm(res1$resid)\nqqline(res$resid)\nvif(res)"
+              }
+            }
+          }
+        }
+      break;   
+      case "LogitPanel":
+      case "PoiPanel":
+        
+        let family = ""
+        if (currentPanel === "LogitPanel")
+          family = "family = binomial"
+        else if (currentPanel === "PoiPanel")
+          family = "family = poisson(link = \"log\")"
+
+        if (this.state.AnalysisSetting[currentPanel].robustReg) {
+
+        }else{
+          if (this.state.Variables.RandomEffect.length > 0) {
+            codeString = codeString + "\nlibrary(lme4)\n\n"
+
+            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+              codeString = codeString +
+                "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glmer(" + formulaFixedPart + 
+                formulaRandompart + ",\n  " + family +
+                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
+                this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
+            }else
+            {
+              codeString = codeString + "res <- glmer(" + formulaFixedPart + 
+                formulaRandompart + ",\n  " + family + 
+                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+                if (this.state.AnalysisSetting[currentPanel].expCoeff)
+                  codeString = codeString +
+                  "se <- sqrt(diag(vcov(res)))\n" +
+                  "z <- -qnorm((1-" + this.state.AnalysisSetting[currentPanel].confLv/100 + ")/2)\n" +
+                  "exp(cbind(Est=fixef(res), LL = fixef(res) - z*se, UL = fixef(res) + z*se))\n\n"
+            }
+          }else {
+
+          }
+        }
+      break;
+    }
+   
 
     this.props.updateTentativeScriptCallback(codeString) 
   }
@@ -370,26 +561,68 @@ export class RegPanel extends Component {
     this.setState({panels: panelsObj})
   }
 
-  updateAnalysisSetting = (event,target) => {
+  updateAnalysisSetting = (event, targetPanel, target) => {
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     
+
     switch (target) {
+      case "robustReg":
+        AnalysisSettingObj[targetPanel][target] = !AnalysisSettingObj[targetPanel][target]
+        AnalysisSettingObj[targetPanel]["diagnosticPlot"] = false
+        break;
+      case "imputedDataset":
+        AnalysisSettingObj[targetPanel][target] = !AnalysisSettingObj[targetPanel][target]
+        AnalysisSettingObj[targetPanel]["imputeMissing"] = false
+        break;
+      case "imputeMissing":
+        AnalysisSettingObj[targetPanel][target] = !AnalysisSettingObj[targetPanel][target]
+        AnalysisSettingObj[targetPanel]["imputedDataset"] = false
+        break;
+      case "diagnosticPlot":
+      case "expCoeff":
+        AnalysisSettingObj[targetPanel][target] = !AnalysisSettingObj[targetPanel][target]
+        break;
       case "M":
         AnalysisSettingObj[target] = event.target.value
+        break;
+      case "confLv":
+        AnalysisSettingObj[targetPanel][target] = event.target.value
         break;
       default:
         break;
     }
+
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
   render () {
+    let analysisType = ""
+    let currentPanel = this.props.currentActiveAnalysisPanel
+    switch (this.props.currentActiveAnalysisPanel) {
+      case "LRPanel":
+        analysisType = "Linear Regression"
+        break;
+      case "LogitPanel":
+        analysisType = "Logistic Regression"
+        break;
+      case "PoiPanel":
+        analysisType = "Poison Regression"
+        break;
+      case "NbPanel":
+        analysisType = "Negative Binomial Regression"
+        break;
+      case "MultinomPanel":
+        analysisType = "Multinomial Logistic Regression"
+        break;
+      default:
+        break;
+    }
     return (
       <div className="mt-2">        
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Regression - Variable Selection</Typography>
+            <Typography>{analysisType} - Variable Selection</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
             <RegVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
@@ -432,7 +665,8 @@ export class RegPanel extends Component {
           </ExpansionPanelDetails>
         </ExpansionPanel>
         <ExpansionPanel square expanded={this.state.panels.randomEffect}
-        onChange = {this.handlePanelExpansion("randomEffect")}>
+        onChange = {this.handlePanelExpansion("randomEffect")}
+        hidden = {(currentPanel !== "LRPanel" && currentPanel !== "LogitPanel" && currentPanel !== "PoiPanel")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
             <Typography>Random Effect</Typography>
           </ExpansionPanelSummary>
@@ -469,7 +703,8 @@ export class RegPanel extends Component {
             Variables = {this.state.Variables}
             currentActiveAnalysisPanel = {this.props.currentActiveAnalysisPanel}
             AnalysisSetting = {this.state.AnalysisSetting}
-            updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+            updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+            imputedDataset = {this.props.imputedDataset}/>
           </ExpansionPanelDetails>
         </ExpansionPanel>    
       </div>

@@ -33,7 +33,7 @@ export class MIAnalysisSetting extends Component {
                     className="Analysis-Setting-TextField"
                     defaultValue={this.props.AnalysisSetting.M}
                     onChange = {(event) => this.props.updateAnalysisSettingCallback(event,"M")}
-                    onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event,"M")}/></div>
+                    /></div>
                 </div> 
             </div>
         )

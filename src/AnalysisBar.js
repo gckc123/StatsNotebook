@@ -152,7 +152,10 @@ class RegressionMenu extends Component {
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick = {() => this.setAnalysisPanel("PoiPanel")}>Poisson Regression (For count outcome)</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick = {() => this.setAnalysisPanel("MLRPanel")}>Multinomial logistic Regression (For categorical outcome with more than two levels)</MenuItem>
+                onClick = {() => this.setAnalysisPanel("NbPanel")}>Negative Binomial Regression (For over-dispersed count outcome)</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("MultinomPanel")}>Multinomial Logistic Regression (For categorical outcome with more than two levels)</MenuItem>
+               
             </Menu>
         )
     }
@@ -310,7 +313,10 @@ export class AnalysisBar extends Component {
                 <CausalMenu handleClose ={this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "causal" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
                 
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "regression")}>
+                <StyledButton disableRipple onClick={(event) => {
+                    this.props.getCPUCountCallback()
+                    this.handleMenu(event, "regression")}
+                }>
                 <img src={RegressionIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Regression</div>
                 </StyledButton>
