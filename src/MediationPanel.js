@@ -114,6 +114,8 @@ export class MediationPanel extends Component {
 
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
+          
+          VariablesObj["Available"].sort()
 
           this.setState({Variables:{...VariablesObj}})
           this.setState({Checked: {...CheckedObj}})
@@ -182,6 +184,9 @@ export class MediationPanel extends Component {
       if (from === "Outcome" || from === "Mediator") {
         this.removeFromModelSelection(CheckedObj[from])
       }
+
+      VariablesObj["Available"].sort()
+
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},
           () => this.setState({Checked: {...CheckedObj}}))

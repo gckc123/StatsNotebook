@@ -314,7 +314,7 @@ export class App extends Component {
   
   newNotebook = () => {
     console.log("New Notebook")
-    this.setState({tentativeScript: "", ActiveScript: "", ActiveScript: null, NotebookBlkList: []})
+    this.setState({tentativeScript: "", ActiveScript: "", NotebookBlkList: []})
   }
 
   render() {

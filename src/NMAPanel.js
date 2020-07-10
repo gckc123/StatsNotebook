@@ -120,6 +120,8 @@ export class NMAPanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
+          VariablesObj["Available"].sort()
+
           this.setState({Variables:{...VariablesObj}})
           this.setState({Checked: {...CheckedObj}})
       }
@@ -194,6 +196,8 @@ export class NMAPanel extends Component {
       if (from === "Treatment1" || from === "Treatment2") {    
         this.setState({TreatmentLvs: [...this.getTreatmentLv(VariablesObj)]}, () => console.log(this.state.TreatmentLvs))       
       }
+
+      VariablesObj["Available"].sort()
 
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},

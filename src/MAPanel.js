@@ -131,6 +131,8 @@ export class MAPanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
+          VariablesObj["Available"].sort()
+
           this.setState({Variables:{...VariablesObj}, 
             Checked: {...CheckedObj}, 
             interaction: [...interactionObj],
@@ -177,6 +179,8 @@ export class MAPanel extends Component {
       let CheckedObj = {...this.state.Checked}
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
+
+      VariablesObj["Available"].sort()
 
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},

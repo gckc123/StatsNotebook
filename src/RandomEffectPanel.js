@@ -86,9 +86,9 @@ export class RandomEffectPanel extends Component {
 
     nextRandomEffect = (direction) => {
         let currentREVarIndex = this.props.Variables.RandomEffect.findIndex((item) => item === this.state.currentREVar)        
-        if (direction === "next" && currentREVarIndex != (this.props.Variables.RandomEffect.length - 1)) {
+        if (direction === "next" && currentREVarIndex !== (this.props.Variables.RandomEffect.length - 1)) {
             this.setState({currentREVar: this.props.Variables.RandomEffect[currentREVarIndex+1]})
-        }else if (direction === "previous" && currentREVarIndex != 0) {
+        }else if (direction === "previous" && currentREVarIndex !== 0) {
             this.setState({currentREVar: this.props.Variables.RandomEffect[currentREVarIndex-1]})
         }
     }

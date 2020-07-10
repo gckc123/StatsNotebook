@@ -118,14 +118,12 @@ export class RegPanel extends Component {
           NbPanel: {
             imputedDataset: false,
             imputeMissing: false,
-            diagnosticPlot: true,
             expCoeff: true,
             confLv: 95,
           },
           MultinomPanel: {
             imputedDataset: false,
             imputeMissing: false,
-            diagnosticPlot: true,
             expCoeff: true,
             confLv: 95,
           }
@@ -136,10 +134,15 @@ export class RegPanel extends Component {
   componentDidUpdate() {
     //Update variable list
     if (this.props.currentActiveAnalysisPanel === "LRPanel" ||
-    this.props.currentActiveAnalysisPanel === "LogitPanel") {
+    this.props.currentActiveAnalysisPanel === "LogitPanel" ||
+    this.props.currentActiveAnalysisPanel === "PoiPanel" ||
+    this.props.currentActiveAnalysisPanel === "NbPanel" ||
+    this.props.currentActiveAnalysisPanel === "MultinomPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
+      let RandomSlopesObj = {...this.state.RandomSlopes}
+      let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -160,14 +163,25 @@ export class RegPanel extends Component {
               return false
           })
 
+          Object.keys(this.state.RandomSlopes).forEach((item) => {
+              RandomSlopesObj[item] = this.intersection(RandomSlopesObj[item], CurrentVariableList)
+              CheckedRandomSlopesObj[item] = this.intersection(CheckedRandomSlopesObj[item], RandomSlopesObj[item])
+            }
+          )
+
           let checkedInteractionObj = this.intersection(this.state.checkedInteraction, interactionObj)
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
+          VariablesObj["Available"].sort()
+
           this.setState({Variables:{...VariablesObj}, 
             Checked: {...CheckedObj}, 
             interaction: [...interactionObj],
-            checkedInteraction: [...checkedInteractionObj]})      
+            checkedInteraction: [...checkedInteractionObj],
+            RandomSlopes: {...RandomSlopesObj},
+            CheckedRandomSlopes: {...CheckedRandomSlopesObj}
+          })      
       }
     }
     // Need to check if any treatment variable is removed?
@@ -235,19 +249,38 @@ export class RegPanel extends Component {
       let CheckedObj = {...this.state.Checked}
       let RandomSlopesObj = {...this.state.RandomSlopes}
       let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+      let interactionArr = [...this.state.interaction]
+      let checkedInteractionArr = [...this.state.checkedInteraction]
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
+
+      VariablesObj["Available"].sort()
 
       if (from === "RandomEffect") {
         CheckedObj[from].forEach( (item) => {
           delete RandomSlopesObj[item]
           delete CheckedRandomSlopesObj[item]
+        })        
+      }
+
+      if (from === "Covariates") {
+        interactionArr = this.state.interaction.filter((item) => {
+          let terms = item.split("*")
+          let match = this.intersection(terms, VariablesObj["Covariates"])
+          if (match.length === terms.length)
+            return true
+          else
+            return false
         })
-        
+        checkedInteractionArr = this.intersection(checkedInteractionArr, interactionArr)
+
+
       }
 
       CheckedObj[from] = []
-      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}, CheckedRandomSlopes: {...CheckedRandomSlopesObj}},
+      this.setState({Variables: {...VariablesObj}, RandomSlopes: {...RandomSlopesObj}, 
+        CheckedRandomSlopes: {...CheckedRandomSlopesObj}, interaction: [...interactionArr],
+        checkedInteraction: [...checkedInteractionArr]},
           () => this.setState({Checked: {...CheckedObj}}, ()=> console.log(this.state.RandomSlopes)))
   }
   
@@ -255,7 +288,7 @@ export class RegPanel extends Component {
     
     let CheckedObj = {...this.state.Checked}
     let currentIndex = CheckedObj[from].indexOf(varname);
-
+    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
     if (currentIndex === -1) {
         CheckedObj[from].push(varname)
     }else {
@@ -266,14 +299,20 @@ export class RegPanel extends Component {
         if (key !== from) {
             CheckedObj[key] = [];
         }
-    }        
-    this.setState({Checked: {...CheckedObj}, checkedInteraction: []})
+    }
+    
+    for (let key in CheckedRandomSlopesObj) {
+      CheckedRandomSlopesObj[key] = [];
+    }
+
+    this.setState({Checked: {...CheckedObj}, checkedInteraction: [], CheckedRandomSlopes: {...CheckedRandomSlopesObj}})
   }
 
   handleToggleInteraction = (varname, from) => {
     let CheckedObj = {...this.state.Checked}
     let CheckedIntObj = [...this.state.checkedInteraction]
     let currentIndex = CheckedIntObj.indexOf(varname)
+    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
     
     if (currentIndex === -1) {
       CheckedIntObj.push(varname)
@@ -285,7 +324,11 @@ export class RegPanel extends Component {
       CheckedObj[key] = []
     }
 
-    this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}})
+    for (let key in CheckedRandomSlopesObj) {
+      CheckedRandomSlopesObj[key] = [];
+    }
+
+    this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}, CheckedRandomSlopes: {...CheckedRandomSlopesObj}})
   }
 
   handleToggleRE = (varname, from) => {
@@ -303,7 +346,7 @@ export class RegPanel extends Component {
       CheckedObj[key] = []
     }
 
-    this.setState({CheckedRandomSlopes: CheckedRandomSlopesObj, Checked: {...CheckedObj}}, 
+    this.setState({CheckedRandomSlopes: CheckedRandomSlopesObj, Checked: {...CheckedObj}, checkedInteraction: []}, 
       () => console.log(this.state.CheckedRandomSlopes))
   }
 
@@ -360,9 +403,23 @@ export class RegPanel extends Component {
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
       alert("Please select at least two variables.")
     }else {
-      interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
+
+      let newTerm = [...CheckedObj["CovariatesIntSelection"]]
+      let addTerm = true
+      let existingTerm = []
+      interactionObj.forEach((item) => {
+        existingTerm = item.split("*")
+        if (this.intersection(newTerm, existingTerm).length === newTerm.length)
+          addTerm = false
+      })
+
+      if (addTerm) {
+        interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
+        this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
+      }
+
       CheckedObj["CovariatesIntSelection"] = []
-      this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
+      
     }
   }
 
@@ -376,8 +433,9 @@ export class RegPanel extends Component {
   buildCode = () => {
 
     let codeString =""
+    let currentPanel = this.props.currentActiveAnalysisPanel
 
-    if (this.state.AnalysisSetting.LRPanel.imputeMissing) {
+    if (this.state.AnalysisSetting[currentPanel].imputeMissing) {
 
       if (Object.keys(this.props.CurrentVariableList).indexOf(".imp") !== -1) {
         codeString = codeString + "currentDataset <- currentDataset[which(currentDataset$.imp == 0),]\n" +
@@ -387,7 +445,7 @@ export class RegPanel extends Component {
       codeString = codeString + "library(mice)\n"
       let formula = []
       let method = []
-      let formulaCode = "formula <- make.formulas(currentDataset)\n"
+      let formulaCode = "formulas <- make.formulas(currentDataset)\n"
 
       let analysisVars = this.state.Variables.Covariates.concat(this.state.Variables.Outcome)
 
@@ -414,7 +472,7 @@ export class RegPanel extends Component {
 
     }
 
-    let currentPanel = this.props.currentActiveAnalysisPanel
+    
 
     let formulaFixedPart = this.state.Variables.Outcome[0] +
     " ~ " + this.state.Variables.Covariates.join(" + ") + ( this.state.interaction.length > 0 ? " + " + this.state.interaction.join(" + "): "" )
@@ -536,19 +594,104 @@ export class RegPanel extends Component {
                 formulaRandompart + ",\n  " + family + 
                 (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
                 ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
-                this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
 
                 if (this.state.AnalysisSetting[currentPanel].expCoeff)
                   codeString = codeString +
                   "se <- sqrt(diag(vcov(res)))\n" +
                   "z <- -qnorm((1-" + this.state.AnalysisSetting[currentPanel].confLv/100 + ")/2)\n" +
-                  "exp(cbind(Est=fixef(res), LL = fixef(res) - z*se, UL = fixef(res) + z*se))\n\n"
+                  "exp(cbind(Est=fixef(res),\n  \"" + ((100-(this.state.AnalysisSetting[currentPanel].confLv))/2).toString() + "%\"  = fixef(res) - z*se,\n  \"" + 
+                  (100-(100-(this.state.AnalysisSetting[currentPanel].confLv))/2).toString() + "%\" = fixef(res) + z*se))\n\n"
             }
           }else {
 
+            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+              codeString = codeString +
+                "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glm(" + formulaFixedPart + 
+                ",\n  " + family +
+                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
+                this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
+
+                if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                  codeString = codeString + "res1 <- res$analyses[[1]]\n" +
+                  "car::infIndexPlot(res1)\n\n"
+                }
+
+
+            }else {
+              codeString = codeString + "res <- glm(" + formulaFixedPart + ",\n  " + family + 
+              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+              ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
+              this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
+
+              if (this.state.AnalysisSetting[currentPanel].expCoeff) {
+                codeString = codeString + 
+                "exp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
+              }
+
+              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                codeString = codeString +
+                "\ncar::infIndexPlot(res)\n\n"
+              }
+            }
           }
         }
       break;
+      case "NbPanel":
+      case "MultinomPanel":
+        let regType = ""
+        let library = ""
+        if (currentPanel === "NbPanel") {
+          regType = "glm.nb"
+          library = "\nlibrary(MASS)\n\n"
+        }else {
+          regType = "multinom"
+          library = "\nlibrary(nnet)\n\n"
+        }
+        codeString = codeString + library
+        if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+          codeString = codeString +
+          "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  " +
+          regType + "(" + formulaFixedPart + 
+          (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+          "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+          this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
+          this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
+        }else{
+          codeString = codeString + "res <- " + regType + "(" + formulaFixedPart +  
+            (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+            ",\n  data = currentDataset)\nsummary(res)\n"
+          
+          if (currentPanel === "MultinomPanel") {
+            codeString = codeString + "  summary(res)$coefficients\n" +
+            "summary(res)$standard.errors\n" +
+            "z <- summary(res)$coefficients/summary(res)$standard.errors\n" +
+            "p <- (1 - pnorm(abs(z), 0, 1))*2\n" + 
+            "p\n"
+
+          }
+            
+          codeString = codeString + "confint(res, level = "+
+            this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+            if (this.state.AnalysisSetting[currentPanel].expCoeff) {
+              if (currentPanel === "NbPanel") {
+                codeString = codeString + 
+                "exp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
+              }else {
+                codeString = codeString +
+                "exp(summary(res)$coefficients)\n" +
+                "exp(confint(res, level = " +
+                this.state.AnalysisSetting[currentPanel].confLv/100 + "))"
+              }
+            }
+        }
+
+      break;
+
+
     }
    
 

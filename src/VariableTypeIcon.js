@@ -25,7 +25,13 @@ const MenuItemStyle = {
 class ChangeVariableTypeMenu extends Component {
 
     changeVariableType = (targetType) => {
-        let script = "currentDataset$" + this.props.targetVar + " <- as." + targetType + "(currentDataset$" + this.props.targetVar + ")"
+        let script = ""
+        if (targetType === "numeric" || targetType === "character") {
+            script = "currentDataset$" + this.props.targetVar + " <- as." + targetType + "(currentDataset$" + this.props.targetVar + ")"
+        }else {
+            script = "currentDataset$" + this.props.targetVar + " <- " + targetType + "(currentDataset$" + this.props.targetVar + ", exclude = " + 
+            (this.props.disableItem === "Character" ? "\"\"" : "NA") +")"    
+        }
         this.props.addExtraBlkCallback(script, true)
         this.props.handleClose()
     }

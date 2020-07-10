@@ -80,7 +80,7 @@ export class RegAnalysisSetting extends Component {
                         </div>
                     </div>
                     
-
+                    {(currentPanel !== "NbPanel" && currentPanel !== "MultinomPanel") &&
                     <div className="NMACheckbox"><Checkbox  size="small" 
                     disabled = {this.props.AnalysisSetting[currentPanel].robustReg ||
                         ((currentPanel === "LogitPanel" || currentPanel === "PoiPanel") && (this.props.Variables.RandomEffect.length > 0))}
@@ -89,7 +89,7 @@ export class RegAnalysisSetting extends Component {
                         <StyledTooltip title="If missing data is imputed using multiple imputation, diagnostic plots are based on the first imputed dataset. Diagnostic plots are not available for robust regression.">
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                     </div>
-
+                    }
                 </div>
             )
         }
