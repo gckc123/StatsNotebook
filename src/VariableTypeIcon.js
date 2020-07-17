@@ -29,8 +29,7 @@ class ChangeVariableTypeMenu extends Component {
         if (targetType === "numeric" || targetType === "character") {
             script = "currentDataset$" + this.props.targetVar + " <- as." + targetType + "(currentDataset$" + this.props.targetVar + ")"
         }else {
-            script = "currentDataset$" + this.props.targetVar + " <- " + targetType + "(currentDataset$" + this.props.targetVar + ", exclude = " + 
-            (this.props.disableItem === "Character" ? "\"\"" : "NA") +")"    
+            script = "currentDataset$" + this.props.targetVar + " <- " + targetType + "(currentDataset$" + this.props.targetVar +")"    
         }
         this.props.addExtraBlkCallback(script, true)
         this.props.handleClose()

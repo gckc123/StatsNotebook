@@ -11,6 +11,7 @@ import "./AnalysisPanelElements.css";
 import { RegAnalysisSetting } from "./RegAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
 import { RandomEffectPanel } from './RandomEffectPanel';
+import { Alert } from './Alert.js'
 
 const ExpansionPanel = withStyles({
   root: {
@@ -126,8 +127,12 @@ export class RegPanel extends Component {
             imputeMissing: false,
             expCoeff: true,
             confLv: 95,
-          }
-        }
+          },
+          
+        },
+        showAlert: false,
+        alertText: "",
+        alertTitle: "",
     }
   }
 
@@ -214,7 +219,10 @@ export class RegPanel extends Component {
       )
 
       if (toRightVars.length !== CheckedObj["Available"].length) {
-        alert("Character variables will not be added. These variables need to be firstly converted into factor variables.")
+        this.setState({showAlert: true, 
+          alertText: "Character variables will not be added. These variables need to be firstly converted into factor variables.",
+          alertTitle: "Alert"
+        })
       }
 
       VariablesObj["Available"] = this.not(VariablesObj["Available"],toRightVars)
@@ -239,7 +247,10 @@ export class RegPanel extends Component {
 
     }else{
         if (CheckedObj["Available"].length > 0) {
-            alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
+            this.setState({showAlert: true, 
+              alertText: "Only "+ maxElement + " " + target + " variable(s) can be specified.",
+              alertTitle: "Alert"
+            })
         }
     }
   }
@@ -273,8 +284,6 @@ export class RegPanel extends Component {
             return false
         })
         checkedInteractionArr = this.intersection(checkedInteractionArr, interactionArr)
-
-
       }
 
       CheckedObj[from] = []
@@ -401,7 +410,10 @@ export class RegPanel extends Component {
     let interactionObj = [...this.state.interaction]
     let CheckedObj = {...this.state.Checked}
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
-      alert("Please select at least two variables.")
+      this.setState({showAlert: true, 
+        alertText: "Please select at least two variables.",
+        alertTitle: "Alert"
+      })
     }else {
 
       let newTerm = [...CheckedObj["CovariatesIntSelection"]]
@@ -415,10 +427,11 @@ export class RegPanel extends Component {
 
       if (addTerm) {
         interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
-        this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
+        
       }
 
       CheckedObj["CovariatesIntSelection"] = []
+      this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
       
     }
   }
@@ -738,6 +751,18 @@ export class RegPanel extends Component {
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
+  openAlert = () => {
+    this.setState({showAlert: true})
+  };
+
+  closeAlert = () => {
+    this.setState({showAlert: false})
+  }
+
+  setAlert = (title, text) => {
+    this.setState({alertTitle: title, alertText: text})
+  }
+
   render () {
     let analysisType = ""
     let currentPanel = this.props.currentActiveAnalysisPanel
@@ -761,7 +786,10 @@ export class RegPanel extends Component {
         break;
     }
     return (
-      <div className="mt-2">        
+      <div className="mt-2">    
+        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+        title = {this.state.alertTitle}
+        content = {this.state.alertText}></Alert>     
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>

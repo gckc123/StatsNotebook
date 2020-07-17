@@ -10,6 +10,8 @@ import "./App.css";
 import "./AnalysisPanelElements.css";
 import { NMAAnalysisSetting } from "./NMAAnalysisSetting";
 import { Alert } from './Alert.js'
+import { CrosstabVariableSelection } from './CrosstabVariableSelection';
+import { CrosstabAnalysisSetting } from './CrosstabAnalysisSetting'
 
 const ExpansionPanel = withStyles({
   root: {
@@ -54,34 +56,28 @@ const ExpansionPanelDetails = withStyles((theme) => ({
 }))(MuiExpansionPanelDetails);
 
 
-export class NMAPanel extends Component {
+export class CrosstabPanel extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
         Variables: {
             Available: [],
-            Treatment1: [],
-            Treatment2: [],
-            StudyLab: [],
-            EffectSize: [],
-            SE: [],
+            SplitBy: [],
+            RowVars: [],
+            ColVars: [],
         }, 
-        TreatmentLvs : [], 
+
         Checked: {
             Available: [],
-            Treatment1: [],
-            Treatment2: [],
-            StudyLab: [],
-            EffectSize: [],
-            SE: [],
+            SplitBy: [],
+            RowVars: [],
+            ColVars: [],
         },
         hideToRight: {
-            Treatment1: false,
-            Treatment2: false,
-            StudyLab: false,
-            EffectSize: false,
-            SE: false,
+            SplitBy: false,
+            RowVars: false,
+            ColVars: false,
         },
         tentativeScript: "",
         panels: {
@@ -89,14 +85,11 @@ export class NMAPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
-          ESType: "",
-          ConfLv: 95,
-          ForestPlot: true,
-          ForestPlotRef: "",
-          NetworkPlot: true,
-          HeatPlot: true, 
-          FunnelPlot: true,
-          FunnelPlotOrder: []
+          RowPercent: true,
+          ColPercent: false,
+          OverallPercent: false,
+          ChisqTest: false,
+          FisherTest: false,          
         },
         showAlert: false,
         alertText: "",
@@ -106,11 +99,12 @@ export class NMAPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "NMAPanel") {
+    if (this.props.currentActiveAnalysisPanel === "CrosstabPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
       let allVarsInCurrentList = []
+
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
       }
@@ -120,6 +114,7 @@ export class NMAPanel extends Component {
               VariablesObj[key] = this.intersection(VariablesObj[key], CurrentVariableList)
               CheckedObj[key] = this.intersection(CheckedObj[key],VariablesObj[key])
           }
+
 
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
@@ -145,37 +140,45 @@ export class NMAPanel extends Component {
   handleToRight = (target, maxElement) => {
     let VariablesObj = {...this.state.Variables}
     let CheckedObj = {...this.state.Checked}
-    
-    console.log(target)
-    console.log(this.props.CurrentVariableList[CheckedObj["Available"][0]])
+    let toRightVars = []
 
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
-      if ((target === "Treatment1" || target === "Treatment2") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Factor")) {
-        this.setState({showAlert: true, 
-          alertText: "Only factor variable(s) can be entered as Treatment 1 or Treatment 2.",
-          alertTitle: "Alert"
-        })
+      if (target === "SplitBy") {
 
-      }else if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
-        this.setState({showAlert: true, 
-          alertText: "Only numeric variable(s) can be entered as Effect Size or Standard Error.",
-          alertTitle: "Alert"
-        })
-      }else if ((target === "StudyLab") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Numeric")) {
-        this.setState({showAlert: true, 
-          alertText: "Study Labels must not be a numeric variable.",
-          alertTitle: "Alert"
-        })
-      }else {
-        VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
-        VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
-        if (target === "Treatment1" || target === "Treatment2") {    
-          this.setState({TreatmentLvs: [...this.getTreatmentLv(VariablesObj)]})       
+        toRightVars = CheckedObj["Available"].filter((item) =>
+          this.props.CurrentVariableList[item][0] === "Factor"
+
+        )
+
+        if (toRightVars.length !== CheckedObj["Available"].length) {
+          this.setState({showAlert: true, 
+            alertText: "Only factor variable(s) can be entered into \"Split By\". Non-factor variables will be dropped.",
+            alertTitle: "Alert"
+          })
         }
-        CheckedObj["Available"] = []
-        this.setState({Variables: {...VariablesObj}},
-            () => this.setState({Checked: {...CheckedObj}}))  
-      }      
+        
+
+      }else if (target === "RowVars" || target === "ColVars") {
+        
+        toRightVars = CheckedObj["Available"].filter((item) =>
+          this.props.CurrentVariableList[item][0] !== "Character"
+        )
+
+        if (toRightVars.length !== CheckedObj["Available"].length) {
+          this.setState({showAlert: true, 
+            alertText: "Character variables will not be added. These variables need to be firstly converted into factor variables.",
+            alertTitle: "Alert"
+          })
+        }
+        
+      }
+
+      VariablesObj["Available"] = this.not(VariablesObj["Available"],toRightVars)
+      VariablesObj[target] = VariablesObj[target].concat(toRightVars)
+      CheckedObj["Available"] = []
+      this.setState({Variables: {...VariablesObj}},
+          () => this.setState({Checked: {...CheckedObj}}))        
+
     }else{
         if (CheckedObj["Available"].length > 0) {
           this.setState({showAlert: true, 
@@ -186,33 +189,11 @@ export class NMAPanel extends Component {
     }
   }
 
-  getTreatmentLv = (VariablesObj) => {
-    let Treatment1Lvs = []
-    let Treatment2Lvs = []
-    let tmpTreatmentLvs = []
-    if (VariablesObj["Treatment1"].length !== 0) {
-      if (Object.keys(this.props.CategoricalVarLevels).indexOf(VariablesObj["Treatment1"][0]) !== -1) {
-        Treatment1Lvs = [...this.props.CategoricalVarLevels[VariablesObj["Treatment1"][0]]]
-      }
-    }
-    if (VariablesObj["Treatment2"].length !== 0) {
-      if (Object.keys(this.props.CategoricalVarLevels).indexOf(VariablesObj["Treatment2"][0]) !== -1) {
-        Treatment2Lvs = [...this.props.CategoricalVarLevels[VariablesObj["Treatment2"][0]]]
-      }
-    }
-    tmpTreatmentLvs = [...new Set([...Treatment1Lvs, ...Treatment2Lvs])]
-    return tmpTreatmentLvs
-  }
-
   handleToLeft = (from) => {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
-
-      if (from === "Treatment1" || from === "Treatment2") {    
-        this.setState({TreatmentLvs: [...this.getTreatmentLv(VariablesObj)]}, () => console.log(this.state.TreatmentLvs))       
-      }
 
       VariablesObj["Available"].sort()
 
@@ -252,52 +233,9 @@ export class NMAPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
-  reorderTreatmentLv = (direction,index) => {
-    let TreatmentLvsObj = [...this.state.TreatmentLvs]
-    let tmp = ""
-    if (direction === "Up") {
-      if (index !== 0) {
-          tmp = TreatmentLvsObj[index-1]
-          TreatmentLvsObj[index-1] = TreatmentLvsObj[index]
-          TreatmentLvsObj[index] = tmp
-          this.setState({TreatmentLvs: [...TreatmentLvsObj]})
-        }
-    }else {
-      if (index !== this.state.TreatmentLvs.length-1) {
-          tmp = TreatmentLvsObj[index+1]
-          TreatmentLvsObj[index+1] = TreatmentLvsObj[index]
-          TreatmentLvsObj[index] = tmp
-          this.setState({TreatmentLvs: [...TreatmentLvsObj]})
-      }
-    }
-  }
-
   buildCode = () => {
-    let codeString = "library(netmeta)\nnma_res <- netmeta::netmeta( TE = " + this.state.Variables.EffectSize + 
-    ",\n seTE = " + this.state.Variables.SE + 
-    ",\ntreat1 = " + this.state.Variables.Treatment1 +
-    ",\ntreat2 = " + this.state.Variables.Treatment2 +
-    ",\nstudlab = " + this.state.Variables.StudyLab + 
-    ",\ndata = currentDataset, \nsm = \"" + this.state.AnalysisSetting.ESType + 
-    "\",\nlevel = " + this.state.AnalysisSetting.ConfLv/100 + 
-    ",\nlevel.comb = " + this.state.AnalysisSetting.ConfLv/100 +")" 
-    codeString = codeString + "\nsummary(nma_res) \nnetsplit(nma_res)"
-    if (this.state.AnalysisSetting.ForestPlot) {
-        codeString = codeString + 
-        "\nforest(netsplit(nma_res, reference.group=\""+ this.state.AnalysisSetting.ForestPlotRef + "\"))"
-    }
-    if (this.state.AnalysisSetting.NetworkPlot) {
-        codeString = codeString +
-        "\nnetgraph(nma_res)"
-    }
-    if (this.state.AnalysisSetting.HeatPlot) {
-        codeString = codeString +
-        "\nnetheat(nma_res)"
-    }
-    if (this.state.AnalysisSetting.FunnelPlot) {
-      codeString = codeString + "\nfunnel(nma_res, order = c(\"" + this.state.TreatmentLvs.join("\", \"") +
-      "\"), linreg = TRUE)\n"
-    }
+    let codeString = "library(tidyverse)\nlibrary(e1071)\nlibrary(ggplot2)\nlibrary(GGally)\n\n"
+
     this.props.updateTentativeScriptCallback(codeString) 
   }
 
@@ -311,15 +249,11 @@ export class NMAPanel extends Component {
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     
     switch (target) {
-      case "ESType":
-      case "ConfLv":
-      case "ForestPlotRef":
-        AnalysisSettingObj[target] = event.target.value
-        break;
-      case "ForestPlot":
-      case "NetworkPlot":
-      case "HeatPlot":
-      case "FunnelPlot":
+      case "RowPercent":
+      case "ColPercent":
+      case "OverallPercent":
+      case "ChisqTest":
+      case "FisherTest":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -349,36 +283,34 @@ export class NMAPanel extends Component {
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Network Meta Analysis</Typography>
+            <Typography>Variable selection</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <NMAVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
-            Variables = {this.state.Variables}
-            Checked = {this.state.Checked}
-            hideToRight = {this.state.hideToRight}
-            intersectionCallback = {this.intersection}
-            notCallback = {this.not}
-            handleToggleCallback = {this.handleToggle}
-            changeArrowCallback = {this.changeArrow}
-            handleToRightCallback = {this.handleToRight}
-            handleToLeftCallback = {this.handleToLeft}
-            addExtraBlkCallback = {this.props.addExtraBlkCallback}
-            />
+            <CrosstabVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+                Variables = {this.state.Variables}
+                Checked = {this.state.Checked}
+                hideToRight = {this.state.hideToRight}
+                intersectionCallback = {this.intersection}
+                notCallback = {this.not}
+                handleToggleCallback = {this.handleToggle}
+                changeArrowCallback = {this.changeArrow}
+                handleToRightCallback = {this.handleToRight}
+                handleToLeftCallback = {this.handleToLeft}
+                addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              />
           </ExpansionPanelDetails>
         </ExpansionPanel>  
         <ExpansionPanel square expanded={this.state.panels.analysisSetting}
         onChange = {this.handlePanelExpansion("analysisSetting")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Analysis Setting</Typography>
+            <Typography>Statistics</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <NMAAnalysisSetting 
-            Variables = {this.state.Variables}
-            CategoricalVarLevels = {this.props.CategoricalVarLevels}
-            TreatmentLvs = {this.state.TreatmentLvs}
-            AnalysisSetting = {this.state.AnalysisSetting}
-            updateAnalysisSettingCallback = {this.updateAnalysisSetting}
-            reorderTreatmentLvCallback = {this.reorderTreatmentLv}/>
+            <CrosstabAnalysisSetting 
+              Variables = {this.state.Variables}
+              CategoricalVarLevels = {this.props.CategoricalVarLevels}
+              AnalysisSetting = {this.state.AnalysisSetting}
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
           </ExpansionPanelDetails>
         </ExpansionPanel>    
       </div>

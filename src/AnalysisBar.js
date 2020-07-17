@@ -217,10 +217,12 @@ class ExploreMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Descriptive statistics</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}>
-                    Frequency
-                </MenuItem>                                       
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick={() => this.setAnalysisPanel("DescriptivePanel")}>Descriptive statistics</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick={() => this.setAnalysisPanel("CrosstabPanel")}>
+                    Crosstab
+                </MenuItem>                                 
             </Menu>
         )
     }
@@ -297,7 +299,7 @@ export class AnalysisBar extends Component {
                 <div style={{fontSize: "12px"}}>Explore</div>
                 </StyledButton>
                 <ExploreMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
-                target = "explore"/>
+                target = "explore" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "mean")}>
                 <img src={BoxplotIcon} alt="" height="38px"/>
@@ -319,7 +321,7 @@ export class AnalysisBar extends Component {
                 }>
                 <img src={RegressionIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Regression</div>
-                </StyledButton>
+                </StyledButton>                
                 <RegressionMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "regression" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
                 

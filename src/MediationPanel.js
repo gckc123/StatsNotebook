@@ -9,6 +9,7 @@ import { MediationVariableSelection } from './MediationVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
 import { MediationAnalysisSetting } from "./MediationAnalysisSetting";
+import { Alert } from './Alert.js'
 
 const ExpansionPanel = withStyles({
   root: {
@@ -91,7 +92,10 @@ export class MediationPanel extends Component {
           Digits: 3,
           Simulation: 1000,
           ImputeData: true,
-        }
+        },
+        showAlert: false,
+        alertText: "",
+        alertTitle: "",
     }
   }
 
@@ -171,7 +175,10 @@ export class MediationPanel extends Component {
             () => this.setState({Checked: {...CheckedObj}}))  
     }else{
         if (CheckedObj["Available"].length > 0) {
-            alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
+            this.setState({showAlert: true, 
+              alertText: "Only "+ maxElement + " " + target + " variable(s) can be specified.",
+              alertTitle: "Alert"
+            })
         }
     }
   }
@@ -273,9 +280,24 @@ export class MediationPanel extends Component {
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
+  openAlert = () => {
+    this.setState({showAlert: true})
+  };
+
+  closeAlert = () => {
+    this.setState({showAlert: false})
+  }
+
+  setAlert = (title, text) => {
+    this.setState({alertTitle: title, alertText: text})
+  }
+
   render () {
     return (
-      <div className="mt-2">        
+      <div className="mt-2">  
+        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+        title = {this.state.alertTitle}
+        content = {this.state.alertText}></Alert>      
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>

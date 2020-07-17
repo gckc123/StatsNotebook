@@ -10,6 +10,7 @@ import "./App.css";
 import "./AnalysisPanelElements.css";
 import { MAAnalysisSetting } from "./MAAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
+import { Alert } from './Alert.js'
 
 const ExpansionPanel = withStyles({
   root: {
@@ -97,7 +98,10 @@ export class MAPanel extends Component {
           ForestPlot: true,
           FunnelPlot: true,
           DiagnosticPlot: true,
-        }
+        },
+        showAlert: false,
+        alertText: "",
+        alertTitle: "",
     }
   }
 
@@ -157,9 +161,15 @@ export class MAPanel extends Component {
 
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
-        alert("Only numeric variable can be entered as Effect Size or Standard Error")
+        this.setState({showAlert: true, 
+          alertText: "Only numeric variable can be entered as Effect Size or Standard Error.",
+          alertTitle: "Alert"
+        })
       }else if ((target === "StudyLab") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Numeric")) {
-        alert("Study Labels must not be a numeric variable.")
+        this.setState({showAlert: true, 
+          alertText: "Study Labels must not be a numeric variable.",
+          alertTitle: "Alert"
+        })
       }else {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
@@ -169,7 +179,10 @@ export class MAPanel extends Component {
       }      
     }else{
         if (CheckedObj["Available"].length > 0) {
-            alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
+            this.setState({showAlert: true, 
+              alertText: "Only "+ maxElement + " " + target + " variable(s) can be specified.",
+              alertTitle: "Alert"
+            })
         }
     }
   }
@@ -177,13 +190,29 @@ export class MAPanel extends Component {
   handleToLeft = (from) => {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
+      let interactionArr = [...this.state.interaction]
+      let checkedInteractionArr = [...this.state.checkedInteraction]
+
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
       VariablesObj["Available"].sort()
 
+      if (from === "Covariates") {
+        console.log("from Covariates")
+        interactionArr = this.state.interaction.filter((item) => {
+          let terms = item.split("*")
+          let match = this.intersection(terms, VariablesObj["Covariates"])
+          if (match.length === terms.length)
+            return true
+          else
+            return false
+        })
+        checkedInteractionArr = this.intersection(checkedInteractionArr, interactionArr)
+      }
+
       CheckedObj[from] = []
-      this.setState({Variables: {...VariablesObj}},
+      this.setState({Variables: {...VariablesObj}, interaction: [...interactionArr], checkedInteraction: [...checkedInteractionArr]},
           () => this.setState({Checked: {...CheckedObj}}))
   }
   
@@ -240,9 +269,25 @@ export class MAPanel extends Component {
     let interactionObj = [...this.state.interaction]
     let CheckedObj = {...this.state.Checked}
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
-      alert("Please select at least two variables.")
+      this.setState({showAlert: true, 
+        alertText: "Please select at least two variables.",
+        alertTitle: "Alert"
+      })
     }else {
-      interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
+      let newTerm = [...CheckedObj["CovariatesIntSelection"]]
+      let addTerm = true
+      let existingTerm = []
+      interactionObj.forEach((item) => {
+        existingTerm = item.split("*")
+        if (this.intersection(newTerm, existingTerm).length === newTerm.length)
+          addTerm = false
+      })
+
+      if (addTerm) {
+        interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
+        
+      }
+
       CheckedObj["CovariatesIntSelection"] = []
       this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
     }
@@ -300,9 +345,24 @@ export class MAPanel extends Component {
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
+  openAlert = () => {
+    this.setState({showAlert: true})
+  };
+
+  closeAlert = () => {
+    this.setState({showAlert: false})
+  }
+
+  setAlert = (title, text) => {
+    this.setState({alertTitle: title, alertText: text})
+  }
+
   render () {
     return (
-      <div className="mt-2">        
+      <div className="mt-2">
+        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+        title = {this.state.alertTitle}
+        content = {this.state.alertText}></Alert>        
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>

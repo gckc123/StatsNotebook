@@ -13,6 +13,8 @@ import { MAPanel } from './MAPanel';
 import { MIPanel } from './MIPanel';
 import { VarsReferencePanel } from './VarsReferencePanel';
 import { RegPanel } from './RegPanel';
+import { DescriptivePanel } from './DescriptivePanel';
+import { CrosstabPanel } from './CrosstabPanel';
 
 
 const electron = window.require('electron');
@@ -50,7 +52,7 @@ export class App extends Component {
 
     ipcRenderer.on('RecvROutput', (event, content) => {
       
-      let ResultsJSON = JSON.parse(content.toString('utf8'))
+      let ResultsJSON = JSON.parse(content.toString())
       
       if (ResultsJSON.OutputType[0] === "Normal" || ResultsJSON.OutputType[0] === "Warning" || ResultsJSON.OutputType[0] === "Message" || ResultsJSON.OutputType[0] === "Error") {
         let tmp = this.state.NotebookBlkList.slice()
@@ -70,6 +72,7 @@ export class App extends Component {
           CategoricalVarLevels: ResultsJSON.CategoricalVarLevels,
           imputedDataset: imputedDataset})
       }else if (ResultsJSON.OutputType[0] === "getData") {
+        console.log(ResultsJSON.Output)
         this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
       }else if(ResultsJSON.OutputType[0] === "END") {
         let tmp = this.state.NotebookBlkList.slice()
@@ -100,16 +103,17 @@ export class App extends Component {
       switch (ext) {
         case ".csv":
         case ".CSV":
-          script = script + `currentDataset <- read.csv("${filename}")`
+          script = script + "library(tidyverse)\n"
+          script = script + `currentDataset <- read_csv("${filename}")`
           break;
         case ".sav":
         case ".SAV":
-          script = script + `library(foreign)\ncurrentDataset <- read.spss("${filename}", 
-          to.data.frame=TRUE, use.value.labels = FALSE)`
+          script = script + "library(tidyverse)\nlibrary(haven)\n"
+          script = script + `currentDataset <- read_sav("${filename}")`
           break;
         case ".dta":
         case ".DTA":
-          script = script + `library(foreign)\ncurrentDataset <- read.dta("${filename}")`
+          script = script + `library(tidyverse)\nlibrary(haven)\ncurrentDataset <- read_dta("${filename}")`
           break;
         default:
           break;
@@ -402,6 +406,22 @@ export class App extends Component {
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     imputedDataset = {this.state.imputedDataset}
                     CPU = {this.state.CPU}/>
+                  </div>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "DescriptivePanel"}>
+                    <DescriptivePanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                  </div>
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "CrosstabPanel"}>
+                    <CrosstabPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
                 </div>
                 

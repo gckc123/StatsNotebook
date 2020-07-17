@@ -10,6 +10,7 @@ import "./App.css";
 import "./AnalysisPanelElements.css";
 import { MIAnalysisSetting } from "./MIAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
+import { Alert } from './Alert.js'
 
 const ExpansionPanel = withStyles({
   root: {
@@ -81,7 +82,10 @@ export class MIPanel extends Component {
         },
         AnalysisSetting: {
           M: 20,
-        }
+        },
+        showAlert: false,
+        alertText: "",
+        alertTitle: "",
     }
   }
 
@@ -150,7 +154,10 @@ export class MIPanel extends Component {
       )
 
       if (toRightVars.length !== CheckedObj["Available"].length) {
-        alert("Character variables will not be added. These variables need to be firstly converted into factor variables.")
+        this.setState({showAlert: true, 
+          alertText: "Character variables will not be added. These variables need to be firstly converted into factor variables.",
+          alertTitle: "Alert"
+        })
       }
 
       VariablesObj["Available"] = this.not(VariablesObj["Available"],toRightVars)
@@ -161,7 +168,10 @@ export class MIPanel extends Component {
 
     }else{
         if (CheckedObj["Available"].length > 0) {
-            alert("Only "+ maxElement + " " + target + " variable(s) can be specified.")
+            this.setState({showAlert: true, 
+              alertText: "Only "+ maxElement + " " + target + " variable(s) can be specified.",
+              alertTitle: "Alert"
+            })
         }
     }
   }
@@ -169,14 +179,30 @@ export class MIPanel extends Component {
   handleToLeft = (from) => {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
+      let interactionArr = [...this.state.interaction]
+      let checkedInteractionArr = [...this.state.checkedInteraction]
+
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
       VariablesObj["Available"].sort()
 
+      if (from === "Covariates") {
+        interactionArr = this.state.interaction.filter((item) => {
+          let terms = item.split("*")
+          let match = this.intersection(terms, VariablesObj["Covariates"])
+          if (match.length === terms.length)
+            return true
+          else
+            return false
+        })
+        checkedInteractionArr = this.intersection(checkedInteractionArr, interactionArr)
+      }
+
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},
-          () => this.setState({Checked: {...CheckedObj}}))
+          () => this.setState({Checked: {...CheckedObj}, interaction: [...interactionArr],
+        checkedInteraction: [...checkedInteractionArr]}))
   }
   
   handleToggle = (varname, from) => {
@@ -232,7 +258,10 @@ export class MIPanel extends Component {
     let interactionObj = [...this.state.interaction]
     let CheckedObj = {...this.state.Checked}
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
-      alert("Please select at least two variables.")
+      this.setState({showAlert: true, 
+        alertText: "Please select at least two variables.",
+        alertTitle: "Alert"
+      })
     }else {
       interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
       CheckedObj["CovariatesIntSelection"] = []
@@ -295,9 +324,24 @@ export class MIPanel extends Component {
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
+  openAlert = () => {
+    this.setState({showAlert: true})
+  };
+
+  closeAlert = () => {
+    this.setState({showAlert: false})
+  }
+
+  setAlert = (title, text) => {
+    this.setState({alertTitle: title, alertText: text})
+  }
+
   render () {
     return (
-      <div className="mt-2">        
+      <div className="mt-2">
+        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+        title = {this.state.alertTitle}
+        content = {this.state.alertText}></Alert>               
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
