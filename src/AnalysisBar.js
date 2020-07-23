@@ -184,7 +184,7 @@ class CausalMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Marginal Structural Models</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle} disabled>Marginal Structural Models</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick={() => this.setAnalysisPanel("MediationPanel")}>
                     Causal Mediation Analysis
@@ -301,7 +301,7 @@ export class AnalysisBar extends Component {
                 <ExploreMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "explore" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "mean")}>
+                <StyledButton disableRipple disabled onClick={(event) => this.handleMenu(event, "mean")}>
                 <img src={BoxplotIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Means</div>
                 </StyledButton>
@@ -344,7 +344,7 @@ export class AnalysisBar extends Component {
                 <ImputationMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "imputation" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
-                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "machinelearning")}>
+                <StyledButton disableRipple disabled onClick={(event) => this.handleMenu(event, "machinelearning")}>
                 <img src={RobotIcon} alt="" height="38px" />
                 <div style={{fontSize: "12px"}}>Learning</div>
                 </StyledButton>

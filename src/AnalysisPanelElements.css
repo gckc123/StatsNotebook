@@ -42,6 +42,14 @@
     cursor: pointer;
 }
 
+.VariableListRow2ItemsNoCheckbox {
+    display: grid;
+    grid-template-columns: auto 30px;
+    padding: 0px;
+    margin: 0px;
+    cursor: pointer;
+}
+
 .VariableListRow:hover {
     background-color: #f1f1f1;   
 }
@@ -331,4 +339,12 @@
 .Crosstab-Available-Variable-List-Container {
     grid-row-start: 2;
     grid-row-end: 7;
+}
+
+.EMM-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 340px;
+    grid-template-rows:25px 200px;
+    margin: 0px;
+    padding: 0px;
 }

@@ -15,6 +15,8 @@ import { VarsReferencePanel } from './VarsReferencePanel';
 import { RegPanel } from './RegPanel';
 import { DescriptivePanel } from './DescriptivePanel';
 import { CrosstabPanel } from './CrosstabPanel';
+import { ComputePanel } from './ComputePanel';
+import { FilterPanel } from './FilterPanel';
 
 
 const electron = window.require('electron');
@@ -334,7 +336,10 @@ export class App extends Component {
             newNotebookCallback = {this.newNotebook}/>
             <div className="main-pane">
               <div className="left-pane pl-2 pr-2 mb-2" ref={this.DataPanelContainerRef}>
+                
                 <div hidden={this.state.currentActiveLeftPanel !== "DataPanel"}>
+                  {this.state.currentActiveLeftPanel === "DataPanel" &&
+                  <>
                   <div hidden={this.state.currentActiveDataPanel !== "DataPanel"}>
                     <DataPanel CurrentData = {this.state.CurrentData}
                     CurrentVariableList = {this.state.CurrentVariableList}
@@ -345,6 +350,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}/>
                     <div style={{fontSize: "12px", paddingTop: "2px"}}>** This is a data preview. Only the first 500 rows are shown.</div>
                   </div>
+                  
                   <div hidden={this.state.currentActiveDataPanel !== "VarsReferencePanel"}>
                     <VarsReferencePanel CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     CurrentVariableList = {this.state.CurrentVariableList}
@@ -354,13 +360,39 @@ export class App extends Component {
                     dataPanelWidth = {this.state.dataPanelWidth}
                     addExtraBlkCallback = {this.addExtraBlk}/>
                   </div>
+
+                  <div hidden={this.state.currentActiveDataPanel !== "ComputePanel"}>
+                    <ComputePanel CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    CurrentVariableListSorted = {Object.keys(this.state.CurrentVariableList).sort()}
+                    CurrentVariableList = {this.state.CurrentVariableList}
+                    ncol = {this.state.ncol}
+                    dataPanelHeight = {this.state.dataPanelHeight}
+                    dataPanelWidth = {this.state.dataPanelWidth}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    runScriptCallback = {this.runScript}/>
+                  </div>
+                  </>
+                  }
+                  <div hidden={this.state.currentActiveDataPanel !== "FilterPanel"}>
+                    <FilterPanel CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    CurrentVariableListSorted = {Object.keys(this.state.CurrentVariableList).sort()}
+                    CurrentVariableList = {this.state.CurrentVariableList}
+                    ncol = {this.state.ncol}
+                    dataPanelHeight = {this.state.dataPanelHeight}
+                    dataPanelWidth = {this.state.dataPanelWidth}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    runScriptCallback = {this.runScript}/>
+                  </div>
+
                 </div>
+                
                 <div hidden={this.state.currentActiveLeftPanel !== "AnalysisPanel"}>
                   <div className="notebook-bar">
                   <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlk}
                   runScriptCallback = {this.runScript}
                   tentativeScript = {this.state.tentativeScript}/>
                   </div>
+
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
                     <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
@@ -368,6 +400,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
+
                   <div hidden={this.state.currentActiveAnalysisPanel !== "NMAPanel"}>
                     <NMAPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
@@ -376,6 +409,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
+
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MAPanel"}>
                     <MAPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
@@ -384,6 +418,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
+
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MIPanel"}>
                     <MIPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
@@ -393,6 +428,7 @@ export class App extends Component {
                     CPU = {this.state.CPU}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
+
                   <div hidden={this.state.currentActiveAnalysisPanel !== "LRPanel" &&
                   this.state.currentActiveAnalysisPanel !== "LogitPanel" &&
                   this.state.currentActiveAnalysisPanel !== "PoiPanel" &&
@@ -407,6 +443,7 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     CPU = {this.state.CPU}/>
                   </div>
+
                   <div hidden={this.state.currentActiveAnalysisPanel !== "DescriptivePanel"}>
                     <DescriptivePanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
@@ -415,6 +452,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
+
                   <div hidden={this.state.currentActiveAnalysisPanel !== "CrosstabPanel"}>
                     <CrosstabPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
@@ -423,6 +461,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
+                  
                 </div>
                 
               </div>

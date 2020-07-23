@@ -35,10 +35,10 @@ export class DataBar extends Component {
                 <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("VarsReferencePanel")}>
                     <FontAwesomeIcon icon={faBook}/><div className='ml-1'>Reference</div>
                 </StyledButton>
-                <StyledButton disableRipple disabled>
+                <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("ComputePanel")}>
                     <FontAwesomeIcon icon={faCalculator} /><div className='ml-1'>Compute</div>
                 </StyledButton>
-                <StyledButton disableRipple disabled>
+                <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("FilterPanel")}>
                     <FontAwesomeIcon icon={faFilter} /><div className='ml-1'>Filter</div>
                 </StyledButton>
                 <StyledButton disableRipple disabled>

@@ -153,7 +153,7 @@ export class NotebookBlk extends Component {
                                         return (
                                             <div key={index}>
                                                 <div style={{color: "black", fontWeight: "bold"}}>######################################################</div>
-                                                <div><img width={this.props.ElementWidth*0.6} src={graphicsData} alt=""/></div>
+                                                <div><img width={this.props.ElementWidth*0.8} src={graphicsData} alt=""/></div>
                                             </div>
                                             
                                         )

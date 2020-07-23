@@ -79,7 +79,7 @@ export class DescriptivePanel extends Component {
         },
         tentativeScript: "",
         panels: {
-          variableSelection: false,
+          variableSelection: true,
           analysisSetting: false,
         },
         AnalysisSetting: {
@@ -351,7 +351,7 @@ export class DescriptivePanel extends Component {
         })
       }
 
-      codeString = codeString + "\n  ) %>% \n  print(width = Inf)\n" 
+      codeString = codeString + "\n  ) %>% \n  print(width = 1000)\n" 
       
       if (this.state.AnalysisSetting["QQPlot"]) {
         this.state.TargetsNum.forEach((item) => {
@@ -500,42 +500,46 @@ export class DescriptivePanel extends Component {
   render () {
     return (
       <div className="mt-2"> 
-        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
-        title = {this.state.alertTitle}
-        content = {this.state.alertText}></Alert>            
-        <ExpansionPanel square expanded={this.state.panels.variableSelection}
-        onChange = {this.handlePanelExpansion("variableSelection")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Variable selection</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <DescriptiveVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
-              Variables = {this.state.Variables}
-              Checked = {this.state.Checked}
-              hideToRight = {this.state.hideToRight}
-              intersectionCallback = {this.intersection}
-              notCallback = {this.not}
-              handleToggleCallback = {this.handleToggle}
-              changeArrowCallback = {this.changeArrow}
-              handleToRightCallback = {this.handleToRight}
-              handleToLeftCallback = {this.handleToLeft}
-              addExtraBlkCallback = {this.props.addExtraBlkCallback}
-            />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>  
-        <ExpansionPanel square expanded={this.state.panels.analysisSetting}
-        onChange = {this.handlePanelExpansion("analysisSetting")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Statistics and plots</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <DescriptiveAnalysisSetting 
-              Variables = {this.state.Variables}
-              CategoricalVarLevels = {this.props.CategoricalVarLevels}
-              AnalysisSetting = {this.state.AnalysisSetting}
-              updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>    
+      {this.props.currentActiveAnalysisPanel === "DescriptivePanel" &&
+        <div>
+          <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+          title = {this.state.alertTitle}
+          content = {this.state.alertText}></Alert>            
+          <ExpansionPanel square expanded={this.state.panels.variableSelection}
+          onChange = {this.handlePanelExpansion("variableSelection")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Variable selection</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <DescriptiveVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+                Variables = {this.state.Variables}
+                Checked = {this.state.Checked}
+                hideToRight = {this.state.hideToRight}
+                intersectionCallback = {this.intersection}
+                notCallback = {this.not}
+                handleToggleCallback = {this.handleToggle}
+                changeArrowCallback = {this.changeArrow}
+                handleToRightCallback = {this.handleToRight}
+                handleToLeftCallback = {this.handleToLeft}
+                addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>  
+          <ExpansionPanel square expanded={this.state.panels.analysisSetting}
+          onChange = {this.handlePanelExpansion("analysisSetting")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Statistics and plots</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <DescriptiveAnalysisSetting 
+                Variables = {this.state.Variables}
+                CategoricalVarLevels = {this.props.CategoricalVarLevels}
+                AnalysisSetting = {this.state.AnalysisSetting}
+                updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>    
+        </div>
+      }
       </div>
     )
   }

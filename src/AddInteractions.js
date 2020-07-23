@@ -6,6 +6,14 @@ import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import Tooltip from '@material-ui/core/Tooltip';
+
+const StyledTooltip = withStyles({
+    tooltip: {
+      fontSize: "12px"
+    }
+  })(Tooltip);
 
 const StyledButton = withStyles({
     root: {
@@ -65,7 +73,8 @@ export class AddInteraction extends Component {
                 <div className="AddInteraction-Variable-Selection-Box">
                     <div>Covariates</div>
                     <div></div>
-                    <div>Interaction terms</div>
+                    <div>Interaction terms<StyledTooltip title="When a higer order interaction is added, all relevant lower order interactions will be included in the model.">
+                            <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
                     <div onClick={() => this.setState({arrowDelBtn: "arrow"})}>
                         {this.genVariableSelectionList("Covariates","CovariatesIntSelection", true)}
                     </div>

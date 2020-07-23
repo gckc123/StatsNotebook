@@ -76,7 +76,7 @@ export class MIPanel extends Component {
         },
         tentativeScript: "",
         panels: {
-          variableSelection: false,
+          variableSelection: true,
           modelSpec: false,
           analysisSetting: false,
         },
@@ -339,66 +339,69 @@ export class MIPanel extends Component {
   render () {
     return (
       <div className="mt-2">
-        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
-        title = {this.state.alertTitle}
-        content = {this.state.alertText}></Alert>               
-        <ExpansionPanel square expanded={this.state.panels.variableSelection}
-        onChange = {this.handlePanelExpansion("variableSelection")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Multiple Imputation - Variable Selection</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <MIVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
-            Variables = {this.state.Variables}
-            Checked = {this.state.Checked}
-            hideToRight = {this.state.hideToRight}
-            intersectionCallback = {this.intersection}
-            notCallback = {this.not}
-            handleToggleCallback = {this.handleToggle}
-            changeArrowCallback = {this.changeArrow}
-            handleToRightCallback = {this.handleToRight}
-            handleToLeftCallback = {this.handleToLeft}
-            addExtraBlkCallback = {this.props.addExtraBlkCallback}
-            />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>  
-        <ExpansionPanel square expanded={this.state.panels.modelSpec}
-        onChange = {this.handlePanelExpansion("modelSpec")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Passive Imputation - Add interaction terms</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <AddInteraction CurrentVariableList = {this.props.CurrentVariableList}
-            Variables = {this.state.Variables}
-            Checked = {this.state.Checked}
-            hideToRight = {this.state.hideToRight}
-            intersectionCallback = {this.intersection}
-            notCallback = {this.not}
-            handleToggleCallback = {this.handleToggle}
-            changeArrowCallback = {this.changeArrow}
-            handleToRightCallback = {this.handleToRight}
-            handleToLeftCallback = {this.handleToLeft}
-            addExtraBlkCallback = {this.props.addExtraBlkCallback}
-            interaction = {this.state.interaction}
-            checkedInteraction = {this.state.checkedInteraction}
-            addInteractionTermCallback = {this.addInteractionTerm}
-            handleToggleInteractionCallback = {this.handleToggleInteraction}
-            delInteractionTermCallback = {this.delInteractionTerm}
-            />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>    
-        <ExpansionPanel square expanded={this.state.panels.analysisSetting}
-        onChange = {this.handlePanelExpansion("analysisSetting")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Analysis Setting</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <MIAnalysisSetting 
-            Variables = {this.state.Variables}
-            AnalysisSetting = {this.state.AnalysisSetting}
-            updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>    
+        {this.props.currentActiveAnalysisPanel === "MIPanel" &&
+        <div>
+          <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+          title = {this.state.alertTitle}
+          content = {this.state.alertText}></Alert>               
+          <ExpansionPanel square expanded={this.state.panels.variableSelection}
+          onChange = {this.handlePanelExpansion("variableSelection")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Multiple Imputation - Variable Selection</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <MIVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              Variables = {this.state.Variables}
+              Checked = {this.state.Checked}
+              hideToRight = {this.state.hideToRight}
+              intersectionCallback = {this.intersection}
+              notCallback = {this.not}
+              handleToggleCallback = {this.handleToggle}
+              changeArrowCallback = {this.changeArrow}
+              handleToRightCallback = {this.handleToRight}
+              handleToLeftCallback = {this.handleToLeft}
+              addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>  
+          <ExpansionPanel square expanded={this.state.panels.modelSpec}
+          onChange = {this.handlePanelExpansion("modelSpec")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Passive Imputation - Add interaction terms</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <AddInteraction CurrentVariableList = {this.props.CurrentVariableList}
+              Variables = {this.state.Variables}
+              Checked = {this.state.Checked}
+              hideToRight = {this.state.hideToRight}
+              intersectionCallback = {this.intersection}
+              notCallback = {this.not}
+              handleToggleCallback = {this.handleToggle}
+              changeArrowCallback = {this.changeArrow}
+              handleToRightCallback = {this.handleToRight}
+              handleToLeftCallback = {this.handleToLeft}
+              addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              interaction = {this.state.interaction}
+              checkedInteraction = {this.state.checkedInteraction}
+              addInteractionTermCallback = {this.addInteractionTerm}
+              handleToggleInteractionCallback = {this.handleToggleInteraction}
+              delInteractionTermCallback = {this.delInteractionTerm}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>    
+          <ExpansionPanel square expanded={this.state.panels.analysisSetting}
+          onChange = {this.handlePanelExpansion("analysisSetting")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Analysis Setting</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <MIAnalysisSetting 
+              Variables = {this.state.Variables}
+              AnalysisSetting = {this.state.AnalysisSetting}
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
+        </div>}
       </div>
     )
   }

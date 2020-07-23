@@ -81,7 +81,7 @@ export class CrosstabPanel extends Component {
         },
         tentativeScript: "",
         panels: {
-          variableSelection: false,
+          variableSelection: true,
           analysisSetting: false,
         },
         AnalysisSetting: {
@@ -234,7 +234,38 @@ export class CrosstabPanel extends Component {
   }
 
   buildCode = () => {
-    let codeString = "library(tidyverse)\nlibrary(e1071)\nlibrary(ggplot2)\nlibrary(GGally)\n\n"
+    let codeString = "library(tidyverse)\n\n"
+
+    this.state.Variables["RowVars"].forEach((rowItem) => {
+      this.state.Variables["ColVars"].forEach((colItem) => {
+        codeString = codeString + "tab <- currentDataset %>%\n  select(" +
+        rowItem + ", " + colItem + (this.state.Variables["SplitBy"].length > 0 ? ", " + 
+          this.state.Variables["SplitBy"].join(", ") : "") + ") %>%\n  " +
+          "table()\n\ntab\n\n"
+
+        if (this.state.Variables["SplitBy"].length === 0) {
+          if (this.state.AnalysisSetting["RowPercent"]) {
+            codeString = codeString + "tab %>%\n  prop.table(1)\n\n"
+          }
+
+          if (this.state.AnalysisSetting["ColPercent"]) {
+            codeString = codeString + "tab %>%\n  prop.table(2)\n\n"
+          }
+
+          if (this.state.AnalysisSetting["OverallPercent"]) {
+            codeString = codeString + "tab %>%\n  prop.table()\n\n"
+          }
+
+          if (this.state.AnalysisSetting["ChisqTest"]) {
+            codeString = codeString + "tab %>%\n chisq.test()"
+          }
+          
+          if (this.state.AnalysisSetting["FisherTest"]) {
+            codeString = codeString + "tab %>%\n fisher.test()"
+          }
+        }
+      })
+    })
 
     this.props.updateTentativeScriptCallback(codeString) 
   }
@@ -277,6 +308,8 @@ export class CrosstabPanel extends Component {
   render () {
     return (
       <div className="mt-2"> 
+      {this.props.currentActiveAnalysisPanel === "CrosstabPanel" &&
+        <div>
         <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
         title = {this.state.alertTitle}
         content = {this.state.alertText}></Alert>            
@@ -312,7 +345,8 @@ export class CrosstabPanel extends Component {
               AnalysisSetting = {this.state.AnalysisSetting}
               updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
           </ExpansionPanelDetails>
-        </ExpansionPanel>    
+        </ExpansionPanel>  
+    </div>}  
       </div>
     )
   }

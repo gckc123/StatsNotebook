@@ -85,7 +85,7 @@ export class NMAPanel extends Component {
         },
         tentativeScript: "",
         panels: {
-          variableSelection: false,
+          variableSelection: true,
           analysisSetting: false,
         },
         AnalysisSetting: {
@@ -343,44 +343,48 @@ export class NMAPanel extends Component {
   render () {
     return (
       <div className="mt-2"> 
-        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
-        title = {this.state.alertTitle}
-        content = {this.state.alertText}></Alert>            
-        <ExpansionPanel square expanded={this.state.panels.variableSelection}
-        onChange = {this.handlePanelExpansion("variableSelection")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Network Meta Analysis</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <NMAVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
-            Variables = {this.state.Variables}
-            Checked = {this.state.Checked}
-            hideToRight = {this.state.hideToRight}
-            intersectionCallback = {this.intersection}
-            notCallback = {this.not}
-            handleToggleCallback = {this.handleToggle}
-            changeArrowCallback = {this.changeArrow}
-            handleToRightCallback = {this.handleToRight}
-            handleToLeftCallback = {this.handleToLeft}
-            addExtraBlkCallback = {this.props.addExtraBlkCallback}
-            />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>  
-        <ExpansionPanel square expanded={this.state.panels.analysisSetting}
-        onChange = {this.handlePanelExpansion("analysisSetting")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Analysis Setting</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <NMAAnalysisSetting 
-            Variables = {this.state.Variables}
-            CategoricalVarLevels = {this.props.CategoricalVarLevels}
-            TreatmentLvs = {this.state.TreatmentLvs}
-            AnalysisSetting = {this.state.AnalysisSetting}
-            updateAnalysisSettingCallback = {this.updateAnalysisSetting}
-            reorderTreatmentLvCallback = {this.reorderTreatmentLv}/>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>    
+      {this.props.currentActiveAnalysisPanel === "NMAPanel" &&
+        <div>
+          <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+          title = {this.state.alertTitle}
+          content = {this.state.alertText}></Alert>            
+          <ExpansionPanel square expanded={this.state.panels.variableSelection}
+          onChange = {this.handlePanelExpansion("variableSelection")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Network Meta Analysis</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <NMAVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              Variables = {this.state.Variables}
+              Checked = {this.state.Checked}
+              hideToRight = {this.state.hideToRight}
+              intersectionCallback = {this.intersection}
+              notCallback = {this.not}
+              handleToggleCallback = {this.handleToggle}
+              changeArrowCallback = {this.changeArrow}
+              handleToRightCallback = {this.handleToRight}
+              handleToLeftCallback = {this.handleToLeft}
+              addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>  
+          <ExpansionPanel square expanded={this.state.panels.analysisSetting}
+          onChange = {this.handlePanelExpansion("analysisSetting")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Analysis Setting</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <NMAAnalysisSetting 
+              Variables = {this.state.Variables}
+              CategoricalVarLevels = {this.props.CategoricalVarLevels}
+              TreatmentLvs = {this.state.TreatmentLvs}
+              AnalysisSetting = {this.state.AnalysisSetting}
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+              reorderTreatmentLvCallback = {this.reorderTreatmentLv}/>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>    
+        </div>
+      }
       </div>
     )
   }

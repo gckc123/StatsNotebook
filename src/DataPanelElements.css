@@ -1,4 +1,91 @@
-.dataCell {
-    border-left: 1px solid #e8e8e8;
-    background: tomato;
+.compute-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding: 0px;
+    margin: 0px;
+}
+
+.compute-pane-var-formula-box {
+    display: grid;
+    grid-template-columns: 250px 250px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.compute-pane-target-var-box {
+    display: grid;
+    grid-template-columns: 120px 380px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.ComputeTargetVarInput {
+    width: 380px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #e8e8e8;
+    font-size: 14px;
+}
+
+.ComputeTargetVarInput:hover {
+    border-bottom: 2px solid #a7a7a7;
+}
+
+.ComputeTargetVarInput:focus {
+    border-bottom: 2px solid #a7a7a7;
+    outline: none;
+}
+
+.ComputeFormulaTextarea {
+    width: 500px;
+    height: 130px;
+    font-size: 14px;
+    resize: none;
+    border: 1px solid #e8e8e8
+}
+
+.ComputeFormulaTextarea:hover {
+    border: 1px solid #a7a7a7;
+}
+
+.ComputeFormulaTextarea:focus {
+    border: 1px solid #a7a7a7;
+}
+
+.ComputeFormulaVarList {
+    cursor: pointer;
+}
+
+.Filter-pane-box {
+    display: grid;
+    grid-template-columns: 190px 300px 90px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.FilterTextarea {
+    width: 290px;
+    height: 400px;
+    font-size: 14px;
+    resize: none;
+    border: 1px solid #e8e8e8
+}
+
+.FilterTextarea:hover {
+    border: 1px solid #a7a7a7;
+}
+
+.FilterTextarea:focus {
+    border: 1px solid #a7a7a7;
+}
+
+.Operation-Grid {
+    display: grid;
+    grid-template-columns: 65px 65px;
+    grid-template-rows: 30px 30px 30px 30px;
+    margin: 0px;
+    padding: 0px;
 }

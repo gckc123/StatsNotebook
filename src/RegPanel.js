@@ -11,6 +11,7 @@ import "./AnalysisPanelElements.css";
 import { RegAnalysisSetting } from "./RegAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
 import { RandomEffectPanel } from './RandomEffectPanel';
+import { EMMPanel } from './EMMPanel';
 import { Alert } from './Alert.js'
 
 const ExpansionPanel = withStyles({
@@ -76,23 +77,30 @@ export class RegPanel extends Component {
             Weight: [],
             CovariatesIntSelection: [],
             CovariatesRESelection: [],
+            CovariatesEMMSelection: [],
         },
         RandomSlopes: {},
         CheckedRandomSlopes: {},
         interaction: [],
         checkedInteraction: [],
+
         hideToRight: {
             Covariates: false,
         },
         tentativeScript: "",
         panels: {
-          variableSelection: false,
+          variableSelection: true,
           modelSpec: false,
           randomEffect: false,
+          EMM: false,
           analysisSetting: false,
         },
         AnalysisSetting: {
           M : 20,
+          EMMResponseScale: false,
+          Pairwise: false,
+          SimpleSlope: false,
+          InteractionPlot: false,
           LRPanel: {
             robustReg: false,
             imputedDataset: false,
@@ -127,6 +135,7 @@ export class RegPanel extends Component {
             imputeMissing: false,
             expCoeff: true,
             confLv: 95,
+
           },
           
         },
@@ -284,6 +293,7 @@ export class RegPanel extends Component {
             return false
         })
         checkedInteractionArr = this.intersection(checkedInteractionArr, interactionArr)
+        CheckedObj["CovariatesEMMSelection"] = this.intersection(CheckedObj["CovariatesEMMSelection"], VariablesObj["Covariates"].concat(interactionArr))
       }
 
       CheckedObj[from] = []
@@ -305,11 +315,12 @@ export class RegPanel extends Component {
     }
 
     for (let key in CheckedObj) {
-        if (key !== from) {
+        if (key !== from && key !== "CovariatesEMMSelection") {
             CheckedObj[key] = [];
         }
     }
     
+    console.log(this.state.Checked["CovariatesEMMSelection"])
     for (let key in CheckedRandomSlopesObj) {
       CheckedRandomSlopesObj[key] = [];
     }
@@ -330,7 +341,9 @@ export class RegPanel extends Component {
     }
 
     for (let key in CheckedObj) {
-      CheckedObj[key] = []
+      if (key !== "CovariatesEMMSelection") {
+        CheckedObj[key] = []
+      }
     }
 
     for (let key in CheckedRandomSlopesObj) {
@@ -338,6 +351,11 @@ export class RegPanel extends Component {
     }
 
     this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}, CheckedRandomSlopes: {...CheckedRandomSlopesObj}})
+  }
+
+  handleToggleEMM = (varname, from) => {
+    let CheckObj = {...this.state.Checked}
+    
   }
 
   handleToggleRE = (varname, from) => {
@@ -352,7 +370,9 @@ export class RegPanel extends Component {
     }
 
     for (let key in CheckedObj) {
-      CheckedObj[key] = []
+      if (key !== "CovariatesEMMSelection") {
+        CheckedObj[key] = []
+      }
     }
 
     this.setState({CheckedRandomSlopes: CheckedRandomSlopesObj, Checked: {...CheckedObj}, checkedInteraction: []}, 
@@ -378,15 +398,6 @@ export class RegPanel extends Component {
     
 
     let newTerm = this.not(CheckedObj["CovariatesRESelection"], RandomSlopesObj[target])
-
-    console.log("Target")
-    console.log(target)
-    console.log("Current RandomSlopes Object")
-    console.log(RandomSlopesObj)
-    console.log("Selected RE")
-    console.log(CheckedObj["CovariatesRESelection"])
-    console.log("Terms to be added")
-    console.log(newTerm)
 
     RandomSlopesObj[target] = RandomSlopesObj[target].concat(newTerm)
 
@@ -432,15 +443,15 @@ export class RegPanel extends Component {
 
       CheckedObj["CovariatesIntSelection"] = []
       this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
-      
     }
   }
 
   delInteractionTerm = () => {
+    let CheckedObj = {...this.state.Checked}
     let interactionObj = this.not(this.state.interaction, this.state.checkedInteraction)
-    this.setState({interaction: interactionObj, checkedInteraction: []})
+    CheckedObj["CovariatesEMMSelection"] = this.intersection(CheckedObj["CovariatesEMMSelection"], this.state.Variables["Covariates"].concat(interactionObj))
+    this.setState({interaction: interactionObj, checkedInteraction: [], Checked: CheckedObj})
   }
-
 
 
   buildCode = () => {
@@ -536,17 +547,17 @@ export class RegPanel extends Component {
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "res1 <- res$analyses[[1]]\n" +
                 "library(car)\n\nplot(res1, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res1)\ninfIndexPlot(res1)\nqqnorm(residuals(res1))\nqqline(residuals(res1))\nvif(res1)"
+                "\noutlierTest(res1)\ninfIndexPlot(res1)\nqqnorm(residuals(res1))\nqqline(residuals(res1))\nvif(res1)\n\n"
               }
 
             }else{
               codeString = codeString + "res <- lmer(" + formulaFixedPart + 
                 formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
                 ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
-                this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "library(car)\n\nplot(res, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res)\ninfIndexPlot(res)\nqqnorm(residuals(res))\nqqline(residuals(res))\nvif(res)"
+                "\noutlierTest(res)\ninfIndexPlot(res)\nqqnorm(residuals(res))\nqqline(residuals(res))\nvif(res)\n\n"
               }
             }
 
@@ -561,7 +572,7 @@ export class RegPanel extends Component {
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "res1 <- res$analyses[[1]]\n" +
                 "library(car)\n\nres1.std <- rstandard(res1)\nplot(res1.std, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res1)\ninfIndexPlot(res1)\nresidualPlots(res1)\nqqnorm(res1$resid)\nqqline(res1$resid)\nvif(res1)"
+                "\noutlierTest(res1)\ninfIndexPlot(res1)\nresidualPlots(res1)\nqqnorm(res1$resid)\nqqline(res1$resid)\nvif(res1)\n\n"
               }
 
             }else {
@@ -572,7 +583,7 @@ export class RegPanel extends Component {
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "library(car)\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res)\ninfIndexPlot(res)\nresidualPlots(res)\nqqnorm(res1$resid)\nqqline(res$resid)\nvif(res)"
+                "\noutlierTest(res)\ninfIndexPlot(res)\nresidualPlots(res)\nqqnorm(res1$resid)\nqqline(res$resid)\nvif(res)\n\n"
               }
             }
           }
@@ -697,7 +708,7 @@ export class RegPanel extends Component {
                 codeString = codeString +
                 "exp(summary(res)$coefficients)\n" +
                 "exp(confint(res, level = " +
-                this.state.AnalysisSetting[currentPanel].confLv/100 + "))"
+                this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
               }
             }
         }
@@ -705,6 +716,69 @@ export class RegPanel extends Component {
       break;
 
 
+    }
+    if (this.state.Checked["CovariatesEMMSelection"].length > 0) {
+      if (currentPanel === "LogitPanel" || currentPanel === "PoiPanel" || currentPanel === "NbPanel" || (currentPanel === "LRPanel" && !this.state.AnalysisSetting["LRPanel"].robustReg)) {
+        codeString = codeString + "library(emmeans)\n\n"
+        this.state.Checked["CovariatesEMMSelection"].forEach((item) => {
+          let terms = item.split("*")
+          let numeric = 0
+          let numericCode = ",\n  cov.keep = 3, at = list("
+          let settingGridLevel = ""
+          terms.forEach((variable, index) => {
+            if (this.props.CurrentVariableList[variable][0] === "Numeric") {
+              numeric = numeric + 1
+
+              settingGridLevel = settingGridLevel + "m_" + variable + "<- mean(currentDataset$" + variable + ", na.rm = TRUE)\n" + 
+                "sd_" + variable + "<- sd(currentDataset$" + variable + ", na.rm = TRUE)\n\n"
+
+              numericCode = numericCode + (index === 0 ? "\n  " : ",\n  ") + variable + " = c(m_" + variable + "-sd_" + variable +
+                ", m_" + variable + ", m_" + variable + "+sd_" + variable + ")"
+            }
+          })
+          numericCode = numericCode + ")"
+
+          if (numeric > 0) {
+            codeString = codeString + settingGridLevel + "\n"
+          }
+
+          codeString = codeString + "emm <- emmeans(res, " + (this.state.AnalysisSetting["Pairwise"] ? "pairwise" : "") + 
+            " ~ " + item + (numeric > 0 ? numericCode : "") + (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = " : "") +", level = " +
+            this.state.AnalysisSetting[currentPanel].confLv/100 + ")\nsummary(emm)\n\n"
+          
+          if (this.state.AnalysisSetting["SimpleSlope"] && terms.length >= 2 && this.props.CurrentVariableList[terms[0]][0] === "Numeric") {
+            
+            let moderators = [...terms]
+            moderators.shift()
+
+            codeString = codeString + "simpleSlope <- emtrends(res, pairwise ~ " + moderators.join("*") + ", var = \"" +
+              terms[0] + "\""
+
+
+            if (numeric > 1) {
+              let searchTerm = terms[0] + ".*?\\),"
+              let regex = new RegExp(searchTerm)
+              let numericCodeForSimpleSlope = numericCode.replace(regex, "")
+              codeString = codeString + numericCodeForSimpleSlope
+              
+            }
+
+            codeString = codeString + ", level = " + 
+            this.state.AnalysisSetting[currentPanel].confLv/100 +")\nsummary(simpleSlope)\n\n"
+          }
+          
+          console.log(terms)
+          console.log(numericCode)
+          if (this.state.AnalysisSetting["InteractionPlot"] && terms.length >= 2) {
+            codeString = codeString + "emmip(res, " + terms[1] + " ~ " + terms[0] + (terms.length >= 3 ? " | " + terms[2] : "") +
+              numericCode + ",\n  CIs = TRUE, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ", position = \"jitter\")\n\n"
+            
+          }
+        })
+
+
+        
+      }
     }
    
 
@@ -743,6 +817,12 @@ export class RegPanel extends Component {
         break;
       case "confLv":
         AnalysisSettingObj[targetPanel][target] = event.target.value
+        break;
+      case "EMMResponseScale":
+      case "Pairwise":
+      case "SimpleSlope":
+      case "InteractionPlot":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
         break;
@@ -787,97 +867,133 @@ export class RegPanel extends Component {
     }
     return (
       <div className="mt-2">    
-        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
-        title = {this.state.alertTitle}
-        content = {this.state.alertText}></Alert>     
-        <ExpansionPanel square expanded={this.state.panels.variableSelection}
-        onChange = {this.handlePanelExpansion("variableSelection")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>{analysisType} - Variable Selection</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <RegVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
-            Variables = {this.state.Variables}
-            Checked = {this.state.Checked}
-            hideToRight = {this.state.hideToRight}
-            intersectionCallback = {this.intersection}
-            notCallback = {this.not}
-            handleToggleCallback = {this.handleToggle}
-            changeArrowCallback = {this.changeArrow}
-            handleToRightCallback = {this.handleToRight}
-            handleToLeftCallback = {this.handleToLeft}
-            addExtraBlkCallback = {this.props.addExtraBlkCallback}
-            />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>  
-        <ExpansionPanel square expanded={this.state.panels.modelSpec}
-        onChange = {this.handlePanelExpansion("modelSpec")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Add interaction terms</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <AddInteraction CurrentVariableList = {this.props.CurrentVariableList}
-            Variables = {this.state.Variables}
-            Checked = {this.state.Checked}
-            hideToRight = {this.state.hideToRight}
-            intersectionCallback = {this.intersection}
-            notCallback = {this.not}
-            handleToggleCallback = {this.handleToggle}
-            changeArrowCallback = {this.changeArrow}
-            handleToRightCallback = {this.handleToRight}
-            handleToLeftCallback = {this.handleToLeft}
-            addExtraBlkCallback = {this.props.addExtraBlkCallback}
-            interaction = {this.state.interaction}
-            checkedInteraction = {this.state.checkedInteraction}
-            addInteractionTermCallback = {this.addInteractionTerm}
-            handleToggleInteractionCallback = {this.handleToggleInteraction}
-            delInteractionTermCallback = {this.delInteractionTerm}
-            />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
-        <ExpansionPanel square expanded={this.state.panels.randomEffect}
-        onChange = {this.handlePanelExpansion("randomEffect")}
-        hidden = {(currentPanel !== "LRPanel" && currentPanel !== "LogitPanel" && currentPanel !== "PoiPanel")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Random Effect</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <RandomEffectPanel CurrentVariableList = {this.props.CurrentVariableList}
-            Variables = {this.state.Variables}
-            Checked = {this.state.Checked}
-            hideToRight = {this.state.hideToRight}
-            intersectionCallback = {this.intersection}
-            notCallback = {this.not}
-            handleToggleCallback = {this.handleToggle}
-            changeArrowCallback = {this.changeArrow}
-            handleToRightCallback = {this.handleToRight}
-            handleToLeftCallback = {this.handleToLeft}
-            addExtraBlkCallback = {this.props.addExtraBlkCallback}
+      {(this.props.currentActiveAnalysisPanel === "LRPanel" ||
+       this.props.currentActiveAnalysisPanel === "LogitPanel" ||
+       this.props.currentActiveAnalysisPanel === "PoiPanel" ||
+       this.props.currentActiveAnalysisPanel === "NbPanel" ||
+       this.props.currentActiveAnalysisPanel === "MultinomPanel") &&
+        <div>
+          <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+          title = {this.state.alertTitle}
+          content = {this.state.alertText}></Alert>     
+          <ExpansionPanel square expanded={this.state.panels.variableSelection}
+          onChange = {this.handlePanelExpansion("variableSelection")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>{analysisType} - Variable Selection</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <RegVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              Variables = {this.state.Variables}
+              Checked = {this.state.Checked}
+              hideToRight = {this.state.hideToRight}
+              intersectionCallback = {this.intersection}
+              notCallback = {this.not}
+              handleToggleCallback = {this.handleToggle}
+              changeArrowCallback = {this.changeArrow}
+              handleToRightCallback = {this.handleToRight}
+              handleToLeftCallback = {this.handleToLeft}
+              addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>  
+          <ExpansionPanel square expanded={this.state.panels.modelSpec}
+          onChange = {this.handlePanelExpansion("modelSpec")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Add interaction terms</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <AddInteraction CurrentVariableList = {this.props.CurrentVariableList}
+              Variables = {this.state.Variables}
+              Checked = {this.state.Checked}
+              hideToRight = {this.state.hideToRight}
+              intersectionCallback = {this.intersection}
+              notCallback = {this.not}
+              handleToggleCallback = {this.handleToggle}
+              changeArrowCallback = {this.changeArrow}
+              handleToRightCallback = {this.handleToRight}
+              handleToLeftCallback = {this.handleToLeft}
+              addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              interaction = {this.state.interaction}
+              checkedInteraction = {this.state.checkedInteraction}
+              addInteractionTermCallback = {this.addInteractionTerm}
+              handleToggleInteractionCallback = {this.handleToggleInteraction}
+              delInteractionTermCallback = {this.delInteractionTerm}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
+          <ExpansionPanel square expanded={this.state.panels.randomEffect}
+          onChange = {this.handlePanelExpansion("randomEffect")}
+          hidden = {(currentPanel !== "LRPanel" && currentPanel !== "LogitPanel" && currentPanel !== "PoiPanel")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Random Effect</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <RandomEffectPanel CurrentVariableList = {this.props.CurrentVariableList}
+              Variables = {this.state.Variables}
+              Checked = {this.state.Checked}
+              hideToRight = {this.state.hideToRight}
+              intersectionCallback = {this.intersection}
+              notCallback = {this.not}
+              handleToggleCallback = {this.handleToggle}
+              changeArrowCallback = {this.changeArrow}
+              handleToRightCallback = {this.handleToRight}
+              handleToLeftCallback = {this.handleToLeft}
+              addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              RandomSlopes = {this.state.RandomSlopes}
+              CheckedRandomSlopes = {this.state.CheckedRandomSlopes}
+              handleToggleSecondaryCallback = {this.handleToggleSecondary}
+              addRandomSlopesCallback = {this.addRandomSlopes}
+              handleToggleRECallback = {this.handleToggleRE}
+              delRandomSlopesCallback = {this.delRandomSlopes}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
 
-            RandomSlopes = {this.state.RandomSlopes}
-            CheckedRandomSlopes = {this.state.CheckedRandomSlopes}
-            handleToggleSecondaryCallback = {this.handleToggleSecondary}
-            addRandomSlopesCallback = {this.addRandomSlopes}
-            handleToggleRECallback = {this.handleToggleRE}
-            delRandomSlopesCallback = {this.delRandomSlopes}
+          <ExpansionPanel square expanded={this.state.panels.EMM}
+          onChange = {this.handlePanelExpansion("EMM")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Estimated Marginal Means</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <EMMPanel CurrentVariableList = {this.props.CurrentVariableList}
+              Variables = {this.state.Variables}
+              Checked = {this.state.Checked}
+              AnalysisSetting = {this.state.AnalysisSetting}
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+              intersectionCallback = {this.intersection}
+              notCallback = {this.not}
+              handleToggleCallback = {this.handleToggle}
+              changeArrowCallback = {this.changeArrow}
+              handleToRightCallback = {this.handleToRight}
+              handleToLeftCallback = {this.handleToLeft}
+              addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              EMM = {this.state.EMM}
+              checkedEMM = {this.state.CheckedEMM}
+              addEMMTermCallback = {this.addEMMTerm}
+              delEMMTermCallback = {this.delEMMTerm}
+              handleToggleEMMCallback = {this.handleToggleEMM}
+              availableVarsEMM = {this.state.Variables["Covariates"].concat(this.state.interaction)}
+              CovariatesEMMSelection = {this.state.Checked["CovariatesEMMSelection"]}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
 
-            />
-          </ExpansionPanelDetails>
-        </ExpansionPanel>    
-        <ExpansionPanel square expanded={this.state.panels.analysisSetting}
-        onChange = {this.handlePanelExpansion("analysisSetting")}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Analysis Setting</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-            <RegAnalysisSetting 
-            Variables = {this.state.Variables}
-            currentActiveAnalysisPanel = {this.props.currentActiveAnalysisPanel}
-            AnalysisSetting = {this.state.AnalysisSetting}
-            updateAnalysisSettingCallback = {this.updateAnalysisSetting}
-            imputedDataset = {this.props.imputedDataset}/>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>    
+          <ExpansionPanel square expanded={this.state.panels.analysisSetting}
+          onChange = {this.handlePanelExpansion("analysisSetting")}>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography>Analysis Setting</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
+              <RegAnalysisSetting 
+              Variables = {this.state.Variables}
+              currentActiveAnalysisPanel = {this.props.currentActiveAnalysisPanel}
+              AnalysisSetting = {this.state.AnalysisSetting}
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+              imputedDataset = {this.props.imputedDataset}/>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
+        </div>
+      }    
       </div>
     )
   }
