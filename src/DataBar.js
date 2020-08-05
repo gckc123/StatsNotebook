@@ -41,7 +41,7 @@ export class DataBar extends Component {
                 <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("FilterPanel")}>
                     <FontAwesomeIcon icon={faFilter} /><div className='ml-1'>Filter</div>
                 </StyledButton>
-                <StyledButton disableRipple disabled>
+                <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("RecodePanel")}>
                     <FontAwesomeIcon icon={faExchangeAlt} /><div className='ml-1'>Recode</div>
                 </StyledButton>
 

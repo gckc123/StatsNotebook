@@ -90,8 +90,10 @@ export class DescriptiveAnalysisSetting extends Component {
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"QQPlot")}/>QQ Plot for numeric variables
                         <StyledTooltip title="Data can be assumed normal if the points roughtly follow a 45 degree straight line.">
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
-                        <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.CorrelationMatrix} size="small"
+                <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.CorrelationMatrix} size="small"
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"CorrelationMatrix")}/>Correlation Matrix for numeric variables</div>
+                <div className="AnalysisSettingCheckBox pl-3" hidden = {!this.props.AnalysisSetting.CorrelationMatrix}><Checkbox checked = {this.props.AnalysisSetting.Spearman} size="small"
+                        onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"Spearman")}/>Spearman's Rho</div>
                 
                 <Divider className="mt-2 mb-2"/>
                 <div><b>Plots</b></div>

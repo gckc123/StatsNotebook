@@ -88,6 +88,7 @@ export class CrosstabPanel extends Component {
           RowPercent: true,
           ColPercent: false,
           OverallPercent: false,
+          IncludeNA: false,
           ChisqTest: false,
           FisherTest: false,          
         },
@@ -237,34 +238,42 @@ export class CrosstabPanel extends Component {
     let codeString = "library(tidyverse)\n\n"
 
     this.state.Variables["RowVars"].forEach((rowItem) => {
-      this.state.Variables["ColVars"].forEach((colItem) => {
+      if (this.state.Variables["ColVars"].length > 0){ 
+        this.state.Variables["ColVars"].forEach((colItem) => {
+          codeString = codeString + "tab <- currentDataset %>%\n  select(" +
+          rowItem + ", " + colItem + (this.state.Variables["SplitBy"].length > 0 ? ", " + 
+            this.state.Variables["SplitBy"].join(", ") : "") + ") %>%\n  " +
+            "table("+ (this.state.AnalysisSetting["IncludeNA"] ? "useNA=\"always\"" : "") + ")" + "\n\ntab\n\n"
+
+          if (this.state.Variables["SplitBy"].length === 0) {
+            if (this.state.AnalysisSetting["RowPercent"]) {
+              codeString = codeString + "tab %>%\n  prop.table(1)\n\n"
+            }
+
+            if (this.state.AnalysisSetting["ColPercent"]) {
+              codeString = codeString + "tab %>%\n  prop.table(2)\n\n"
+            }
+
+            if (this.state.AnalysisSetting["OverallPercent"]) {
+              codeString = codeString + "tab %>%\n  prop.table()\n\n"
+            }
+
+            if (this.state.AnalysisSetting["ChisqTest"]) {
+              codeString = codeString + "tab %>%\n chisq.test()"
+            }
+            
+            if (this.state.AnalysisSetting["FisherTest"]) {
+              codeString = codeString + "tab %>%\n fisher.test()"
+            }
+          }
+        })
+      }else{
         codeString = codeString + "tab <- currentDataset %>%\n  select(" +
-        rowItem + ", " + colItem + (this.state.Variables["SplitBy"].length > 0 ? ", " + 
-          this.state.Variables["SplitBy"].join(", ") : "") + ") %>%\n  " +
-          "table()\n\ntab\n\n"
-
-        if (this.state.Variables["SplitBy"].length === 0) {
-          if (this.state.AnalysisSetting["RowPercent"]) {
-            codeString = codeString + "tab %>%\n  prop.table(1)\n\n"
-          }
-
-          if (this.state.AnalysisSetting["ColPercent"]) {
-            codeString = codeString + "tab %>%\n  prop.table(2)\n\n"
-          }
-
-          if (this.state.AnalysisSetting["OverallPercent"]) {
-            codeString = codeString + "tab %>%\n  prop.table()\n\n"
-          }
-
-          if (this.state.AnalysisSetting["ChisqTest"]) {
-            codeString = codeString + "tab %>%\n chisq.test()"
-          }
-          
-          if (this.state.AnalysisSetting["FisherTest"]) {
-            codeString = codeString + "tab %>%\n fisher.test()"
-          }
+        rowItem + ") %>%\n  table("+ (this.state.AnalysisSetting["IncludeNA"] ? "useNA=\"always\"" : "") +")\n\ntab\n\n"
+        if (this.state.AnalysisSetting["RowPercent"]) {
+          codeString = codeString + "tab %>%\n  prop.table()\n\n"
         }
-      })
+      }
     })
 
     this.props.updateTentativeScriptCallback(codeString) 
@@ -283,6 +292,7 @@ export class CrosstabPanel extends Component {
       case "RowPercent":
       case "ColPercent":
       case "OverallPercent":
+      case "IncludeNA":
       case "ChisqTest":
       case "FisherTest":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]

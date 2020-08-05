@@ -95,6 +95,7 @@ export class DescriptivePanel extends Component {
           Normality: false,
           QQPlot: true,
           CorrelationMatrix: false,
+          Spearman: false,
           Histogram: true,
           Density: false,
           Boxplot: false,
@@ -165,13 +166,13 @@ export class DescriptivePanel extends Component {
       if (target === "SplitBy") {
 
         toRightVars = CheckedObj["Available"].filter((item) =>
-          this.props.CurrentVariableList[item][0] === "Factor"
+          this.props.CurrentVariableList[item][0] !== "Character"
 
         )
 
         if (toRightVars.length !== CheckedObj["Available"].length) {
           this.setState({showAlert: true, 
-            alertText: "Only factor variable(s) can be entered into \"Split By\". Non-factor variables will be dropped.",
+            alertText: "Character variables will not be added. These variables need to be firstly converted into factor variables.",
             alertTitle: "Alert"
           })
         }
@@ -351,7 +352,7 @@ export class DescriptivePanel extends Component {
         })
       }
 
-      codeString = codeString + "\n  ) %>% \n  print(width = 1000)\n" 
+      codeString = codeString + "\n  ) %>% \n  print(width = 1000, n = 500)\n" 
       
       if (this.state.AnalysisSetting["QQPlot"]) {
         this.state.TargetsNum.forEach((item) => {
@@ -366,10 +367,12 @@ export class DescriptivePanel extends Component {
 
       if (this.state.TargetsNum.length > 1 && this.state.AnalysisSetting["CorrelationMatrix"]) {
         if (this.state.Variables["SplitBy"].length === 0) {
-          codeString = codeString + "\ncurrentDataset %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  as.matrix() %>% Hmisc::rcorr()"
+          codeString = codeString + "\ncurrentDataset %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  as.matrix() %>% Hmisc::rcorr("+ 
+          (this.state.AnalysisSetting.Spearman ? ", type = \"spearman\"": "")+ ")"
         }else {
           codeString = codeString + "\ncurrentDataset %>% split(list(.$" + this.state.Variables["SplitBy"].join(", .$") + ")) %>% \n  map(select, c(" +
-            this.state.TargetsNum.join(", ") +")) %>%\n  map(as.matrix) %>% map(Hmisc::rcorr)" 
+            this.state.TargetsNum.join(", ") +")) %>%\n  map(as.matrix) %>% map(Hmisc::rcorr"+ 
+            (this.state.AnalysisSetting.Spearman ? ", type =\"spearman\"": "") +")" 
         }
         codeString = codeString + "\n"
       }
@@ -425,6 +428,8 @@ export class DescriptivePanel extends Component {
 
       })      
 
+      
+
       if (this.state.AnalysisSetting["BarChart"]) {
         this.state.TargetsCat.forEach((item) => {
           codeString =  codeString + "\nggplot(currentDataset) +\n  geom_bar(stat = \"count\", aes(x=" + 
@@ -472,6 +477,7 @@ export class DescriptivePanel extends Component {
       case "Normality":
       case "QQPlot":
       case "CorrelationMatrix":
+      case "Spearman":
       case "Histogram":
       case "Density":
       case "Boxplot":

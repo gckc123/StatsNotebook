@@ -131,6 +131,8 @@ export class MAPanel extends Component {
               return false
           })
 
+          CheckedObj["CovariatesIntSelection"] = this.intersection(CheckedObj["CovariatesIntSelection"], VariablesObj["Covariates"])
+          
           let checkedInteractionObj = this.intersection(this.state.checkedInteraction, interactionObj)
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)

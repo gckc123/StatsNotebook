@@ -2,13 +2,14 @@ import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import {VariableSelectionList} from './VariableSelectionList';
 import Button from '@material-ui/core/Button';
-import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
+import {faArrowRight, faGrinTongueSquint} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
 import Checkbox from '@material-ui/core/Checkbox';
 import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
+import {faExclamationTriangle} from '@fortawesome/free-solid-svg-icons';
 
 
 const StyledTooltip = withStyles({
@@ -72,10 +73,10 @@ export class EMMPanel extends Component {
         return (
             
             <div className="analysis-pane">
-                <div className="EMM-Variable-Selection-Box">
+                <div className="EMM-Variable-Selection-Box" hidden={(this.props.AnalysisSetting[this.props.currentActiveAnalysisPanel].robustReg)}>
                     <div>Marginal Means
-                    <StyledTooltip title={<div>Categorical variables: Marginal means of the outcome for each level of the target categorical variable will be computed. <br/> 
-                    Numeric variables: Marginal means of the outcome will be calculated at the mean and +/- 1 SD of the target numeric variable.</div>}>
+                    <StyledTooltip title={<div>Categorical variables: Marginal means of the outcome for each level of the target categorical variable will be computed. <br/><br/> 
+                    Numeric variables: Marginal means of the outcome will be calculated at the mean and +/- 1 SD of the target numeric variable.<br/><br/>Estimated Marginal Means are not available for robust regression.</div>}>
                             <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                     </div>
                     <div></div>
@@ -89,7 +90,7 @@ export class EMMPanel extends Component {
                             needTypeIcon = {false}/>
                     </div>
                     <div>
-                        <div className="NMACheckbox"><Checkbox size="small"
+                        <div className="NMACheckbox" hidden = {this.props.currentActiveAnalysisPanel === "ANOVAPanel"}><Checkbox size="small"
                             checked = {this.props.AnalysisSetting["EMMResponseScale"]}
                             onClick={(event) => this.props.updateAnalysisSettingCallback(event, "EMMPanel","EMMResponseScale")}/>Marginal means in response scale
                             <StyledTooltip title="For logistic and multinomial logistic regression model, show marginal means in terms of probability.
@@ -101,7 +102,7 @@ export class EMMPanel extends Component {
                             onClick={(event) => this.props.updateAnalysisSettingCallback(event, "EMMPanel","Pairwise")}
                             />Pairwise comparison
                         </div>
-                        <div className="NMACheckbox"><Checkbox size="small"
+                        <div className="NMACheckbox" hidden = {this.props.currentActiveAnalysisPanel === "ANOVAPanel"}><Checkbox size="small"
                             checked = {this.props.AnalysisSetting["SimpleSlope"]}
                             onClick={(event) => this.props.updateAnalysisSettingCallback(event, "EMMPanel","SimpleSlope")}
                             />Test for simple slope
@@ -112,10 +113,13 @@ export class EMMPanel extends Component {
                             checked = {this.props.AnalysisSetting["InteractionPlot"]}
                             onClick={(event) => this.props.updateAnalysisSettingCallback(event, "EMMPanel","InteractionPlot")}
                             />Interaction plot
-                            <StyledTooltip title="Interaction plot for two or three-way interaction.">
+                            <StyledTooltip title="Interaction plot for two or three-way interaction. The first variable in the interaction term will go to the horizontal axis, the second variable will be shown using different color of lines and the third will be shown in different panels.">
                             <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                         </div>
                     </div>
+                </div>
+                <div className="p-2" hidden={(!this.props.AnalysisSetting[this.props.currentActiveAnalysisPanel].robustReg)}>
+                    <FontAwesomeIcon icon={faExclamationTriangle} size="1x"/><span className="pl-2">Estimated Marginal Means are not available for Robust Regression.</span>
                 </div>
             </div>
         )

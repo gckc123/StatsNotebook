@@ -221,7 +221,7 @@ class ExploreMenu extends Component {
                 onClick={() => this.setAnalysisPanel("DescriptivePanel")}>Descriptive statistics</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick={() => this.setAnalysisPanel("CrosstabPanel")}>
-                    Crosstab
+                    Frequencies
                 </MenuItem>                                 
             </Menu>
         )
@@ -251,10 +251,11 @@ class MeanMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Independent sample T-test</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}>Repeated measure T-test</MenuItem>                                       
-                <MenuItem disableRipple style = {MenuItemStyle}>ANOVA</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}>ANCOVA</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}>Repeated measure T-test</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick={() => this.setAnalysisPanel("IndependentTTestPanel")}>Independent sample T-test</MenuItem>                                       
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick={() => this.setAnalysisPanel("ANOVAPanel")}>ANOVA/ ANCOVA</MenuItem>
             </Menu>
         )
     }
@@ -301,12 +302,12 @@ export class AnalysisBar extends Component {
                 <ExploreMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "explore" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
-                <StyledButton disableRipple disabled onClick={(event) => this.handleMenu(event, "mean")}>
+                <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "mean")}>
                 <img src={BoxplotIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Means</div>
                 </StyledButton>
                 <MeanMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
-                target = "mean"/>
+                target = "mean" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
                 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "causal")}>
                 <img src={MediationIcon} alt="" height="38px"/>
@@ -344,7 +345,7 @@ export class AnalysisBar extends Component {
                 <ImputationMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "imputation" selectAnalysisPanelCallback={this.props.selectAnalysisPanelCallback}/>
 
-                <StyledButton disableRipple disabled onClick={(event) => this.handleMenu(event, "machinelearning")}>
+                <StyledButton disableRipple disabled onClick={(event) => this.handleMenu(event, "machinelearning")} hidden={true}>
                 <img src={RobotIcon} alt="" height="38px" />
                 <div style={{fontSize: "12px"}}>Learning</div>
                 </StyledButton>

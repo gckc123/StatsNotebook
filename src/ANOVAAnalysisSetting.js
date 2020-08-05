@@ -13,12 +13,10 @@ const StyledTooltip = withStyles({
     }
   })(Tooltip);
 
-export class RegAnalysisSetting extends Component {
+export class ANOVAAnalysisSetting extends Component {
     
     render () {
         let currentPanel = this.props.currentActiveAnalysisPanel
-        if (currentPanel === "LRPanel" || currentPanel === "LogitPanel" ||
-        currentPanel === "PoiPanel" || currentPanel === "NbPanel" || currentPanel === "MultinomPanel") {
             return (
                 <div>
                     <div className = "NMA-Analysis-Box">
@@ -29,37 +27,18 @@ export class RegAnalysisSetting extends Component {
                         onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event, currentPanel, "confLv")}></input>%</div>
                     </div>
 
-                    {(currentPanel === "LogitPanel" || currentPanel === "PoiPanel" || currentPanel === "NbPanel" || currentPanel === "MultinomPanel") &&
-                        <div className="NMACheckbox"><Checkbox size="small"
-                        checked= {this.props.AnalysisSetting[currentPanel].expCoeff}
-                        onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"expCoeff")}/>Exponentiate model coefficients
-                            <StyledTooltip title="Exponentiate the model coefficients to obtain odds ratio/risk ratio/relative risk ratio.">
-                            <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
-                        </div>
-                    }
-
-                    {(currentPanel === "LRPanel") &&
-                        <div className="NMACheckbox"><Checkbox size="small"
-                        disabled = {(this.props.AnalysisSetting[currentPanel].imputedDataset || this.props.AnalysisSetting[currentPanel].imputeMissing) && this.props.Variables.RandomEffect.length > 0}
-                        checked= {this.props.AnalysisSetting[currentPanel].robustReg}
-                        onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"robustReg")}/>Robust Regression
-                            <StyledTooltip title={<div>Robust regression is not available for for imputed Dataset when random effect is present. <br/><br/> Weight will be ignored when random effect is present. <br/><br/> It should be noted that robust regression might not always produce a convergent solution.</div>}>
-                            <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
-                        </div>
-                    }
-
                     <div className="NMACheckbox"><Checkbox  size="small" 
                     disabled = {this.props.AnalysisSetting[currentPanel].imputeMissing}
                     checked = {this.props.AnalysisSetting[currentPanel].imputedDataset}
                     onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"imputedDataset")}/>This is an Imputed Dataset.
-                        <StyledTooltip title="Click this if the data is already an imputed dataset.">
+                        <StyledTooltip title={<div>Click this if the data is already an imputed dataset.<br/><br/>The "lm" (Linear model) function will be used to examine group differences.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                     </div>
                     <div className="NMACheckbox"><Checkbox size="small" 
                     disabled = {this.props.AnalysisSetting[currentPanel].imputedDataset}
                     checked = {this.props.AnalysisSetting[currentPanel].imputeMissing}
                     onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"imputeMissing")}/>Impute missing data
-                        <StyledTooltip title="Multiple imputation will be used to impute missing data. Random effects will not be used for imputation. If existing data is an imputed dataset, missing data will be reimputed using the analysis variables.">
+                        <StyledTooltip title={<div>Multiple imputation will be used to impute missing data. If existing data is an imputed dataset, missing data will be reimputed using the analysis variables. <br/><br/>The "lm" (Linear model) function will be used to examine group differences.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                     </div>
                     <div className ="NMA-Analysis-Box pl-3" hidden = {!this.props.AnalysisSetting[currentPanel].imputeMissing}>
@@ -80,21 +59,21 @@ export class RegAnalysisSetting extends Component {
                         </div>
                     </div>
                     
-                    {(currentPanel !== "NbPanel" && currentPanel !== "MultinomPanel") &&
                     <div className="NMACheckbox"><Checkbox  size="small" 
-                    disabled = {this.props.AnalysisSetting[currentPanel].robustReg ||
-                        ((currentPanel === "LogitPanel" || currentPanel === "PoiPanel") && (this.props.Variables.RandomEffect.length > 0))}
                     checked = {this.props.AnalysisSetting[currentPanel].diagnosticPlot}
                     onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"diagnosticPlot")}/>Diagnostic plots and tests
-                        <StyledTooltip title="If missing data is imputed using multiple imputation, diagnostic plots are based on the first imputed dataset. Diagnostic plots are not available for robust regression.">
+                        <StyledTooltip title={<div>QQ plot will be shown and test of homogenity of variance will be performed (Levene's test). <br/><br/>If missing data is imputed using multiple imputation, diagnostic plots and tests will be based on the first imputed dataset.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                     </div>
-                    }
+                    
+                    <div className="NMACheckbox"><Checkbox  size="small" 
+                    checked = {this.props.AnalysisSetting[currentPanel].nonParametric}
+                    onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"nonParametric")}/>Non-parametric test for all factor variables
+                        <StyledTooltip title={<div>Kruskal-Wallis test will be performed on all factor variables.<br/><br/>Pairwise comparisons will be conducted using Wilcox's test. Multiple comparisons will be adjusted for using the method proposed by Benjamini and Hochberg (1995).<br/><br/>If missing data is imputed using multiple imputation, diagnostic plots and tests will be based on the first imputed dataset.</div>}>
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
+
                 </div>
             )
-        }
-        return (
-            null
-        )
     }
 }

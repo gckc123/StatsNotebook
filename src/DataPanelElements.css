@@ -61,7 +61,7 @@
 
 .Filter-pane-box {
     display: grid;
-    grid-template-columns: 190px 300px 90px;
+    grid-template-columns: 190px 300px 130px;
     margin: 0px;
     padding: 0px;
 }
@@ -85,7 +85,85 @@
 .Operation-Grid {
     display: grid;
     grid-template-columns: 65px 65px;
-    grid-template-rows: 30px 30px 30px 30px;
+    grid-template-rows: 30px 30px 30px 40px 40px;
     margin: 0px;
     padding: 0px;
+}
+
+.Wide-Button-Container {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    
+}
+
+.Recode-Pane-Middle-Column {
+    display: grid;
+    grid-template-columns: 300px;
+    grid-template-rows:30px 30px auto;
+    margin: 0px;
+    padding: 0px;
+}
+
+.RecodeConditionTextarea {
+    width: 290px;
+    height: 190px;
+    font-size: 14px;
+    resize: none;
+    border: 1px solid #e8e8e8
+}
+
+.RecodeConditionTextarea:hover {
+    border: 1px solid #a7a7a7;
+}
+
+.RecodeConditionTextarea:focus {
+    border: 1px solid #a7a7a7;
+}
+
+.RecodeNewValueInput {
+    width: 290px;
+    font-size: 14px;
+    border: 1px solid #e8e8e8;
+}
+
+.RecodeNewValueInput:hover {
+    border: 1px solid #a7a7a7;
+}
+
+.RecodeNewValueInput:focus {
+    border: 1px solid #a7a7a7;
+}
+
+.RecodeTargetVarInput {
+    width: 370px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #e8e8e8;
+    font-size: 14px;
+}
+
+.RecodeTargetVarInput:hover {
+    border-bottom: 2px solid #a7a7a7;
+}
+
+.RecodeTargetVarInput:focus {
+    border-bottom: 2px solid #a7a7a7;
+    outline: none;
+}
+
+.RecodeRuleTextarea {
+    width: 620px;
+    height: 190px;
+    font-size: 14px;
+    resize: none;
+    border: 1px solid #e8e8e8
+}
+
+.RecodeRuleTextarea:hover {
+    border: 1px solid #a7a7a7;
+}
+
+.RecodeRuleTextarea:focus {
+    border: 1px solid #a7a7a7;
 }
