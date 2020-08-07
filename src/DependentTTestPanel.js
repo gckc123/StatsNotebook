@@ -5,10 +5,10 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { IndependentTTestVariableSelection } from './IndependentTTestVariableSelection';
+import { DependentTTestVariableSelection } from './DependentTTestVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { IndependentTTestAnalysisSetting } from "./IndependentTTestAnalysisSetting";
+import { DependentTTestAnalysisSetting } from "./DependentTTestAnalysisSetting";
 import { Alert } from './Alert.js'
 
 const ExpansionPanel = withStyles({
@@ -53,25 +53,24 @@ const ExpansionPanelDetails = withStyles((theme) => ({
   },
 }))(MuiExpansionPanelDetails);
 
-
-export class IndependentTTestPanel extends Component {
+export class DependentTTestPanel extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
         Variables: {
             Available: [],
-            Outcome: [],
-            Covariates: [],
+            Variable1: [],
+            Variable2: [],
         }, 
         Checked: {
             Available: [],
-            Outcome: [],
-            Covariates: [],
+            Variable1: [],
+            Variable2: [],
         },
 
         hideToRight: {
-            Covariates: false,
+            Variable2: false,
         },
         tentativeScript: "",
         panels: {
@@ -81,7 +80,7 @@ export class IndependentTTestPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
-          IndependentTTestPanel: {
+          DependentTTestPanel: {
             varianceNotEqual: false,
             robust: false,
             nonParametric: false,
@@ -97,7 +96,7 @@ export class IndependentTTestPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "IndependentTTestPanel") {
+    if (this.props.currentActiveAnalysisPanel === "DependentTTestPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -234,31 +233,28 @@ export class IndependentTTestPanel extends Component {
     let currentPanel = this.props.currentActiveAnalysisPanel
 
     
-    this.state.Variables.Outcome.forEach((item) =>{
-      codeString = codeString + "t.test(" + item + " ~ " + this.state.Variables.Covariates[0] + ", data = currentDataset, var.equal = "+
-      (this.state.AnalysisSetting["IndependentTTestPanel"].varianceNotEqual ? "FALSE" : "TRUE")+", conf.level = "+ 
-      this.state.AnalysisSetting["IndependentTTestPanel"].confLv/100 +")\n\n"
+    this.state.Variables.Variable1.forEach((item, index) =>{
+      codeString = codeString + "t.test(currentDataset$" + item + ", currentDataset$" + this.state.Variables.Variable2[index] + ", paired = TRUE, "+
+      ", conf.level = "+ this.state.AnalysisSetting["DependentTTestPanel"].confLv/100 +")\n\n"    
       
-      codeString = codeString + "library(effsize)\ncohen.d(" + item + " ~ " + this.state.Variables.Covariates[0] + ", " + 
-      (this.state.AnalysisSetting["IndependentTTestPanel"].varianceNotEqual ? "pooled = FALSE," : "") + "data = currentDataset, conf.level =" +
-      this.state.AnalysisSetting["IndependentTTestPanel"].confLv/100 + ")\n\n"
-      
+      codeString = codeString + "cohen.d(currentDataset$"+ item +", currentDataset$"+ 
+      this.state.Variables.Variable2[index] +", paired = TRUE, na.rm = TRUE, conf.level = "+
+      this.state.AnalysisSetting["DependentTTestPanel"].confLv/100 + ")\n\n"
 
-      if (this.state.AnalysisSetting["IndependentTTestPanel"].robust) {
-        codeString = codeString + "library(WRS2)\nyuen(" + item + " ~ " + this.state.Variables.Covariates[0] + ", data = currentDataset)\n"
-        codeString = codeString + "yuen.effect.ci(" + item + " ~ " + this.state.Variables.Covariates[0] + ", nboot = 2000, data = currentDataset, alpha = " +
-        (1-this.state.AnalysisSetting["IndependentTTestPanel"].confLv/100/2)+ ")\n"
+      if (this.state.AnalysisSetting["DependentTTestPanel"].robust) {
+        codeString = codeString + "library(WRS2)\nyuend(currentDataset$" + item + ", currentDataset$" + this.state.Variables.Variable2[index] + ")\n\n"
       }
 
-      if (this.state.AnalysisSetting["IndependentTTestPanel"].nonParametric) {
-        codeString = codeString + "wilcox.test(" + item + " ~ " + this.state.Variables.Covariates[0] + ", data = currentDataset, conf.level = "+
-        this.state.AnalysisSetting["IndependentTTestPanel"].confLv/100 +", conf.inf = TRUE)\n\n"
+      if (this.state.AnalysisSetting["DependentTTestPanel"].nonParametric) {
+        codeString = codeString + "wilcox.test(currentDataset$" + item + ", currentDataset$" + this.state.Variables.Variable2[index] + ", conf.level = "+
+        this.state.AnalysisSetting["DependentTTestPanel"].confLv/100 +", conf.inf = TRUE)\n\n"
       }
 
-      if (this.state.AnalysisSetting["IndependentTTestPanel"].diagnosticPlot) {
-        codeString = codeString + "library(car)\nleveneTest(" + item + " ~ " + this.state.Variables.Covariates[0] + ", data = currentDataset)\n"
+      if (this.state.AnalysisSetting["DependentTTestPanel"].diagnosticPlot) {        
         codeString = codeString + "ggplot(currentDataset, aes(sample = " + item + ")) +\n" +
-        "  geom_qq(aes(color = "+ this.state.Variables.Covariates[0] +")) +\n  geom_qq_line(aes(color = " + this.state.Variables.Covariates[0] + "))\n\n"
+        "  geom_qq() +\n  geom_qq_line()\n"
+        codeString = codeString + "ggplot(currentDataset, aes(sample = " + this.state.Variables.Variable2[index] + ")) +\n" +
+        "  geom_qq() +\n  geom_qq_line()\n\n"
       }
       console.log(codeString)
     })
@@ -306,12 +302,12 @@ export class IndependentTTestPanel extends Component {
   }
 
   render () {
-    let analysisType = "Independent sample T-test"
+    let analysisType = "Dependent sample T-Test"
     let currentPanel = this.props.currentActiveAnalysisPanel
   
     return (
       <div className="mt-2">    
-      {(this.props.currentActiveAnalysisPanel === "IndependentTTestPanel") &&
+      {(this.props.currentActiveAnalysisPanel === "DependentTTestPanel") &&
         <div>
           <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
           title = {this.state.alertTitle}
@@ -322,7 +318,7 @@ export class IndependentTTestPanel extends Component {
               <Typography>{analysisType} - Variable Selection</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <IndependentTTestVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              <DependentTTestVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
               Variables = {this.state.Variables}
               Checked = {this.state.Checked}
               hideToRight = {this.state.hideToRight}
@@ -345,7 +341,7 @@ export class IndependentTTestPanel extends Component {
               <Typography>Analysis Setting</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <IndependentTTestAnalysisSetting 
+              <DependentTTestAnalysisSetting 
               Variables = {this.state.Variables}
               currentActiveAnalysisPanel = {this.props.currentActiveAnalysisPanel}
               AnalysisSetting = {this.state.AnalysisSetting}

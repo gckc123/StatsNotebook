@@ -13,7 +13,7 @@ const StyledTooltip = withStyles({
     }
   })(Tooltip);
 
-export class IndependentTTestAnalysisSetting extends Component {
+export class DependentTTestAnalysisSetting extends Component {
     
     render () {
         let currentPanel = this.props.currentActiveAnalysisPanel
@@ -27,19 +27,10 @@ export class IndependentTTestAnalysisSetting extends Component {
                         onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event, currentPanel, "confLv")}></input>%</div>
                     </div>
 
-                    
-
-                    <div className="NMACheckbox"><Checkbox size="small" 
-                    checked = {this.props.AnalysisSetting[currentPanel].varianceNotEqual}
-                    onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"varianceNotEqual")}/>Do not assume equality of variance (homogeneity).
-                        <StyledTooltip title={<div>Welch's T-test will be conducted.</div>}>
-                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
-                    </div>
-
                     <div className="NMACheckbox"><Checkbox size="small" 
                     checked = {this.props.AnalysisSetting[currentPanel].robust}
                     onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"robust")}/>Robust Independent T-test
-                        <StyledTooltip title={<div>Yuen's test will be conducted on trimmed mean. This test does not assume equality of variance. <br/><br/> Use this test if there are extreme observations and/or the variances acros groups are not the same.</div>}>
+                        <StyledTooltip title={<div>Yuen's test will be conducted on trimmed mean. <br/><br/> Use this test if there are extreme observations.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                     </div>
 

@@ -251,7 +251,8 @@ class MeanMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Repeated measure T-test</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick={() => this.setAnalysisPanel("DependentTTestPanel")}>Dependent sample T-test</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick={() => this.setAnalysisPanel("IndependentTTestPanel")}>Independent sample T-test</MenuItem>                                       
                 <MenuItem disableRipple style = {MenuItemStyle}

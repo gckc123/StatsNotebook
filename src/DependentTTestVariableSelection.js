@@ -31,7 +31,7 @@ const StyledButton = withStyles({
      }   
 })(Button);
 
-export class IndependentTTestVariableSelection extends Component {
+export class DependentTTestVariableSelection extends Component {
     
     genVariableSelectionList = (targetList) => {
         return (
@@ -64,31 +64,31 @@ export class IndependentTTestVariableSelection extends Component {
         
         return (
             <div className="analysis-pane">
-                <div className="IndependentTTest-Variable-Selection-Box">
+                <div className="DependentTTest-Variable-Selection-Box">
                     <div> Variables</div>
                     <div></div>
-                    <div>Outcomes
+                    <div>Variable 1
                     </div>
 
-                    <div className="IndependentTTest-Available-Variable-List-Container" 
+                    <div className="DependentTTest-Available-Variable-List-Container" 
                     onClick={() => this.props.changeArrowCallback("Available")}>
                         {this.genVariableSelectionList("Available")}
                     </div>
                     <div><center>
-                        {this.genArrowButton("Outcome", 10000)}
+                        {this.genArrowButton("Variable1", 10000)}
                     </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Outcome")}>
-                        {this.genVariableSelectionList("Outcome")}
+                    <div onClick={() => this.props.changeArrowCallback("Variable1")}>
+                        {this.genVariableSelectionList("Variable1")}
                     </div>
 
                     <div></div>
-                    <div>Grouping Variable 
+                    <div>Variable 2
                     </div>
                     <div><center>
-                        {this.genArrowButton("Covariates", 1)}
+                        {this.genArrowButton("Variable2", 1)}
                     </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Covariates")}>
-                        {this.genVariableSelectionList("Covariates")}
+                    <div onClick={() => this.props.changeArrowCallback("Variable2")}>
+                        {this.genVariableSelectionList("Variable2")}
                     </div>
 
                 </div>

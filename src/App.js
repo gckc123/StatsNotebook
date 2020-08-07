@@ -20,6 +20,7 @@ import { FilterPanel } from './FilterPanel';
 import { RecodePanel } from './RecodePanel';
 import { ANOVAPanel } from './ANOVAPanel';
 import { IndependentTTestPanel } from './IndependentTTestPanel';
+import { DependentTTestPanel } from './DependentTTestPanel';
 
 
 const electron = window.require('electron');
@@ -514,6 +515,17 @@ export class App extends Component {
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "IndependentTTestPanel"}>
                     <IndependentTTestPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
+                    imputedDataset = {this.state.imputedDataset}
+                    CPU = {this.state.CPU}/>
+                  </div>
+
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "DependentTTestPanel"}>
+                    <DependentTTestPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
