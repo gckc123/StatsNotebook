@@ -756,7 +756,7 @@ export class RegPanel extends Component {
           }
 
           codeString = codeString + "emm <- emmeans(res, " + (this.state.AnalysisSetting["Pairwise"] ? "pairwise" : "") + 
-            " ~ " + item + (numeric > 0 ? numericCode : "") + (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = " : "") +", level = " +
+            " ~ " + item + (numeric > 0 ? numericCode : "") + (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = \"response\"" : "") +", level = " +
             this.state.AnalysisSetting[currentPanel].confLv/100 + ")\nsummary(emm)\n\n"
           
           if (this.state.AnalysisSetting["Pairwise"] && currentPanel === "LRPanel") {

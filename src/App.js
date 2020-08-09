@@ -45,6 +45,7 @@ export class App extends Component {
       NotebookBlkList: [],
       currentActiveAnalysisPanel: "",
       currentActiveDataPanel: "",
+      currentActiveDataVizPanel: "",
       currentActiveLeftPanel: "",
       dataPanelWidth: 100,
       dataPanelHeight: 100,
@@ -194,8 +195,18 @@ export class App extends Component {
 
   selectLeftPanel = (panel) => {
     this.setState({currentActiveLeftPanel: panel})
-    if (panel === "DataPanel") {
-      this.setState({currentActiveDataPanel: panel})
+    switch (panel) {
+      case "DataPanel":
+        this.setState({currentActiveDataPanel: panel, currentActiveAnalysisPanel: "", currentActiveDataVizPanel: ""})
+        break;
+      case "AnalaysisPanel":
+        this.setState({currentActiveDataPanel: "", currentActiveDataVizPanel: ""})
+        break;
+      case "DataVizPanel":
+        this.setState({currentActiveDataPanel: "", currentActiveAnalysisPanel: ""})
+        break;
+      default:
+        break;
     }
   }
 
@@ -205,6 +216,10 @@ export class App extends Component {
 
   selectAnalysisPanel = (panel) => {
     this.setState({currentActiveAnalysisPanel: panel})
+  }
+
+  selectDataVizPanel = (panel) => {
+    this.setState({currentActiveDataVizPanel: panel})
   }
 
   savingFile = () => {
@@ -360,6 +375,7 @@ export class App extends Component {
             selectLeftPanelCallback = {this.selectLeftPanel}
             selectAnalysisPanelCallback = {this.selectAnalysisPanel}
             selectDataPanelCallback = {this.selectDataPanel}
+            selectDataVizPanelCallback = {this.selectDataVizPanel}
             savingFileCallback = {this.savingFile}
             getCPUCountCallback = {this.getCPUCount}
             newNotebookCallback = {this.newNotebook}/>
@@ -536,6 +552,23 @@ export class App extends Component {
                   </div>
                 </div>
                 
+                <div hidden={this.state.currentActiveLeftPanel !== "DataVizPanel"}>
+                  <div className="notebook-bar">
+                  <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlk}
+                  runScriptCallback = {this.runScript}
+                  tentativeScript = {this.state.tentativeScript}/>
+                  </div>
+
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
+                    <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                  </div>
+
+                </div>
+
               </div>
               <div className="right-pane pl-2 pr-2 mb-2">
                   <Notebook

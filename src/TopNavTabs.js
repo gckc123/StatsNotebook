@@ -6,6 +6,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { SettingBar } from "./SettingBar";
 import { DataBar } from "./DataBar";
 import { AnalysisBar } from "./AnalysisBar";
+import { DataVizBar } from "./DataVizBar";
 
 
 const FirstTabs = withStyles({
@@ -70,6 +71,8 @@ export class TopNavTabs extends Component {
         case 2:
           this.props.selectLeftPanelCallback("AnalysisPanel")
           break;
+        case 3:
+          this.props.selectLeftPanelCallback("DataVizPanel")
         default:
           this.props.selectLeftPanelCallback("")
           break;
@@ -84,7 +87,8 @@ export class TopNavTabs extends Component {
         <FirstTabs value={this.state.CurrentTab} onChange={this.handleChange}>
           <FirstTab icon={<MenuIcon  fontSize="small" />}/>
           <FirstTab label="Data" />
-          <FirstTab label="Analysis"/>            
+          <FirstTab label="Analysis"/>
+          <FirstTab label="DataViz"/>            
         </FirstTabs>
         <TabPanel CurrentTab={this.state.CurrentTab} index={0}>
           <SettingBar openFileCallback = {this.props.openFileCallback}
@@ -97,7 +101,11 @@ export class TopNavTabs extends Component {
         <TabPanel CurrentTab={this.state.CurrentTab} index={2}>
           <AnalysisBar selectAnalysisPanelCallback = {this.props.selectAnalysisPanelCallback}
           getCPUCountCallback = {this.props.getCPUCountCallback}/>
-        </TabPanel>               
+        </TabPanel> 
+        <TabPanel CurrentTab={this.state.CurrentTab} index={3}>
+          <DataVizBar selectDataVizPanelCallback = {this.props.selectDataVizPanelCallback}
+          getCPUCountCallback = {this.props.getCPUCountCallback}/>
+        </TabPanel>              
       </div>
     )
   }
