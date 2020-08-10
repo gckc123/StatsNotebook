@@ -10,7 +10,10 @@ import RegressionIcon from "./icon/regression.svg";
 import MediationIcon from "./icon/Mediation.svg";
 import MissingDataIcon from "./icon/missingdata.svg";
 import MetaAnalysisIcon from "./icon/Meta_analysis.svg";
-import HistogramIcon from "./icon/histogram.svg";
+import DensityIcon from "./icon/Density.svg";
+import PieChartIcon from "./icon/PieChart.svg";
+import missingdataIcon from "./icon/missingdata.svg"
+import LineIcon from "./icon/Line.svg"
 import RobotIcon from "./icon/robot.svg";
 
 
@@ -125,11 +128,9 @@ class CategoricalMenu extends Component {
                 open = {open}
                 onClose={this.props.handleClose}>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("LineChartPanel")}>Line chart</MenuItem>
+                onClick={() => this.setDataVizPanel("LineChartPanel")}>Bar Chart</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("AreaChartPanel")}>Area chart</MenuItem>                                       
-                <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("TimeSeriesPanel")}>Time series</MenuItem>
+                onClick={() => this.setDataVizPanel("AreaChartPanel")}>Ciruclar Bar chart</MenuItem>                                       
             </Menu>
         )
     }
@@ -202,28 +203,28 @@ export class DataVizBar extends Component {
         return (
             <div className="app-bar">
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "numeric")}>
-                <img src={HistogramIcon} alt="" height="38px"/>
+                <img src={DensityIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Numeric</div>
                 </StyledButton>
                 <NumericMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "numeric" selectDataVizPanelCallback={this.props.selectDataVizPanelCallback}/>
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "categorical")}>
-                <img src={BoxplotIcon} alt="" height="38px"/>
+                <img src={PieChartIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Categorical</div>
                 </StyledButton>
                 <CategoricalMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "categorical" selectDataVizPanelCallback={this.props.selectDataVizPanelCallback}/>
                 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "correlation")}>
-                <img src={MediationIcon} alt="" height="38px"/>
+                <img src={missingdataIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Correlation</div>
                 </StyledButton>                
                 <CorrelationMenu handleClose ={this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "correlation" selectDataVizPanelCallback={this.props.selectDataVizPanelCallback}/>
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "linearea")}>
-                <img src={MediationIcon} alt="" height="38px"/>
+                <img src={LineIcon} alt="" height="38px"/>
                 <div style={{fontSize: "12px"}}>Line/Area</div>
                 </StyledButton>                
                 <LineAreaMenu handleClose ={this.handleClose} anchorEl = {this.state.anchorEl}

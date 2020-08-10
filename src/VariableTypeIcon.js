@@ -7,6 +7,7 @@ import {withStyles} from '@material-ui/core';
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import PieChartIcon from '@material-ui/icons/PieChart';
+import DensityIcon from "./icon/DensityOrange.svg";
 
 const OrangeIconButton = withStyles({
     root: {
@@ -96,7 +97,7 @@ export class VariableTypeIcon extends Component {
                 return (
                     <>
                     <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
-                        <BarChartIcon fontSize="small"/>
+                        <img src={DensityIcon} alt="" height="20px"/>
                     </OrangeIconButton>
                     <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                     disableItem = "Numeric"

@@ -387,3 +387,49 @@
     grid-row-start: 2;
     grid-row-end: 5;
 }
+
+
+.Histogram-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows: 25px 150px 25px 25px 40px 25px 40px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.Histogram-Available-Variable-List-Container {
+    grid-row-start: 2;
+    grid-row-end: 8;
+}
+
+.Histogram-Two-Column-Box {
+    display: grid;
+    grid-template-columns: 150px 250px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.Label-And-Theme-Box {
+    display: grid;
+    grid-template-columns: 120px 450px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.LabelAndThemeSettingInput {
+
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #a7a7a7;
+    font-size: 14px;
+}
+
+.LabelAndThemeSettingInput:hover {
+    border-bottom: 2px solid black;
+}
+
+.LabelAndThemeSettingInput:focus {
+    border-bottom: 2px solid black;
+    outline: none;
+}

@@ -64,6 +64,7 @@ export class TopNavTabs extends Component {
     
   handleChange = (event, newValue) => {
       this.setState({CurrentTab: newValue});
+      console.log(newValue)
       switch (newValue) {
         case 1:
           this.props.selectLeftPanelCallback("DataPanel")
@@ -73,6 +74,7 @@ export class TopNavTabs extends Component {
           break;
         case 3:
           this.props.selectLeftPanelCallback("DataVizPanel")
+          break;
         default:
           this.props.selectLeftPanelCallback("")
           break;

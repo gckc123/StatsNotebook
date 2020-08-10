@@ -21,6 +21,7 @@ import { RecodePanel } from './RecodePanel';
 import { ANOVAPanel } from './ANOVAPanel';
 import { IndependentTTestPanel } from './IndependentTTestPanel';
 import { DependentTTestPanel } from './DependentTTestPanel';
+import { HistogramPanel } from './HistogramPanel';
 
 
 const electron = window.require('electron');
@@ -559,12 +560,13 @@ export class App extends Component {
                   tentativeScript = {this.state.tentativeScript}/>
                   </div>
 
-                  <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
-                    <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
+                  <div hidden={this.state.currentActiveDataVizPanel !== "HistogramPanel"}>
+                    <HistogramPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                    currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}/>
                   </div>
 
                 </div>
