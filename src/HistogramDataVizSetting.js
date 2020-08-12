@@ -55,9 +55,11 @@ export class HistogramDataVizSetting extends Component {
         return (
             <div>
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.Density} size="small"
-                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"Density")}/>Density</div>     
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"Density")}/>Density</div>    
+
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.Polygon} size="small"
-                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"Polygon")}/>Polygon</div>
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"Polygon")}/>Polygon</div>    
+
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.SetBinWidth} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"SetBinWidth")}/>Set Bin Width
                 <StyledTooltip title="R will automatically determine the width of each bin in the histogram. You can manually set the bin width here.">

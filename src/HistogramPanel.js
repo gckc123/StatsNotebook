@@ -87,9 +87,33 @@ export class HistogramPanel extends Component {
         },
         AnalysisSetting: {          
           Density: false,
-          Ploygon: false,
+          Polygon: false,
           SetBinWidth: false,
           BinWidth: 0,
+
+          title: "",
+          titleFontSize: "",
+          xlab: "",
+          xlabFontSize: "",
+          xLowerLim: "",
+          xUppperLim: "",
+          xAxisFontSize: "",
+          ylab: "",
+          yLowerLim: "",
+          yUpperLim: "",
+          ylabFontSize: "",
+          yAxisFontSize: "",
+          legendFillLab: "",
+          legendColorLab: "",
+          legendShapeLab: "",
+          legendSizeLab: "",
+          legendFontSize: "",
+          legendKeyFontSize: "",
+          legendPosition: "bottom",
+          facetFontSize: "",
+          theme: "theme_bw",
+          colorPalette: "Set2"
+          
         },
         showAlert: false,
         alertText: "",
@@ -234,7 +258,54 @@ export class HistogramPanel extends Component {
   }
 
   buildCode = () => {
-    let codeString = ""
+    let codeString = (this.state.AnalysisSetting.theme === "theme_ipsum" ? "library(hrbrthemes)\n\n" : "")
+
+    let dropNA = this.state.Variables.FillColor.concat(this.state.Variables.Facet)
+    
+    this.state.Variables.Horizontal.forEach((item) => {
+      codeString = codeString + "currentDataset %>%\n" +
+      (dropNA.length > 0 ? "  drop_na("+ dropNA.join(", ") + ") %>%\n" : "") + 
+      "  ggplot(aes(x = " + item + (this.state.Variables.FillColor.length > 0 ? ", "+ 
+      (this.state.AnalysisSetting.Polygon? "color" : "fill") + " = " + this.state.Variables.FillColor[0] : "") +
+      ", na.rm = TRUE))" + " +\n  " +
+      (this.state.AnalysisSetting.Polygon ? "  geom_freqpoly" :"  geom_histogram") + "(" + 
+      (this.state.AnalysisSetting.Density ? "aes(y = ..density..), " : "") +
+      (this.state.AnalysisSetting.SetBinWidth ? "binwidth = " + this.state.AnalysisSetting.BinWidth + ", ": "") + 
+      (this.state.AnalysisSetting.Polygon ? "" : "color = \"white\", alpha = 0.65, ") + "na.rm = TRUE)" + 
+      (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
+      this.state.AnalysisSetting.colorPalette + "\")") + 
+      (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
+      (this.state.AnalysisSetting.theme === "ggplot_default" ? "" : "+\n    " + this.state.AnalysisSetting.theme + "(base_family = \"sans\")") + 
+      (this.state.AnalysisSetting.title === "" ? "" : "+\n    ggtitle(\"" + this.state.AnalysisSetting.title + "\")") +
+      (this.state.AnalysisSetting.xlab === "" ? "" : "+\n    xlab(\"" + this.state.AnalysisSetting.xlab + "\")") +
+      (this.state.AnalysisSetting.ylab === "" ? "" : "+\n    ylab(\"" + this.state.AnalysisSetting.ylab + "\")") +
+      (this.state.AnalysisSetting.legendFillLab === "" ? "" : "+\n    labs("+
+      (this.state.AnalysisSetting.Polygon ? "color = ": "fill = ")+ "\"" + this.state.AnalysisSetting.legendFillLab + "\")") +
+      (this.state.AnalysisSetting.titleFontSize === "" ? "" : "+\n    theme(plot.title = element_text(size = " + 
+      this.state.AnalysisSetting.titleFontSize + "))") +
+      (this.state.AnalysisSetting.xlabFontSize === "" ? "" : "+\n    theme(axis.title.x = element_text(size = " + 
+      this.state.AnalysisSetting.xlabFontSize + "))") +
+      (this.state.AnalysisSetting.ylabFontSize === "" ? "" : "+\n    theme(axis.title.y = element_text(size = " + 
+      this.state.AnalysisSetting.ylabFontSize + "))") +
+      (this.state.AnalysisSetting.xAxisFontSize === "" ? "" : "+\n    theme(axis.text.x = element_text(size = " + 
+      this.state.AnalysisSetting.xAxisFontSize + "))") +
+      (this.state.AnalysisSetting.yAxisFontSize === "" ? "" : "+\n    theme(axis.text.y = element_text(size = " + 
+      this.state.AnalysisSetting.yAxisFontSize + "))") +
+      (this.state.AnalysisSetting.legendFontSize === "" ? "" : "+\n    theme(legend.title = element_text(size = " + 
+      this.state.AnalysisSetting.legendFontSize + "))") +
+      (this.state.AnalysisSetting.legendKeyFontSize === "" ? "" : "+\n    theme(legend.text = element_text(size = " + 
+      this.state.AnalysisSetting.legendKeyFontSize + "))") +
+      (this.state.AnalysisSetting.facetFontSize === "" ? "" : "+\n    theme(strip.text.x = element_text(size = " + 
+      this.state.AnalysisSetting.facetFontSize + "))") +
+      (this.state.AnalysisSetting.legendPosition === "right" ? "" : "+\n    theme(legend.position = \"" + this.state.AnalysisSetting.legendPosition +"\")") +
+      "\n\n"
+    })
+    
+    
+
+    
+
+    
     this.props.updateTentativeScriptCallback(codeString) 
   }
 
@@ -249,6 +320,27 @@ export class HistogramPanel extends Component {
     
     switch (target) {
       case "BinWidth":
+      case "title":
+      case "titleFontSize":
+      case "xlab":
+      case "xlabFontSize":
+      case "xAxisFontSize":
+      case "ylab":
+      case "ylabFontSize":
+      case "yAxisFontSize":
+      case "legendFillLab":
+      case "legendColorLab":
+      case "legendShapeLab":
+      case "legendSizeLab":
+      case "legendFontSize":
+      case "legendPosition":
+      case "facetFontSize":
+      case "theme":
+      case "colorPalette":
+      case "xLowerLim":
+      case "xUpperLim":
+      case "yLowerLim":
+      case "yUpperLim":
         AnalysisSettingObj[target] = event.target.value
         break;
       case "Density":
@@ -259,6 +351,11 @@ export class HistogramPanel extends Component {
       default:
         break;
     }
+    this.setState({AnalysisSetting: {...AnalysisSettingObj}})
+  }
+
+  updateLabelAndThemeSetting = (updatedLabelAndThemeSetting) => {
+    let AnalysisSettingObj = {...this.state.AnalysisSetting, ...updatedLabelAndThemeSetting}
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
@@ -311,10 +408,8 @@ export class HistogramPanel extends Component {
               <HistogramDataVizSetting 
               Variables = {this.state.Variables}
               CategoricalVarLevels = {this.props.CategoricalVarLevels}
-              TreatmentLvs = {this.state.TreatmentLvs}
               AnalysisSetting = {this.state.AnalysisSetting}
-              updateAnalysisSettingCallback = {this.updateAnalysisSetting}
-              reorderTreatmentLvCallback = {this.reorderTreatmentLv}/>
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
             </ExpansionPanelDetails>
           </ExpansionPanel>    
 
@@ -327,10 +422,18 @@ export class HistogramPanel extends Component {
               <LabelAndThemeDataVizSetting 
               Variables = {this.state.Variables}
               CategoricalVarLevels = {this.props.CategoricalVarLevels}
-              TreatmentLvs = {this.state.TreatmentLvs}
               AnalysisSetting = {this.state.AnalysisSetting}
               updateAnalysisSettingCallback = {this.updateAnalysisSetting}
-              reorderTreatmentLvCallback = {this.reorderTreatmentLv}/>
+              updateLabelAndThemeSettingCallback = {this.updateLabelAndThemeSetting}
+              needFillLabel = {this.state.Variables.FillColor.length > 0}
+              needColorLabel = {false}
+              needShapeLabel = {false}
+              needSizeLabel = {false}
+              needYLim = {false}
+              needXLim = {false}
+              needFacetFontSize = {this.state.Variables.Facet.length > 0}
+
+              />
             </ExpansionPanelDetails>
           </ExpansionPanel>
         </div>
