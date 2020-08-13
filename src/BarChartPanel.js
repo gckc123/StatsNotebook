@@ -5,10 +5,10 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { HistogramVariableSelection } from './HistogramVariableSelection';
+import { BarChartVariableSelection } from './BarChartVariableSelection';
+import { BarChartDataVizSetting } from './BarChartDataVizSetting';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { HistogramDataVizSetting } from "./HistogramDataVizSetting";
 import { LabelAndThemeDataVizSetting } from "./LabelAndThemeDataVizSetting";
 import { Alert } from './Alert.js'
 
@@ -55,7 +55,7 @@ const ExpansionPanelDetails = withStyles((theme) => ({
 }))(MuiExpansionPanelDetails);
 
 
-export class HistogramPanel extends Component {
+export class BarChartPanel extends Component {
 
   constructor(props) {
     super(props)
@@ -86,11 +86,10 @@ export class HistogramPanel extends Component {
           labelAndThemeSetting: false,
         },
         AnalysisSetting: {          
-          Density: false,
-          Polygon: false,
-          SetBinWidth: false,
-          BinWidth: 0,
+          
           originalData: true,
+          fill: false,
+          dodge: false,
 
           title: "",
           titleFontSize: "",
@@ -124,7 +123,7 @@ export class HistogramPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveDataVizPanel === "HistogramPanel") {
+    if (this.props.currentActiveDataVizPanel === "BarChartPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -170,12 +169,12 @@ export class HistogramPanel extends Component {
       
       if (target === "Horizontal") {
         toRightVars = CheckedObj["Available"].filter((item) =>
-          this.props.CurrentVariableList[item][0] === "Numeric"
+          this.props.CurrentVariableList[item][0] !== "Character"
         )
 
         if (toRightVars.length !== CheckedObj["Available"].length) {
           this.setState({showAlert: true, 
-            alertText: "Character and categorical variables will not be added. Only numeric variables can be added to the horizontal axis.",
+            alertText: "Character variables will not be added. These variables need to be firstly converted into factor variables.",
             alertTitle: "Alert"
           })
         }
@@ -278,22 +277,18 @@ export class HistogramPanel extends Component {
       }
      
       codeString = codeString + 
-      "  ggplot(aes(x = " + item + (this.state.Variables.FillColor.length > 0 ? ", "+ 
-      (this.state.AnalysisSetting.Polygon? "color" : "fill") + " = " + this.state.Variables.FillColor[0] : "") +
-      "))" + " +\n  " +
-      (this.state.AnalysisSetting.Polygon ? "  geom_freqpoly" :"  geom_histogram") + "(" + 
-      (this.state.AnalysisSetting.Density ? "aes(y = ..density..), " : "") +
-      (this.state.AnalysisSetting.SetBinWidth ? "binwidth = " + this.state.AnalysisSetting.BinWidth + ", ": "") + 
-      (this.state.AnalysisSetting.Polygon ? "" : "color = \"white\", alpha = 0.60, position = \"identity\", ") + "na.rm = TRUE)" + 
+      "  ggplot(aes(x = " + item + (this.state.Variables.FillColor.length > 0 ? ", fill = " + this.state.Variables.FillColor[0] +
+      ", color = "+ this.state.Variables.FillColor[0] : "") + "))" + " +\n  " +
+      "geom_density(alpha = 0.2, na.rm = TRUE)" + 
       (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
-      this.state.AnalysisSetting.colorPalette + "\")") + 
+      this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
       (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
       (this.state.AnalysisSetting.theme === "ggplot_default" ? "" : "+\n    " + this.state.AnalysisSetting.theme + "(base_family = \"sans\")") + 
       (this.state.AnalysisSetting.title === "" ? "" : "+\n    ggtitle(\"" + this.state.AnalysisSetting.title + "\")") +
       (this.state.AnalysisSetting.xlab === "" ? "" : "+\n    xlab(\"" + this.state.AnalysisSetting.xlab + "\")") +
       (this.state.AnalysisSetting.ylab === "" ? "" : "+\n    ylab(\"" + this.state.AnalysisSetting.ylab + "\")") +
-      (this.state.AnalysisSetting.legendFillLab === "" ? "" : "+\n    labs("+
-      (this.state.AnalysisSetting.Polygon ? "color = ": "fill = ")+ "\"" + this.state.AnalysisSetting.legendFillLab + "\")") +
+      (this.state.AnalysisSetting.legendFillLab === "" ? "" : "+\n    labs(color = \"" + this.state.AnalysisSetting.legendFillLab + "\", fill = \""+ 
+      this.state.AnalysisSetting.legendFillLab +"\")") +
       (this.state.AnalysisSetting.titleFontSize === "" ? "" : "+\n    theme(plot.title = element_text(size = " + 
       this.state.AnalysisSetting.titleFontSize + "))") +
       (this.state.AnalysisSetting.xlabFontSize === "" ? "" : "+\n    theme(axis.title.x = element_text(size = " + 
@@ -356,16 +351,14 @@ export class HistogramPanel extends Component {
       case "yUpperLim":
         AnalysisSettingObj[target] = event.target.value
         break;
-      case "Density":
-      case "Polygon":
-      case "SetBinWidth":
       case "originalData":
+      case "fill":
+      case "dodge":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
         break;
     }
-    console.log(this.props.imputedDataset)
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
@@ -389,7 +382,7 @@ export class HistogramPanel extends Component {
   render () {
     return (
       <div className="mt-2"> 
-      {this.props.currentActiveDataVizPanel === "HistogramPanel" &&
+      {this.props.currentActiveDataVizPanel === "BarChartPanel" &&
         <div>
           <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
           title = {this.state.alertTitle}
@@ -397,10 +390,10 @@ export class HistogramPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.variableSelection}
           onChange = {this.handlePanelExpansion("variableSelection")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Histogram</Typography>
+              <Typography>Bar Chart</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <HistogramVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              <BarChartVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
               Variables = {this.state.Variables}
               Checked = {this.state.Checked}
               hideToRight = {this.state.hideToRight}
@@ -414,13 +407,14 @@ export class HistogramPanel extends Component {
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  
+          
           <ExpansionPanel square expanded={this.state.panels.analysisSetting}
           onChange = {this.handlePanelExpansion("analysisSetting")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Histogram Setting</Typography>
+              <Typography>Bar Chart Setting</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <HistogramDataVizSetting 
+              <BarChartDataVizSetting 
               Variables = {this.state.Variables}
               CategoricalVarLevels = {this.props.CategoricalVarLevels}
               AnalysisSetting = {this.state.AnalysisSetting}

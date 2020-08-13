@@ -98,7 +98,7 @@ class NumericMenu extends Component {
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick={() => this.setDataVizPanel("HistogramPanel")}>Histogram</MenuItem>                                 
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("BoxplotPanel")}>Boxplot</MenuItem>
+                onClick={() => this.setDataVizPanel("BoxplotPanel")}>Boxplot/ Violin plot</MenuItem>
             </Menu>
         )
     }
@@ -128,9 +128,9 @@ class CategoricalMenu extends Component {
                 open = {open}
                 onClose={this.props.handleClose}>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("LineChartPanel")}>Bar Chart</MenuItem>
+                onClick={() => this.setDataVizPanel("BarChartPanel")}>Bar Chart</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("AreaChartPanel")}>Ciruclar Bar chart</MenuItem>                                       
+                onClick={() => this.setDataVizPanel("CircularBarChartPanel")}>Ciruclar Bar chart</MenuItem>                                       
             </Menu>
         )
     }

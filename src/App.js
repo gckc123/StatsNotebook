@@ -22,6 +22,9 @@ import { ANOVAPanel } from './ANOVAPanel';
 import { IndependentTTestPanel } from './IndependentTTestPanel';
 import { DependentTTestPanel } from './DependentTTestPanel';
 import { HistogramPanel } from './HistogramPanel';
+import { DensityPanel } from './DensityPanel';
+import { BoxplotPanel } from './BoxplotPanel';
+import { BarChartPanel } from './BarChartPanel';
 
 
 const electron = window.require('electron');
@@ -58,7 +61,7 @@ export class App extends Component {
     this.updateDataPanelDimension();
     window.addEventListener("resize", this.updateDataPanelDimension);
 
-    let initialScript = "library(tidyverse)\nlibrary(ggplot2)\n"
+    let initialScript = "library(tidyverse)\nlibrary(ggplot2)\nlibrary(forcats)\n"
     this.addExtraBlk(initialScript, true)
 
     ipcRenderer.on('RecvROutput', (event, content) => {
@@ -566,7 +569,38 @@ export class App extends Component {
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}/>
+                    currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
+                    imputedDataset = {this.state.imputedDataset}/>
+                  </div>
+                  
+                  <div hidden={this.state.currentActiveDataVizPanel !== "DensityPanel"}>
+                    <DensityPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
+                    imputedDataset = {this.state.imputedDataset}/>
+                  </div>
+
+                  <div hidden={this.state.currentActiveDataVizPanel !== "BoxplotPanel"}>
+                    <BoxplotPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
+                    imputedDataset = {this.state.imputedDataset}/>
+                  </div>
+
+                  <div hidden={this.state.currentActiveDataVizPanel !== "BarChartPanel"}>
+                    <BarChartPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
+                    imputedDataset = {this.state.imputedDataset}/>
                   </div>
 
                 </div>
