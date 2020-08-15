@@ -260,7 +260,7 @@ export class BarChartPanel extends Component {
   buildCode = () => {
     let codeString = (this.state.AnalysisSetting.theme === "theme_ipsum" ? "library(hrbrthemes)\n\n" : "")
 
-    let dropNA = this.state.Variables.FillColor.concat(this.state.Variables.Facet)
+    let dropNA = this.state.Variables.Horizontal.concat(this.state.Variables.FillColor.concat(this.state.Variables.Facet))
     
     this.state.Variables.Horizontal.forEach((item) => {
       codeString = codeString + "currentDataset %>%\n" 
@@ -277,9 +277,10 @@ export class BarChartPanel extends Component {
       }
      
       codeString = codeString + 
-      "  ggplot(aes(x = " + item + (this.state.Variables.FillColor.length > 0 ? ", fill = " + this.state.Variables.FillColor[0] +
-      ", color = "+ this.state.Variables.FillColor[0] : "") + "))" + " +\n  " +
-      "geom_density(alpha = 0.2, na.rm = TRUE)" + 
+      "  ggplot(aes(x = " + item + (this.state.Variables.FillColor.length > 0 ? ", fill = " + this.state.Variables.FillColor[0] : "") + "))" + 
+      " +\n  geom_bar(alpha = 0.6, na.rm = TRUE"+ 
+      (this.state.AnalysisSetting.fill ? ", position = \"fill\"" : "")+ 
+      (this.state.AnalysisSetting.dodge ? ", position = \"dodge\"": "")+")" + 
       (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
       this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
       (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
@@ -352,9 +353,15 @@ export class BarChartPanel extends Component {
         AnalysisSettingObj[target] = event.target.value
         break;
       case "originalData":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        break;
       case "fill":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        AnalysisSettingObj["dodge"] = false
+        break;
       case "dodge":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        AnalysisSettingObj["fill"] = false
         break;
       default:
         break;

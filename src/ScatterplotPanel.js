@@ -5,10 +5,10 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { BoxplotVariableSelection } from './BoxplotVariableSelection';
+import { ScatterplotVariableSelection } from './ScatterplotVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { BoxplotDataVizSetting } from "./BoxplotDataVizSetting";
+import { ScatterplotDataVizSetting } from "./ScatterplotDataVizSetting";
 import { LabelAndThemeDataVizSetting } from "./LabelAndThemeDataVizSetting";
 import { Alert } from './Alert.js'
 
@@ -55,7 +55,7 @@ const ExpansionPanelDetails = withStyles((theme) => ({
 }))(MuiExpansionPanelDetails);
 
 
-export class BoxplotPanel extends Component {
+export class ScatterplotPanel extends Component {
 
   constructor(props) {
     super(props)
@@ -65,6 +65,8 @@ export class BoxplotPanel extends Component {
             Horizontal: [],
             Vertical: [],
             FillColor: [],
+            Shape: [],
+            Size: [],
             Facet: [],
             
         }, 
@@ -74,12 +76,16 @@ export class BoxplotPanel extends Component {
             Horizontal: [],
             Vertical: [],
             FillColor: [],
+            Shape: [],
+            Size: [],
             Facet: [],          
         },
         hideToRight: {
             Horizontal: false,
-            Vertical: [],
+            Vertical: false,
             FillColor: false,
+            Shape: false,
+            Size: false,
             Facet: false,
         },
         tentativeScript: "",
@@ -89,12 +95,15 @@ export class BoxplotPanel extends Component {
           labelAndThemeSetting: false,
         },
         AnalysisSetting: {          
-          reorderUp: false,
-          reorderDown: false,
-          violinPlot: false,
-          varWidth: false,
-          meanValue: false,
-          individualObs: false,
+          fittedLine: true,
+          fittedLineType: "lm",
+          confInt: true,
+          confIntLevel: "95",
+          byShape: false,
+          byFillColor: false,
+          marginalPlot: false,
+          marginalPlotType: "histogram",
+          rug: false,
 
           originalData: true,
           title: "",
@@ -129,7 +138,7 @@ export class BoxplotPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveDataVizPanel === "BoxplotPanel") {
+    if (this.props.currentActiveDataVizPanel === "ScatterplotPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -173,19 +182,19 @@ export class BoxplotPanel extends Component {
 
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       
-      if (target === "Vertical") {
+      if (target === "Vertical" || (target === "Horizontal")) {
         toRightVars = CheckedObj["Available"].filter((item) =>
           this.props.CurrentVariableList[item][0] === "Numeric"
         )
 
         if (toRightVars.length !== CheckedObj["Available"].length) {
           this.setState({showAlert: true, 
-            alertText: "Character and categorical variables will not be added. Only numeric variables can be added to the Vertical axis.",
+            alertText: "Character and categorical variables will not be added. Only numeric variables can be added.",
             alertTitle: "Alert"
           })
         }
 
-      }else if ((target === "FillColor") || (target === "Facet" || (target === "Horizontal"))) {
+      }else if ((target === "FillColor") || (target === "Facet" || (target === "Shape") || (target === "Size"))) {
         toRightVars = CheckedObj["Available"].filter((item) =>
           this.props.CurrentVariableList[item][0] !== "Character"
         )
@@ -265,10 +274,14 @@ export class BoxplotPanel extends Component {
 
   buildCode = () => {
     let codeString = (this.state.AnalysisSetting.theme === "theme_ipsum" ? "library(hrbrthemes)\n\n" : "")
+    codeString = codeString + (this.state.AnalysisSetting.marginalPlot ? "library(ggMarginal)\n\n": "")
 
-    let dropNA = this.state.Variables.Horizontal.concat(this.state.Variables.FillColor.concat(this.state.Variables.Facet))
+    let dropNA = this.state.Variables.FillColor.concat(this.state.Variables.Facet).concat(this.state.Variables.Shape).concat(this.state.Variables.Size)
     
-    this.state.Variables.Vertical.forEach((item) => {
+    let vertical = this.state.Variables.Vertical[0]
+    let horizontal = this.state.Variables.Horizontal[0]
+
+
       codeString = codeString + "currentDataset %>%\n" 
 
       if (this.props.imputedDataset) {
@@ -282,18 +295,18 @@ export class BoxplotPanel extends Component {
         codeString = codeString + (dropNA.length > 0 ? "  drop_na("+ dropNA.join(", ") + ") %>%\n" : "")
       }
       
-      if (this.state.AnalysisSetting.reorderDown || this.state.AnalysisSetting.reorderUp) {
-        codeString = codeString + "  mutate(" + this.state.Variables.Horizontal[0] + " = fct_reorder(" +
-        this.state.Variables.Horizontal[0] + ", " + (this.state.AnalysisSetting.reorderDown ? "desc(" + item + ")": item)  + ")) %>%\n"
-      }
-
       codeString = codeString + 
-      "  ggplot(aes(y = " + item + 
-      (this.state.Variables.Horizontal.length > 0 ? ", x = " + this.state.Variables.Horizontal[0] : "") + 
-      (this.state.Variables.FillColor.length > 0 ? ", fill = " + this.state.Variables.FillColor[0] : "") + ")) +\n  " +
-      (this.state.AnalysisSetting.violinPlot ? "geom_violin": "geom_boxplot") + "(alpha = 0.6,"+
-      (this.state.AnalysisSetting.varWidth ? "varwidth = TRUE," : "") + " na.rm=TRUE)" + 
-      (this.state.AnalysisSetting.individualObs ? "+\n    geom_jitter(color = \"black\", alpha = 0.5, size = 0.3, na.rm = TRUE)" : "") +
+      "  ggplot(aes(y = " + vertical + ", x = " + horizontal + 
+      ((this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", color = " + this.state.Variables.FillColor[0] : "") +
+      ((this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0) ? ", shape = " + this.state.Variables.Shape[0] : "") + 
+      (this.state.Variables.Size.length > 0 ? ", size = " + this.state.Variables.Size[0] : "") + ")) +\n" +
+      "    geom_jitter(alpha = 0.7"+ ((!this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", aes(color = " + 
+      this.state.Variables.FillColor[0] + ")": "") + 
+      ((!this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0) ? ", aes(shape =" +
+      this.state.Variables.Shape[0] + ")" : "") +
+      ", na.rm = TRUE)" +
+      (this.state.AnalysisSetting.fittedLine ? "+\n    geom_smooth(method = \"" + this.state.AnalysisSetting.fittedLineType + "\"" + 
+      (this.state.AnalysisSetting.confInt ? ", se = TRUE, level = " + this.state.AnalysisSetting.confIntLevel/100 : "") + ", na.rm = TRUE)": "") + 
       (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
       this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
       (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
@@ -303,6 +316,10 @@ export class BoxplotPanel extends Component {
       (this.state.AnalysisSetting.ylab === "" ? "" : "+\n    ylab(\"" + this.state.AnalysisSetting.ylab + "\")") +
       (this.state.AnalysisSetting.legendFillLab === "" ? "" : "+\n    labs(color = \"" + this.state.AnalysisSetting.legendFillLab + "\", fill = \""+ 
       this.state.AnalysisSetting.legendFillLab +"\")") +
+      (this.state.AnalysisSetting.legendShapeLab === "" ? "" : "+\n    labs(color = \"" + this.state.AnalysisSetting.legendShapeLab + "\", fill = \""+ 
+      this.state.AnalysisSetting.legendShapeLab +"\")") +
+      (this.state.AnalysisSetting.legendSizeLab === "" ? "" : "+\n    labs(color = \"" + this.state.AnalysisSetting.legendSizeLab + "\", fill = \""+ 
+      this.state.AnalysisSetting.legendSizeLab +"\")") +
       (this.state.AnalysisSetting.titleFontSize === "" ? "" : "+\n    theme(plot.title = element_text(size = " + 
       this.state.AnalysisSetting.titleFontSize + "))") +
       (this.state.AnalysisSetting.xlabFontSize === "" ? "" : "+\n    theme(axis.title.x = element_text(size = " + 
@@ -321,7 +338,7 @@ export class BoxplotPanel extends Component {
       this.state.AnalysisSetting.facetFontSize + "))") +
       (this.state.AnalysisSetting.legendPosition === "right" ? "" : "+\n    theme(legend.position = \"" + this.state.AnalysisSetting.legendPosition +"\")") +
       "\n\n"
-    })
+
     
     
 
@@ -363,27 +380,17 @@ export class BoxplotPanel extends Component {
       case "xUpperLim":
       case "yLowerLim":
       case "yUpperLim":
+      case "fittedLineType":
+      case "confIntLevel":
+      case "marginalPlotType":
         AnalysisSettingObj[target] = event.target.value
         break;
-      case "violinPlot":
-        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
-        AnalysisSettingObj["varWidth"] = false
-        break;
-      case "varWidth":
-        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
-        AnalysisSettingObj["violinPlot"] = false
-        break;
-      case "reorderUp":
-        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
-        AnalysisSettingObj["reorderDown"] = false
-        break;
-      case "reorderDown":
-        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
-        AnalysisSettingObj["reorderUp"] = false
-        break;
-      case "originalData":
-      case "meanValue":
-      case "individualObs":
+      case "fittedLine":
+      case "confInt":
+      case "byShape":
+      case "byFillColor":
+      case "marginalPlot":
+      case "rug":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -412,7 +419,7 @@ export class BoxplotPanel extends Component {
   render () {
     return (
       <div className="mt-2"> 
-      {this.props.currentActiveDataVizPanel === "BoxplotPanel" &&
+      {this.props.currentActiveDataVizPanel === "ScatterplotPanel" &&
         <div>
           <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
           title = {this.state.alertTitle}
@@ -420,10 +427,10 @@ export class BoxplotPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.variableSelection}
           onChange = {this.handlePanelExpansion("variableSelection")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Boxplot</Typography>
+              <Typography>Scatterplot</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <BoxplotVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              <ScatterplotVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
               Variables = {this.state.Variables}
               Checked = {this.state.Checked}
               hideToRight = {this.state.hideToRight}
@@ -440,10 +447,10 @@ export class BoxplotPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.analysisSetting}
           onChange = {this.handlePanelExpansion("analysisSetting")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Boxplot Setting</Typography>
+              <Typography>Scatterplot Setting</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <BoxplotDataVizSetting 
+              <ScatterplotDataVizSetting 
               Variables = {this.state.Variables}
               CategoricalVarLevels = {this.props.CategoricalVarLevels}
               AnalysisSetting = {this.state.AnalysisSetting}
@@ -465,9 +472,9 @@ export class BoxplotPanel extends Component {
               updateAnalysisSettingCallback = {this.updateAnalysisSetting}
               updateLabelAndThemeSettingCallback = {this.updateLabelAndThemeSetting}
               needFillLabel = {this.state.Variables.FillColor.length > 0}
-              needColorLabel = {false}
-              needShapeLabel = {false}
-              needSizeLabel = {false}
+              needColorLabel = {true}
+              needShapeLabel = {true}
+              needSizeLabel = {true}
               needYLim = {false}
               needXLim = {false}
               needFacetFontSize = {this.state.Variables.Facet.length > 0}

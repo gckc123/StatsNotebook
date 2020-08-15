@@ -128,9 +128,7 @@ class CategoricalMenu extends Component {
                 open = {open}
                 onClose={this.props.handleClose}>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("BarChartPanel")}>Bar Chart</MenuItem>
-                <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("CircularBarChartPanel")}>Ciruclar Bar chart</MenuItem>                                       
+                onClick={() => this.setDataVizPanel("BarChartPanel")}>Bar Chart</MenuItem>                                     
             </Menu>
         )
     }

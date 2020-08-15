@@ -25,6 +25,7 @@ import { HistogramPanel } from './HistogramPanel';
 import { DensityPanel } from './DensityPanel';
 import { BoxplotPanel } from './BoxplotPanel';
 import { BarChartPanel } from './BarChartPanel';
+import { ScatterplotPanel } from './ScatterplotPanel';
 
 
 const electron = window.require('electron');
@@ -595,6 +596,16 @@ export class App extends Component {
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "BarChartPanel"}>
                     <BarChartPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
+                    imputedDataset = {this.state.imputedDataset}/>
+                  </div>
+
+                  <div hidden={this.state.currentActiveDataVizPanel !== "ScatterplotPanel"}>
+                    <ScatterplotPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
