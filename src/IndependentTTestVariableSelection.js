@@ -65,7 +65,8 @@ export class IndependentTTestVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="IndependentTTest-Variable-Selection-Box">
-                    <div> Variables</div>
+                    <div> Variables<StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
                     <div></div>
                     <div>Outcomes
                     </div>

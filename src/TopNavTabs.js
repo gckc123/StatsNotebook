@@ -64,7 +64,6 @@ export class TopNavTabs extends Component {
     
   handleChange = (event, newValue) => {
       this.setState({CurrentTab: newValue});
-      console.log(newValue)
       switch (newValue) {
         case 1:
           this.props.selectLeftPanelCallback("DataPanel")

@@ -11,6 +11,7 @@ import "./AnalysisPanelElements.css";
 import { MAAnalysisSetting } from "./MAAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
 import { Alert } from './Alert.js'
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -107,9 +108,9 @@ export class MAPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "MAPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    if (this.props.currentActiveAnalysisPanel === "MAPanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
@@ -144,6 +145,9 @@ export class MAPanel extends Component {
             interaction: [...interactionObj],
             checkedInteraction: [...checkedInteractionObj]})      
       }
+    }else if((this.props.currentActiveAnalysisPanel === "MAPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -158,8 +162,8 @@ export class MAPanel extends Component {
 
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
 
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       if ((target === "EffectSize" || target === "SE") && (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] !== "Numeric")) {
@@ -190,8 +194,8 @@ export class MAPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let interactionArr = [...this.state.interaction]
       let checkedInteractionArr = [...this.state.checkedInteraction]
 
@@ -220,7 +224,7 @@ export class MAPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
 
     if (currentIndex === -1) {
@@ -238,7 +242,7 @@ export class MAPanel extends Component {
   }
 
   handleToggleInteraction = (varname, from) => {
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let CheckedIntObj = [...this.state.checkedInteraction]
     let currentIndex = CheckedIntObj.indexOf(varname)
     
@@ -269,7 +273,7 @@ export class MAPanel extends Component {
 
   addInteractionTerm = () => {
     let interactionObj = [...this.state.interaction]
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
       this.setState({showAlert: true, 
         alertText: "Please select at least two variables.",
@@ -316,7 +320,7 @@ export class MAPanel extends Component {
     (this.state.AnalysisSetting.Leave1Out && this.state.Variables.Covariates.length === 0 ? ("\n\nleave1out(ma_res)") : "") +
     (this.state.AnalysisSetting.TrimAndFill && this.state.Variables.Covariates.length === 0 ? ("\n\nma_res_tf <- trimfill(ma_res)\nsummary(ma_res_tf)\nfunnel(ma_res_tf)") : "")
     
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {

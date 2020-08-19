@@ -62,9 +62,8 @@ class LineAreaMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle}>Line graph</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("MediationPanel")}>Area graph</MenuItem>                                       
+                onClick={() => this.setDataVizPanel("LineGraphPanel")}>Line graph/ TIme Series</MenuItem>                                   
             </Menu>
         )
     }
@@ -161,8 +160,6 @@ class CorrelationMenu extends Component {
                 onClick={() => this.setDataVizPanel("ScatterplotPanel")}>Scatterplot</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick={() => this.setDataVizPanel("CorrelogramPanel")}>Correlogram</MenuItem>                                       
-                <MenuItem disableRipple style = {MenuItemStyle}
-                onClick={() => this.setDataVizPanel("ContourPanel")}>Contour plot</MenuItem>
             </Menu>
         )
     }
@@ -223,7 +220,7 @@ export class DataVizBar extends Component {
 
                 <StyledButton disableRipple onClick={(event) => this.handleMenu(event, "linearea")}>
                 <img src={LineIcon} alt="" height="38px"/>
-                <div style={{fontSize: "12px"}}>Line/Area</div>
+                <div style={{fontSize: "12px"}}>Line</div>
                 </StyledButton>                
                 <LineAreaMenu handleClose ={this.handleClose} anchorEl = {this.state.anchorEl}
                 target = "linearea" selectDataVizPanelCallback={this.props.selectDataVizPanelCallback}/>

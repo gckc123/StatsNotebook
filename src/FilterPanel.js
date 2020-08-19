@@ -104,7 +104,10 @@ export class FilterPanel extends Component {
                   runScriptCallback = {this.props.runScriptCallback}
                   tentativeScript = {"if (!exists(\"originalDataset\")) {\n  originalDataset <- currentDataset\n}\ncurrentDataset <- originalDataset %>%\n  " + 
                     "filter(" + this.state.filter + ")"
-                  }/>
+                  }
+                  currentActiveLeftPanel = ""
+                  currentActiveDataVizPanel = ""
+                  currentActiveAnalysisPanel = ""/>
                 </div>
                 <div className = "p-2 Filter-pane-box">
     

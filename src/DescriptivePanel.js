@@ -5,13 +5,12 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { NMAVariableSelection } from './NMAVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { NMAAnalysisSetting } from "./NMAAnalysisSetting";
 import { Alert } from './Alert.js'
 import { DescriptiveVariableSelection } from './DescriptiveVariableSelection';
-import { DescriptiveAnalysisSetting } from './DescriptiveAnalysisSetting'
+import { DescriptiveAnalysisSetting } from './DescriptiveAnalysisSetting';
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -111,9 +110,9 @@ export class DescriptivePanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "DescriptivePanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    if (this.props.currentActiveAnalysisPanel === "DescriptivePanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
       let allVarsInCurrentList = []
       let TargetsCatArr = [...this.state.TargetsCat]
@@ -137,9 +136,11 @@ export class DescriptivePanel extends Component {
 
           VariablesObj["Available"].sort()
 
-          this.setState({Variables:{...VariablesObj}, TargetsCat: [...TargetsCatArr], TargetsNum: [...TargetsNumArr]})
-          this.setState({Checked: {...CheckedObj}})
+          this.setState({Variables:{...VariablesObj}, TargetsCat: [...TargetsCatArr], TargetsNum: [...TargetsNumArr], Checked: {...CheckedObj}})
       }
+    }else if((this.props.currentActiveAnalysisPanel === "DescriptivePanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -154,8 +155,8 @@ export class DescriptivePanel extends Component {
 
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let toRightVars = []
     let toRightVarsCat = [] 
     let toRightVarsNum = []
@@ -208,7 +209,7 @@ export class DescriptivePanel extends Component {
       VariablesObj[target] = VariablesObj[target].concat(toRightVars)
       CheckedObj["Available"] = []
       this.setState({Variables: {...VariablesObj}, TargetsCat: [...TargetsCatArr], TargetsNum: [...TargetsNumArr]},
-          () => this.setState({Checked: {...CheckedObj}}, ()=> console.log(this.state.TargetsCat, this.state.TargetsNum)))        
+          () => this.setState({Checked: {...CheckedObj}}))        
 
     }else{
         if (CheckedObj["Available"].length > 0) {
@@ -221,8 +222,8 @@ export class DescriptivePanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let TargetsCatArr = [...this.state.TargetsCat]
       let TargetsNumArr = [...this.state.TargetsNum]
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
@@ -236,13 +237,12 @@ export class DescriptivePanel extends Component {
       }
 
       CheckedObj[from] = []
-      this.setState({Variables: {...VariablesObj}, TargetsCat: [...TargetsCatArr], TargetsNum: [...TargetsNumArr]},
-          () => this.setState({Checked: {...CheckedObj}}, ()=>console.log(this.state.TargetsCat, this.state.TargetsNum)))
+      this.setState({Variables: {...VariablesObj}, TargetsCat: [...TargetsCatArr], TargetsNum: [...TargetsNumArr], Checked: {...CheckedObj}})
   }
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
 
     if (currentIndex === -1) {
@@ -380,7 +380,7 @@ export class DescriptivePanel extends Component {
       if (this.state.AnalysisSetting["Histogram"]) {
         this.state.TargetsNum.forEach((item) => {
           codeString =  codeString + "\nggplot(currentDataset) +\n  geom_histogram(aes(x=" + 
-          item + "))"
+          item + "), color = \"white\")"
           if (this.state.Variables["SplitBy"].length > 0) {
             codeString = codeString + " +\n  facet_wrap(~"+  this.state.Variables["SplitBy"].join(" + ") +")"
           }
@@ -413,7 +413,7 @@ export class DescriptivePanel extends Component {
       }
 
       if (this.state.AnalysisSetting["ScatterplotMatrix"]) {
-        codeString = codeString + "\ncurrentDataset %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  ggpairs()\n\n" 
+        codeString = codeString + "\ncurrentDataset %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  ggpairs(progress = FALSE)\n\n" 
       }
     }
     
@@ -444,21 +444,13 @@ export class DescriptivePanel extends Component {
       }
     }
 
-   
-
-  
-    
-
-    
-
-
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
     let panelsObj = {...this.state.panels}
     panelsObj[target] = !panelsObj[target]
-    this.setState({panels: panelsObj})
+    this.setState({panels: {...panelsObj}})
   }
 
   updateAnalysisSetting = (event,target) => {
@@ -502,7 +494,7 @@ export class DescriptivePanel extends Component {
   setAlert = (title, text) => {
     this.setState({alertTitle: title, alertText: text})
   }
-
+  
   render () {
     return (
       <div className="mt-2"> 
@@ -514,7 +506,7 @@ export class DescriptivePanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.variableSelection}
           onChange = {this.handlePanelExpansion("variableSelection")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Variable selection</Typography>
+              <Typography>Explore - Variable selection</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
               <DescriptiveVariableSelection CurrentVariableList = {this.props.CurrentVariableList}

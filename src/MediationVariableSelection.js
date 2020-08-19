@@ -6,7 +6,15 @@ import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import Tooltip from '@material-ui/core/Tooltip';
 
+const StyledTooltip = withStyles({
+    tooltip: {
+      fontSize: "12px"
+    }
+  })(Tooltip);
+  
 const StyledButton = withStyles({
     root: {
         '&:hover': {
@@ -55,7 +63,8 @@ export class MediationVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="Variable-Selection-Box">
-                    <div >Variables</div>
+                    <div >Variables<StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
                     <div ></div>
                     <div>Outcome</div>
                     <div className="Available-Variable-List-Container" 

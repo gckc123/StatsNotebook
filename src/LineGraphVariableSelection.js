@@ -30,7 +30,7 @@ const StyledButton = withStyles({
      }   
 })(Button);
 
-export class ScatterplotVariableSelection extends Component {
+export class LineGraphVariableSelection extends Component {
     
     genVariableSelectionList = (targetList) => {
         return (
@@ -62,11 +62,11 @@ export class ScatterplotVariableSelection extends Component {
     render () {
         return (
             <div className="analysis-pane">
-                <div className="Scatterplot-Variable-Selection-Box">
+                <div className="LineGraph-Variable-Selection-Box">
                     <div >Variables</div>
                     <div ></div>
                     <div>Vertical Axis</div>
-                    <div className="Scatterplot-Available-Variable-List-Container" 
+                    <div className="LineGraph-Available-Variable-List-Container" 
                     onClick={() => this.props.changeArrowCallback("Available")}>
                         {this.genVariableSelectionList("Available")}
                     </div>
@@ -99,21 +99,12 @@ export class ScatterplotVariableSelection extends Component {
                     </div>
 
                     <div></div>
-                    <div><i>Point shape</i></div>
+                    <div><i>Line type</i></div>
                     <div><center>
                         {this.genArrowButton("Shape", 1)}
                     </center></div>
                     <div onClick={() => this.props.changeArrowCallback("Shape")}> 
                         {this.genVariableSelectionList("Shape")}
-                    </div>
-
-                    <div></div>
-                    <div><i>Size</i></div>
-                    <div><center>
-                        {this.genArrowButton("Size", 1)}
-                    </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Size")}> 
-                        {this.genVariableSelectionList("Size")}
                     </div>
 
                     <div></div>
@@ -124,7 +115,6 @@ export class ScatterplotVariableSelection extends Component {
                     <div onClick={() => this.props.changeArrowCallback("Facet")}> 
                         {this.genVariableSelectionList("Facet")}
                     </div>
-
                 </div>
             </div>
         )

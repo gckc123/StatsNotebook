@@ -49,15 +49,17 @@ const StyledNativeSelect = withStyles({
     }
   })(NativeSelect);
   
-export class DensityDataVizSetting extends Component {
+export class CorrelogramDataVizSetting extends Component {
 
     render () {
         return (
-            <div>              
+            <div>
+                
                 <div className="NMACheckbox" hidden = {!this.props.imputedDataset}><Checkbox checked = {this.props.AnalysisSetting.originalData} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"originalData")}/>Plot using original data
                 <StyledTooltip title="For imputed dataset, the original data will be plotted. Uncheck this to plot the first imputed dataset.">
                 <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
+
             </div>
         )
     }

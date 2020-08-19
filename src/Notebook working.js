@@ -43,21 +43,25 @@ export class Notebook extends Component {
                     this.props.NotebookBlkList.map( (Blk, index) =>
                         <NotebookBlk key={Blk.NotebookBlkID} 
                         index = {index}
-                        ElementWidth={this.state.ElementWidth} 
-                        ActiveBlkID={this.props.ActiveBlkID}
-                        CurrentVariableList = {this.props.CurrentVariableList}
+                        ElementWidth={this.state.ElementWidth} ActiveBlkID={this.props.ActiveBlkID}
+                        Busy = {Blk.Busy}
+                        Expanded = {Blk.Expanded}
+                        NotebookBlkID={Blk.NotebookBlkID}
+                        
+                        Script={this.props.NotebookBlkList[index].NotebookBlkScript}
+                        Title={this.props.NotebookBlkList[index].Title}
+                        editorHTML={this.props.NotebookBlkList[index].editorHTML}
+                        runScriptCallback={this.props.runScriptCallback}
+                        ROutput={this.props.NotebookBlkList[index].NotebookBlkROutput}
+                        showEditor = {this.props.NotebookBlkList[index].showEditor}
 
                         notebookState = {Blk}
 
-                        runScriptCallback={this.props.runScriptCallback}
                         gainFocusCallback={this.props.gainFocusCallback}
                         updateAEditorValueCallback={this.props.updateAEditorValueCallback}
                         toggleEditorCallback = {this.props.toggleTEditorCallback}
                         toggleNotebookBlkCallback = {this.props.toggleNotebookBlkCallback}
-                        updateNotebookBlkStateCallback = {this.props.updateNotebookBlkStateCallback}
-                        restorePanelSettingCallback = {this.props.restorePanelSettingCallback}
-                        
-                        />                        
+                        updateNotebookBlkStateCallback = {this.props.updateNotebookBlkStateCallback}/>                        
                         )
                 }
                 </div>   

@@ -65,7 +65,10 @@ export class DependentTTestVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="DependentTTest-Variable-Selection-Box">
-                    <div> Variables</div>
+                    <div> Variables
+                    <StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div></div>
                     <div>Variable 1
                     </div>
@@ -85,7 +88,7 @@ export class DependentTTestVariableSelection extends Component {
                     <div>Variable 2
                     </div>
                     <div><center>
-                        {this.genArrowButton("Variable2", 1)}
+                        {this.genArrowButton("Variable2", 10000)}
                     </center></div>
                     <div onClick={() => this.props.changeArrowCallback("Variable2")}>
                         {this.genVariableSelectionList("Variable2")}

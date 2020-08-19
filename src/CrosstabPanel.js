@@ -5,13 +5,12 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { NMAVariableSelection } from './NMAVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { NMAAnalysisSetting } from "./NMAAnalysisSetting";
 import { Alert } from './Alert.js'
 import { CrosstabVariableSelection } from './CrosstabVariableSelection';
-import { CrosstabAnalysisSetting } from './CrosstabAnalysisSetting'
+import { CrosstabAnalysisSetting } from './CrosstabAnalysisSetting';
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -100,9 +99,9 @@ export class CrosstabPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "CrosstabPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    if (this.props.currentActiveAnalysisPanel === "CrosstabPanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
       let allVarsInCurrentList = []
 
@@ -125,6 +124,9 @@ export class CrosstabPanel extends Component {
           this.setState({Variables:{...VariablesObj}})
           this.setState({Checked: {...CheckedObj}})
       }
+    }else if((this.props.currentActiveAnalysisPanel === "CrosstabPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -139,8 +141,8 @@ export class CrosstabPanel extends Component {
 
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let toRightVars = []
 
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
@@ -191,8 +193,8 @@ export class CrosstabPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
@@ -205,7 +207,7 @@ export class CrosstabPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
 
     if (currentIndex === -1) {
@@ -276,7 +278,7 @@ export class CrosstabPanel extends Component {
       }
     })
 
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -326,7 +328,7 @@ export class CrosstabPanel extends Component {
         <ExpansionPanel square expanded={this.state.panels.variableSelection}
         onChange = {this.handlePanelExpansion("variableSelection")}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Variable selection</Typography>
+            <Typography>Frequency - Variable selection</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
             <CrosstabVariableSelection CurrentVariableList = {this.props.CurrentVariableList}

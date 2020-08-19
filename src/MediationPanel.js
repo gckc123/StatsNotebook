@@ -9,7 +9,8 @@ import { MediationVariableSelection } from './MediationVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
 import { MediationAnalysisSetting } from "./MediationAnalysisSetting";
-import { Alert } from './Alert.js'
+import { Alert } from './Alert.js';
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -101,9 +102,9 @@ export class MediationPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "MediationPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    if (this.props.currentActiveAnalysisPanel === "MediationPanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
@@ -124,6 +125,9 @@ export class MediationPanel extends Component {
           this.setState({Variables:{...VariablesObj}})
           this.setState({Checked: {...CheckedObj}})
       }
+    }else if((this.props.currentActiveAnalysisPanel === "MediationPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
   }
 
@@ -162,8 +166,8 @@ export class MediationPanel extends Component {
   }
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
@@ -184,8 +188,8 @@ export class MediationPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
       if (from === "Outcome" || from === "Mediator") {
@@ -201,7 +205,7 @@ export class MediationPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
 
     if (currentIndex === -1) {
@@ -239,7 +243,7 @@ export class MediationPanel extends Component {
     let codeString = "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
     "med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
     "treat = \""+ this.state.Variables.Exposure[0] + "\",\n"+
-    "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n"+
+    (this.state.Variables.Covariate.length > 0 ? "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n" : "")+
     "ymodel = \""+ this.state.AnalysisSetting.Models[this.state.Variables.Outcome[0]] +"\",\n"+
     "mmodel = c(\"" + mediatorModels.join("\" ,\"") +"\"),\n"+
     "treat_lv = " + this.state.AnalysisSetting.TreatLv + 
@@ -248,7 +252,7 @@ export class MediationPanel extends Component {
     "data = currentDataset, sim = "+ this.state.AnalysisSetting.Simulation + 
     ", digits = " + this.state.AnalysisSetting.Digits + ",\n" + 
     "HTML_report = FALSE, complete_analysis = "+ (!this.state.AnalysisSetting.ImputeData).toString().toUpperCase() +")"
-    this.props.updateTentativeScriptCallback(codeString)
+    this.props.updateTentativeScriptCallback(codeString, this.state)
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {

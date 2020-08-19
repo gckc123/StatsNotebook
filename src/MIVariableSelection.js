@@ -65,7 +65,10 @@ export class MIVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="MI-Variable-Selection-Box">
-                    <div> Variables</div>
+                    <div> Variables
+                    <StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div></div>
                     <div>Variables used for imputation 
                     <StyledTooltip title={<div>Variables to included in the imputed dataset.

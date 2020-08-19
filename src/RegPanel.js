@@ -13,6 +13,7 @@ import { AddInteraction } from './AddInteractions';
 import { RandomEffectPanel } from './RandomEffectPanel';
 import { EMMPanel } from './EMMPanel';
 import { Alert } from './Alert.js'
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -85,7 +86,10 @@ export class RegPanel extends Component {
         checkedInteraction: [],
 
         hideToRight: {
+            Outcome: false,
             Covariates: false,
+            RandomEffect: false,
+            Weight: false,
         },
         tentativeScript: "",
         panels: {
@@ -149,16 +153,16 @@ export class RegPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "LRPanel" ||
+    if ((this.props.currentActiveAnalysisPanel === "LRPanel" ||
     this.props.currentActiveAnalysisPanel === "LogitPanel" ||
     this.props.currentActiveAnalysisPanel === "PoiPanel" ||
     this.props.currentActiveAnalysisPanel === "NbPanel" ||
-    this.props.currentActiveAnalysisPanel === "MultinomPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    this.props.currentActiveAnalysisPanel === "MultinomPanel") && !this.props.setPanelFromNotebook){
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
-      let RandomSlopesObj = {...this.state.RandomSlopes}
-      let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+      let RandomSlopesObj = _.cloneDeep(this.state.RandomSlopes)
+      let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -203,6 +207,13 @@ export class RegPanel extends Component {
             CheckedRandomSlopes: {...CheckedRandomSlopesObj}
           })      
       }
+    }else if ((this.props.currentActiveAnalysisPanel === "LRPanel" ||
+      this.props.currentActiveAnalysisPanel === "LogitPanel" ||
+      this.props.currentActiveAnalysisPanel === "PoiPanel" ||
+      this.props.currentActiveAnalysisPanel === "NbPanel" ||
+      this.props.currentActiveAnalysisPanel === "MultinomPanel") && this.props.setPanelFromNotebook) {
+        this.setState({...this.props.tentativePanelState})
+        this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -221,11 +232,11 @@ export class RegPanel extends Component {
   }
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
-    let RandomSlopesObj = {...this.state.RandomSlopes}
-    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
-    let AnalysisSettingObj = {...this.state.AnalysisSetting}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
+    let RandomSlopesObj = _.cloneDeep(this.state.RandomSlopes)
+    let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
+    let AnalysisSettingObj = _.cloneDeep(this.state.AnalysisSetting)
     let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       
@@ -271,10 +282,10 @@ export class RegPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
-      let RandomSlopesObj = {...this.state.RandomSlopes}
-      let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
+      let RandomSlopesObj = _.cloneDeep(this.state.RandomSlopes)
+      let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
       let interactionArr = [...this.state.interaction]
       let checkedInteractionArr = [...this.state.checkedInteraction]
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
@@ -311,9 +322,9 @@ export class RegPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
-    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+    let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
     if (currentIndex === -1) {
         CheckedObj[from].push(varname)
     }else {
@@ -334,10 +345,10 @@ export class RegPanel extends Component {
   }
 
   handleToggleInteraction = (varname, from) => {
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let CheckedIntObj = [...this.state.checkedInteraction]
     let currentIndex = CheckedIntObj.indexOf(varname)
-    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+    let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
     
     if (currentIndex === -1) {
       CheckedIntObj.push(varname)
@@ -358,14 +369,11 @@ export class RegPanel extends Component {
     this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}, CheckedRandomSlopes: {...CheckedRandomSlopesObj}})
   }
 
-  handleToggleEMM = (varname, from) => {
-    let CheckObj = {...this.state.Checked}
-    
-  }
+
 
   handleToggleRE = (varname, from) => {
-    let CheckedObj = {...this.state.Checked}
-    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
+    let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
     let currentIndex = CheckedRandomSlopesObj[from].indexOf(varname)
 
     if (currentIndex === -1) {
@@ -397,8 +405,8 @@ export class RegPanel extends Component {
   }
 
   addRandomSlopes = (target) => {
-    let RandomSlopesObj = {...this.state.RandomSlopes}
-    let CheckedObj = {...this.state.Checked}
+    let RandomSlopesObj = _.cloneDeep(this.state.RandomSlopes)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
 
     
 
@@ -414,8 +422,8 @@ export class RegPanel extends Component {
 
   delRandomSlopes = (from) => {
     console.log("Deleting...")
-    let RandomSlopesObj = {...this.state.RandomSlopes}
-    let CheckedRandomSlopesObj = {...this.state.CheckedRandomSlopes}
+    let RandomSlopesObj = _.cloneDeep(this.state.RandomSlopes)
+    let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
     RandomSlopesObj[from] = this.not(RandomSlopesObj[from], CheckedRandomSlopesObj[from])
     CheckedRandomSlopesObj[from] = []
     this.setState({RandomSlopes: RandomSlopesObj, CheckedRandomSlopes: CheckedRandomSlopesObj})
@@ -424,7 +432,7 @@ export class RegPanel extends Component {
 
   addInteractionTerm = () => {
     let interactionObj = [...this.state.interaction]
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
       this.setState({showAlert: true, 
         alertText: "Please select at least two variables.",
@@ -452,7 +460,7 @@ export class RegPanel extends Component {
   }
 
   delInteractionTerm = () => {
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let interactionObj = this.not(this.state.interaction, this.state.checkedInteraction)
     CheckedObj["CovariatesEMMSelection"] = this.intersection(CheckedObj["CovariatesEMMSelection"], this.state.Variables["Covariates"].concat(interactionObj))
     this.setState({interaction: interactionObj, checkedInteraction: [], Checked: CheckedObj})
@@ -565,7 +573,7 @@ export class RegPanel extends Component {
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "library(car)\n\nres.std <- resid(res)/sd(resid(res))\nplot(res.std, ylab=\"Standardized Residuals\")" +
                 "\noutlierTest(res)\ninfIndexPlot(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\nvif(res1)\n\n"
+                "  geom_qq() +\n  geom_qq_line()\nvif(res)\n\n"
               }
             }
 
@@ -593,7 +601,7 @@ export class RegPanel extends Component {
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "library(car)\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
                 "\noutlierTest(res)\ninfIndexPlot(res)\nresidualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\nvif(res1)"
+                "  geom_qq() +\n  geom_qq_line()\nvif(res)"
               }
             }
           }
@@ -805,7 +813,7 @@ export class RegPanel extends Component {
     }
    
 
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -815,7 +823,7 @@ export class RegPanel extends Component {
   }
 
   updateAnalysisSetting = (event, targetPanel, target) => {
-    let AnalysisSettingObj = {...this.state.AnalysisSetting}
+    let AnalysisSettingObj = _.cloneDeep(this.state.AnalysisSetting)
     
 
     switch (target) {

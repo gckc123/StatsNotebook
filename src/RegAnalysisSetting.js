@@ -24,9 +24,9 @@ export class RegAnalysisSetting extends Component {
                     <div className = "NMA-Analysis-Box">
                         <div className = "InvisibleBottomBorder">Confidence Interval:</div>
                         <div><input className = "NMAAnalysisSettingInput"
-                        defaultValue = {this.props.AnalysisSetting[currentPanel].confLv}
-                        onBlur = {(event) => this.props.updateAnalysisSettingCallback(event, currentPanel, "confLv")}
-                        onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event, currentPanel, "confLv")}></input>%</div>
+                        value = {this.props.AnalysisSetting[currentPanel].confLv}
+                        onChange = {(event) => this.props.updateAnalysisSettingCallback(event, currentPanel, "confLv")}
+                        ></input>%</div>
                     </div>
 
                     {(currentPanel === "LogitPanel" || currentPanel === "PoiPanel" || currentPanel === "NbPanel" || currentPanel === "MultinomPanel") &&

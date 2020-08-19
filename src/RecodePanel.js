@@ -121,7 +121,10 @@ export class RecodePanel extends Component {
                 <div className="notebook-bar">
                   <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlkAndClear}
                   runScriptCallback = {this.props.runScriptCallback}
-                  tentativeScript = {this.state.rule}/>
+                  tentativeScript = {this.state.rule}
+                  currentActiveLeftPanel = ""
+                  currentActiveDataVizPanel = ""
+                  currentActiveAnalysisPanel = ""/>
                 </div>
                 <div className="compute-pane-target-var-box pt-2">
                         <div className = "InvisibleBottomBorder pl-2">New Variable</div>

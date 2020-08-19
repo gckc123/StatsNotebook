@@ -30,7 +30,7 @@ const StyledButton = withStyles({
      }   
 })(Button);
 
-export class ScatterplotVariableSelection extends Component {
+export class CorrelogramVariableSelection extends Component {
     
     genVariableSelectionList = (targetList) => {
         return (
@@ -62,25 +62,16 @@ export class ScatterplotVariableSelection extends Component {
     render () {
         return (
             <div className="analysis-pane">
-                <div className="Scatterplot-Variable-Selection-Box">
+                <div className="Correlogram-Variable-Selection-Box">
                     <div >Variables</div>
                     <div ></div>
-                    <div>Vertical Axis</div>
-                    <div className="Scatterplot-Available-Variable-List-Container" 
+                    <div>Horizontal Axis</div>
+                    <div className="Correlogram-Available-Variable-List-Container" 
                     onClick={() => this.props.changeArrowCallback("Available")}>
                         {this.genVariableSelectionList("Available")}
                     </div>
                     <div><center>
-                        {this.genArrowButton("Vertical", 1)}
-                    </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Vertical")}>
-                        {this.genVariableSelectionList("Vertical")}
-                    </div>
-
-                    <div></div>
-                    <div>Horizontal Axis</div>
-                    <div><center>
-                        {this.genArrowButton("Horizontal", 1)}
+                        {this.genArrowButton("Horizontal", 1000)}
                     </center></div>
                     <div onClick={() => this.props.changeArrowCallback("Horizontal")}>
                         {this.genVariableSelectionList("Horizontal")}
@@ -98,32 +89,6 @@ export class ScatterplotVariableSelection extends Component {
                         {this.genVariableSelectionList("FillColor")}
                     </div>
 
-                    <div></div>
-                    <div><i>Point shape</i></div>
-                    <div><center>
-                        {this.genArrowButton("Shape", 1)}
-                    </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Shape")}> 
-                        {this.genVariableSelectionList("Shape")}
-                    </div>
-
-                    <div></div>
-                    <div><i>Size</i></div>
-                    <div><center>
-                        {this.genArrowButton("Size", 1)}
-                    </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Size")}> 
-                        {this.genVariableSelectionList("Size")}
-                    </div>
-
-                    <div></div>
-                    <div><i>Facet</i></div>
-                    <div><center>
-                        {this.genArrowButton("Facet", 1)}
-                    </center></div>
-                    <div onClick={() => this.props.changeArrowCallback("Facet")}> 
-                        {this.genVariableSelectionList("Facet")}
-                    </div>
 
                 </div>
             </div>

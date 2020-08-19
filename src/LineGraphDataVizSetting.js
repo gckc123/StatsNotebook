@@ -11,6 +11,10 @@ import IconButton from '@material-ui/core/IconButton';
 import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField'
+import FormLabel from "@material-ui/core/FormLabel"
+import RadioGroup from "@material-ui/core/RadioGroup"
+import FormControlLabel from "@material-ui/core/FormControlLabel"
+import Radio from "@material-ui/core/Radio"
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -49,11 +53,12 @@ const StyledNativeSelect = withStyles({
     }
   })(NativeSelect);
   
-export class DensityDataVizSetting extends Component {
+export class LineGraphDataVizSetting extends Component {
 
     render () {
         return (
-            <div>              
+            <div>
+
                 <div className="NMACheckbox" hidden = {!this.props.imputedDataset}><Checkbox checked = {this.props.AnalysisSetting.originalData} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"originalData")}/>Plot using original data
                 <StyledTooltip title="For imputed dataset, the original data will be plotted. Uncheck this to plot the first imputed dataset.">

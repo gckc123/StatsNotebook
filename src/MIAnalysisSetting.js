@@ -31,7 +31,7 @@ export class MIAnalysisSetting extends Component {
                         style: {fontSize: 15} 
                       }}
                     className="Analysis-Setting-TextField"
-                    defaultValue={this.props.AnalysisSetting.M}
+                    value={this.props.AnalysisSetting.M}
                     onChange = {(event) => this.props.updateAnalysisSettingCallback(event,"M")}
                     /></div>
                 </div> 

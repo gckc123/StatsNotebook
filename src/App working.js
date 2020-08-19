@@ -28,7 +28,6 @@ import { BarChartPanel } from './BarChartPanel';
 import { ScatterplotPanel } from './ScatterplotPanel';
 import { CorrelogramPanel } from './CorrelogramPanel';
 import { LineGraphPanel } from './LineGraphPanel';
-import _ from "lodash";
 
 
 const electron = window.require('electron');
@@ -57,8 +56,6 @@ export class App extends Component {
       currentActiveLeftPanel: "",
       dataPanelWidth: 100,
       dataPanelHeight: 100,
-      tentativePanelState: {},
-      setPanelFromNotebook: false,
     }
     this.DataPanelContainerRef = React.createRef();        
   }
@@ -71,11 +68,11 @@ export class App extends Component {
     this.addExtraBlk(initialScript, true)
 
     ipcRenderer.on('RecvROutput', (event, content) => {
+      console.log(content)
       let ResultsJSON = JSON.parse(content.toString())
       
       if (ResultsJSON.OutputType[0] === "Normal" || ResultsJSON.OutputType[0] === "Warning" || ResultsJSON.OutputType[0] === "Message" || ResultsJSON.OutputType[0] === "Error") {
-        //let tmp = this.state.NotebookBlkList.slice()
-        let tmp = _.cloneDeep(this.state.NotebookBlkList)
+        let tmp = this.state.NotebookBlkList.slice()
         let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
         if (Reply2BlkIndex >= 0)
         {
@@ -94,7 +91,7 @@ export class App extends Component {
       }else if (ResultsJSON.OutputType[0] === "getData") {
         this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
       }else if(ResultsJSON.OutputType[0] === "END") {
-        let tmp = _.cloneDeep(this.state.NotebookBlkList)
+        let tmp = this.state.NotebookBlkList.slice()
         let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
         if (Reply2BlkIndex >= 0)
         {
@@ -104,7 +101,7 @@ export class App extends Component {
           this.setState({NotebookBlkList:[...tmp]}, console.log(this.state.NotebookBlkList))
         }
       }else if(ResultsJSON.OutputType[0] === "Graphics") {
-        let tmp = _.cloneDeep(this.state.NotebookBlkList)
+        let tmp = this.state.NotebookBlkList.slice()
         let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
         if (Reply2BlkIndex >= 0)
         {
@@ -163,7 +160,7 @@ export class App extends Component {
       imputedDataset: false,
       nrow: 0,
       ncol: 0,
-    })
+    }, console.log(this.state))
   }
 
   updateDataPanelDimension = () => {
@@ -176,7 +173,7 @@ export class App extends Component {
   }
 
   reorderNotebookBlk = (direction) => {
-    let NotebookBlkObj = _.cloneDeep(this.state.NotebookBlkList)
+    let NotebookBlkObj = [...this.state.NotebookBlkList]
     let CurrentActiveIndex = NotebookBlkObj.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
     if (direction === "Up") {
       if (CurrentActiveIndex > 0) {
@@ -236,42 +233,40 @@ export class App extends Component {
     mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
   }
 
-  addExtraBlk = (script,runScript, fromLeftPanel = "", fromPanel = "") => {
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+  addExtraBlk = (script,runScript, fromMenu = false, menuState = null) => {
+    let tmp = this.state.NotebookBlkList.slice()
     let randomID = Math.random().toString(36).substring(2, 15)
-    let genScript = ""
-    if (fromLeftPanel !== "") {
-      genScript = script
-    }
-    let updatedNotebookBlkList = [...tmp, {NotebookBlkScript: script, 
-      NotebookBlkID: randomID,
-      NotebookBlkROutput: [],
-      NotebookBlkNote: "",
-      Busy: false,
-      showEditor: false,
-      editorHTML: "",
-      Expanded: true,
-      Title: "--- Analysis Title Here ---",
-      fromLeftPanel: fromLeftPanel,
-      fromPanel: fromPanel,
-      //panelState: JSON.parse(JSON.stringify(this.state.tentativePanelState)),
-      panelState: _.cloneDeep(this.state.tentativePanelState),
-      genScript: genScript,
-      varState: {...this.state.CurrentVariableList},
-    }]
     if (runScript) {
         this.setState({ActiveBlkID: randomID,
         ActiveScript: script,
-        NotebookBlkList: [...updatedNotebookBlkList]}, () => this.runScript())
+        NotebookBlkList: [...tmp, {NotebookBlkScript: script, 
+          NotebookBlkID: randomID,
+          NotebookBlkROutput: [],
+          NotebookBlkNote: "",
+          Busy: false,
+          showEditor: false,
+          editorHTML: "",
+          Expanded: true,
+          Title: "--- Analysis Title Here ---",
+        }]}, () => this.runScript())
     }else{
         this.setState({ActiveBlkID: randomID,
           ActiveScript: script,
-          NotebookBlkList: [...updatedNotebookBlkList]})
+          NotebookBlkList: [...tmp, {NotebookBlkScript: script, 
+            NotebookBlkID: randomID,
+            NotebookBlkROutput: [],
+            NotebookBlkNote: "",
+            Busy: false,
+            showEditor: false,
+            editorHTML: "",
+            Expanded: true,
+            Title: "--- Analysis Title Here ---",
+          }]})
     }  
   }
 
   gainFocus = (index) => {
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    let tmp = this.state.NotebookBlkList.slice()
     this.setState({ActiveScript: tmp[index].NotebookBlkScript, ActiveBlkID: tmp[index].NotebookBlkID})
   }
 
@@ -281,7 +276,7 @@ export class App extends Component {
   }
 
   updateNotebookBlkState = (index, script, title, editorHTML) => {
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    let tmp = this.state.NotebookBlkList.slice()
     tmp[index].Title = title
     tmp[index].NotebookBlkScript = script
     tmp[index].editorHTML = editorHTML
@@ -289,19 +284,19 @@ export class App extends Component {
   }
 
   toggleTEditor = (index) => {
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    let tmp = this.state.NotebookBlkList.slice()
     tmp[index].showEditor = !tmp[index].showEditor
     this.setState({NotebookBlkList: [...tmp]})
   }
 
   toggleNotebookBlk = (index) => {
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    let tmp = this.state.NotebookBlkList.slice()
     tmp[index].Expanded = !tmp[index].Expanded
     this.setState({NotebookBlkList: [...tmp]})
   }
 
   updateAEditorValue = (index, newValue, execute) => {
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    let tmp = this.state.NotebookBlkList.slice()
     tmp[index].NotebookBlkScript = newValue
     if (execute) {
       this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID}, () => this.runScript())  
@@ -338,7 +333,7 @@ export class App extends Component {
   }
 
   runScript = () => {  
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    let tmp = this.state.NotebookBlkList.slice()
     let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
     if (CurrentActiveIndex >= 0) {
       tmp[CurrentActiveIndex].NotebookBlkROutput = [];
@@ -368,49 +363,12 @@ export class App extends Component {
     this.setState({currentActiveLeftPanel: "DataPanel", currentActiveDataPanel: "DataPanel"})
   }
 
-  updateTentativeScript = (codeString, panelState = {}) => {
-    if (codeString !== this.state.tentativeScript || JSON.stringify(panelState) !== JSON.stringify(this.state.tentativePanelState)) {
-      this.setState({tentativeScript: codeString, tentativePanelState: _.cloneDeep(panelState)})
+  updateTentativeScript = (codeString) => {
+    if (codeString !== this.state.tentativeScript) {
+      this.setState({tentativeScript: codeString})
     }
   }
   
-  setPanelFromNotebookToFalse = () => {
-    this.setState({setPanelFromNotebook: false}, () => console.log("Set to FALSE!"))
-  }
-
-  restorePanelSetting = (index) => {
-    
-    let tmp = _.cloneDeep(this.state.NotebookBlkList)
-
-    
-    switch (tmp[index].fromLeftPanel) {
-      case "AnalysisPanel":
-        this.setState({
-          currentActiveLeftPanel: tmp[index].fromLeftPanel,
-          currentActiveAnalysisPanel: tmp[index].fromPanel,
-          currentActiveDataPanel: "",
-          currentActiveDataVizPanel: "",
-          tentativePanelState: {...tmp[index].panelState},
-          tentativeScript: tmp[index].genScript,
-          setPanelFromNotebook: true,
-        }, () => console.log("Call to panel restoration successfully!"))
-        break;
-      case "DataVizPanel":
-        this.setState({
-          currentActiveLeftPanel: tmp[index].formLeftPanel,
-          currentActiveDataVizPanel: tmp[index].fromPanel,
-          currentActiveDataPanel: "",
-          currentActiveAnalysisPanel: "",
-          tentativePanelState: {...tmp[index].panelState},
-          tentativeScript: tmp[index].genScript,
-          setPanelFromNotebook: true,
-        })
-        break;
-      default:
-        break;
-    }
-  }
-
   newNotebook = () => {
     console.log("New Notebook")
     this.setState({tentativeScript: "", ActiveScript: "", NotebookBlkList: []})
@@ -495,10 +453,7 @@ export class App extends Component {
                   <div className="notebook-bar">
                   <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlk}
                   runScriptCallback = {this.runScript}
-                  tentativeScript = {this.state.tentativeScript}
-                  currentActiveLeftPanel = {this.state.currentActiveLeftPanel}
-                  currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                  currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                  tentativeScript = {this.state.tentativeScript}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
@@ -506,10 +461,7 @@ export class App extends Component {
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "NMAPanel"}>
@@ -518,10 +470,7 @@ export class App extends Component {
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MAPanel"}>
@@ -530,10 +479,7 @@ export class App extends Component {
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MIPanel"}>
@@ -543,10 +489,7 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     CPU = {this.state.CPU}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "LRPanel" &&
@@ -561,10 +504,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     imputedDataset = {this.state.imputedDataset}
-                    CPU = {this.state.CPU}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    CPU = {this.state.CPU}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "DescriptivePanel"}>
@@ -573,10 +513,7 @@ export class App extends Component {
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "CrosstabPanel"}>
@@ -585,10 +522,7 @@ export class App extends Component {
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
-                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
                   </div>
                   
                   <div hidden={this.state.currentActiveAnalysisPanel !== "ANOVAPanel"}>
@@ -599,10 +533,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     imputedDataset = {this.state.imputedDataset}
-                    CPU = {this.state.CPU}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    CPU = {this.state.CPU}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "IndependentTTestPanel"}>
@@ -613,10 +544,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     imputedDataset = {this.state.imputedDataset}
-                    CPU = {this.state.CPU}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    CPU = {this.state.CPU}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "DependentTTestPanel"}>
@@ -627,10 +555,7 @@ export class App extends Component {
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     imputedDataset = {this.state.imputedDataset}
-                    CPU = {this.state.CPU}
-                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
-                    tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    CPU = {this.state.CPU}/>
                   </div>
                 </div>
                 
@@ -638,10 +563,7 @@ export class App extends Component {
                   <div className="notebook-bar">
                   <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlk}
                   runScriptCallback = {this.runScript}
-                  tentativeScript = {this.state.tentativeScript}
-                  currentActiveLeftPanel = {this.state.currentActiveLeftPanel}
-                  currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                  currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}/>
+                  tentativeScript = {this.state.tentativeScript}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "HistogramPanel"}>
@@ -730,8 +652,6 @@ export class App extends Component {
                     updateNotebookBlkStateCallback = {this.updateNotebookBlkState}
                     toggleNotebookBlkCallback = {this.toggleNotebookBlk}
                     ActiveBlkID = {this.state.ActiveBlkID}
-                    restorePanelSettingCallback = {this.restorePanelSetting}
-                    CurrentVariableList = {this.state.CurrentVariableList}
                   />  
               </div>
             </div>

@@ -10,6 +10,7 @@ import "./App.css";
 import "./AnalysisPanelElements.css";
 import { DependentTTestAnalysisSetting } from "./DependentTTestAnalysisSetting";
 import { Alert } from './Alert.js'
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -70,6 +71,7 @@ export class DependentTTestPanel extends Component {
         },
 
         hideToRight: {
+            Variable1: false,
             Variable2: false,
         },
         tentativeScript: "",
@@ -96,7 +98,7 @@ export class DependentTTestPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "DependentTTestPanel") {
+    if (this.props.currentActiveAnalysisPanel === "DependentTTestPanel" && !this.props.setPanelFromNotebook) {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -122,6 +124,9 @@ export class DependentTTestPanel extends Component {
             Checked: {...CheckedObj}, 
           })      
       }
+    }else if((this.props.currentActiveAnalysisPanel === "DependentTTestPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -132,11 +137,6 @@ export class DependentTTestPanel extends Component {
 
   not = (array1, array2) => {
       return array1.filter((item) => array2.indexOf(item) === -1)
-  }
-
-  notInInt = (term, intArray) => {
-    let pattern = "^"+term+"\\*|\\*"+term+"\\*|"+"\\*"+term+"$"
-    return intArray.filter((item) => item.search(pattern) === -1)
   }
 
   handleToRight = (target, maxElement) => {
@@ -229,9 +229,7 @@ export class DependentTTestPanel extends Component {
 
   buildCode = () => {
 
-    let codeString =""
-    let currentPanel = this.props.currentActiveAnalysisPanel
-
+    let codeString = ""
     
     this.state.Variables.Variable1.forEach((item, index) =>{
       codeString = codeString + "t.test(currentDataset$" + item + ", currentDataset$" + this.state.Variables.Variable2[index] + ", paired = TRUE, "+
@@ -256,10 +254,9 @@ export class DependentTTestPanel extends Component {
         codeString = codeString + "ggplot(currentDataset, aes(sample = " + this.state.Variables.Variable2[index] + ")) +\n" +
         "  geom_qq() +\n  geom_qq_line()\n\n"
       }
-      console.log(codeString)
     })
     
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -285,7 +282,6 @@ export class DependentTTestPanel extends Component {
         break;
     }
 
-    console.log(AnalysisSettingObj)
     this.setState({AnalysisSetting: {...AnalysisSettingObj}})
   }
 
@@ -303,7 +299,6 @@ export class DependentTTestPanel extends Component {
 
   render () {
     let analysisType = "Dependent sample T-Test"
-    let currentPanel = this.props.currentActiveAnalysisPanel
   
     return (
       <div className="mt-2">    

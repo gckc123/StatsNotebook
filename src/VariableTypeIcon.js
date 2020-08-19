@@ -8,6 +8,7 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import PieChartIcon from '@material-ui/icons/PieChart';
 import DensityIcon from "./icon/DensityOrange.svg";
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const OrangeIconButton = withStyles({
     root: {
@@ -29,8 +30,10 @@ class ChangeVariableTypeMenu extends Component {
         let script = ""
         if (targetType === "numeric" || targetType === "character") {
             script = "currentDataset$" + this.props.targetVar + " <- as." + targetType + "(currentDataset$" + this.props.targetVar + ")"
-        }else {
+        }else if (targetType === "factor"){
             script = "currentDataset$" + this.props.targetVar + " <- " + targetType + "(currentDataset$" + this.props.targetVar +", exclude = c(\"\", NA))"    
+        }else if (targetType === "date") {
+            script = "currentDataset$" + this.props.targetVar + " <- as_date(currentDataset$" + this.props.targetVar +")"    
         }
         this.props.addExtraBlkCallback(script, true)
         this.props.handleClose()
@@ -63,6 +66,11 @@ class ChangeVariableTypeMenu extends Component {
                 disabled = {this.props.disableItem === "Character"}>
                 <TextRotationNoneIcon style={{color: "orange", paddingRight: "2px"}}/>
                 Text (Character)</MenuItem>
+                <MenuItem onClick={() => this.changeVariableType("date")} disableRipple style={MenuItemStyle}
+                disabled = {this.props.disableItem === "Date"}>
+                <DateRangeIcon style={{color: "orange", paddingRight: "2px"}}/>
+                Date-Time</MenuItem>
+
             </Menu>
         )
     }
@@ -127,6 +135,19 @@ export class VariableTypeIcon extends Component {
                     </OrangeIconButton>
                     <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                     disableItem = "Character"
+                    addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                    targetVar = {this.props.targetVar}/>
+                    </>
+                )
+            }
+            if (this.props.CurrentVariableList[this.props.targetVar][0] === "Date") {
+                return (
+                    <>
+                    <OrangeIconButton key={this.props.targetVar} edge="end" disableRipple size="small" onClick={this.handleMenu}>
+                        <DateRangeIcon fontSize="small"/>
+                    </OrangeIconButton>
+                    <ChangeVariableTypeMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                    disableItem = "Date"
                     addExtraBlkCallback = {this.props.addExtraBlkCallback}
                     targetVar = {this.props.targetVar}/>
                     </>

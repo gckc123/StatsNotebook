@@ -19,10 +19,10 @@ export class MAAnalysisSetting extends Component {
             <div>
                 <div className="NMA-Analysis-Box">
                     <div className="InvisibleBottomBorder">Confidence Interval:</div>
-                    <div><input defaultValue={this.props.AnalysisSetting.ConfLv}
+                    <div><input value={this.props.AnalysisSetting.ConfLv}
                     className="NMAAnalysisSettingInput"
-                    onBlur = {(event) => this.props.updateAnalysisSettingCallback(event,"ConfLv")}
-                    onMouseLeave = {(event) => this.props.updateAnalysisSettingCallback(event,"ConfLv")}></input>%</div>
+                    onChange = {(event) => this.props.updateAnalysisSettingCallback(event,"ConfLv")}
+                    ></input>%</div>
                 </div> 
 
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.FixedEffect} size="small"

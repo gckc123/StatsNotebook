@@ -5,10 +5,10 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { ScatterplotVariableSelection } from './ScatterplotVariableSelection';
+import { LineGraphVariableSelection } from './LineGraphVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { ScatterplotDataVizSetting } from "./ScatterplotDataVizSetting";
+import { LineGraphDataVizSetting } from "./LineGraphDataVizSetting";
 import { LabelAndThemeDataVizSetting } from "./LabelAndThemeDataVizSetting";
 import { Alert } from './Alert.js'
 
@@ -55,7 +55,7 @@ const ExpansionPanelDetails = withStyles((theme) => ({
 }))(MuiExpansionPanelDetails);
 
 
-export class ScatterplotPanel extends Component {
+export class LineGraphPanel extends Component {
 
   constructor(props) {
     super(props)
@@ -66,7 +66,6 @@ export class ScatterplotPanel extends Component {
             Vertical: [],
             FillColor: [],
             Shape: [],
-            Size: [],
             Facet: [],
             
         }, 
@@ -77,16 +76,14 @@ export class ScatterplotPanel extends Component {
             Vertical: [],
             FillColor: [],
             Shape: [],
-            Size: [],
-            Facet: [],          
+            Facet: [],
+        
         },
         hideToRight: {
             Horizontal: false,
             Vertical: false,
             FillColor: false,
             Shape: false,
-            Size: false,
-            Facet: false,
         },
         tentativeScript: "",
         panels: {
@@ -138,7 +135,7 @@ export class ScatterplotPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveDataVizPanel === "ScatterplotPanel") {
+    if (this.props.currentActiveDataVizPanel === "LineGraphPanel") {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
@@ -184,7 +181,7 @@ export class ScatterplotPanel extends Component {
       
       if (target === "Vertical" || (target === "Horizontal")) {
         toRightVars = CheckedObj["Available"].filter((item) =>
-          this.props.CurrentVariableList[item][0] === "Numeric"
+          (this.props.CurrentVariableList[item][0] === "Numeric" || this.props.CurrentVariableList[item][0] === "Date")
         )
 
         if (toRightVars.length !== CheckedObj["Available"].length) {
@@ -194,7 +191,7 @@ export class ScatterplotPanel extends Component {
           })
         }
 
-      }else if ((target === "FillColor") || (target === "Facet" || (target === "Shape") || (target === "Size"))) {
+      }else if ((target === "FillColor") || (target === "Shape") || (target === "Facet")) {
         toRightVars = CheckedObj["Available"].filter((item) =>
           this.props.CurrentVariableList[item][0] !== "Character"
         )
@@ -274,75 +271,58 @@ export class ScatterplotPanel extends Component {
 
   buildCode = () => {
     let codeString = (this.state.AnalysisSetting.theme === "theme_ipsum" ? "library(hrbrthemes)\n\n" : "")
-    codeString = codeString + (this.state.AnalysisSetting.marginalPlot ? "library(ggMarginal)\n\n": "")
-
-    let dropNA = this.state.Variables.FillColor.concat(this.state.Variables.Facet).concat(this.state.Variables.Shape).concat(this.state.Variables.Size)
     
-    let vertical = this.state.Variables.Vertical[0]
-    let horizontal = this.state.Variables.Horizontal[0]
-
-
-      codeString = codeString + "currentDataset %>%\n" 
-
-      if (this.props.imputedDataset) {
-        if (this.state.AnalysisSetting.originalData) {
-          codeString = codeString + "  filter(.imp == 0) %>%\n"
-          codeString = codeString + (dropNA.length > 0 ? "  drop_na("+ dropNA.join(", ") + ") %>%\n" : "")
-        }else{
-          codeString = codeString + "  filter(.imp == 1) %>%\n"
-        }
-      }else{
+    let dropNA = this.state.Variables.FillColor.concat(this.state.Variables.Shape)
+    
+    codeString = codeString + "currentDataset %>%\n" 
+    
+    if (this.props.imputedDataset) {
+      if (this.state.AnalysisSetting.originalData) {
+        codeString = codeString + "  filter(.imp == 0) %>%\n"
         codeString = codeString + (dropNA.length > 0 ? "  drop_na("+ dropNA.join(", ") + ") %>%\n" : "")
+      }else{
+        codeString = codeString + "  filter(.imp == 1) %>%\n"
       }
+    }else{
+      codeString = codeString + (dropNA.length > 0 ? "  drop_na("+ dropNA.join(", ") + ") %>%\n" : "")
+    }
       
-      codeString = codeString + 
-      "  ggplot(aes(y = " + vertical + ", x = " + horizontal + 
-      ((this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", color = " + this.state.Variables.FillColor[0] : "") +
-      ((this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0) ? ", shape = " + this.state.Variables.Shape[0] : "") + 
-      (this.state.Variables.Size.length > 0 ? ", size = " + this.state.Variables.Size[0] : "") + ")) +\n" +
-      "    geom_jitter(alpha = " + (this.state.Variables.Size.length > 0 ? "0.4" : "0.6")
-      + ((!this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", aes(color = " + 
-      this.state.Variables.FillColor[0] + 
-      ((!this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0)? ", shape = " + this.state.Variables.Shape[0] : "") + ")": "") + 
-      ((!this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0) && this.state.Variables.FillColor.length === 0 ? ", aes(shape =" +
-      this.state.Variables.Shape[0] + ")" : "") + 
-      ", na.rm = TRUE)" +
-      (this.state.AnalysisSetting.fittedLine ? "+\n    geom_smooth(method = \"" + this.state.AnalysisSetting.fittedLineType + "\"" + 
-      (this.state.AnalysisSetting.confInt ? ", se = TRUE, level = " + this.state.AnalysisSetting.confIntLevel/100 : "") + ", na.rm = TRUE, show.legend = FALSE)": "") + 
-      (this.state.AnalysisSetting.rug ? "+\n    geom_rug(col = \"steelblue\", alpha = 0.1, size = 1)" : "") + 
-      (this.state.Variables.Size.length > 0 ? "+\n    scale_size(range = c(0.1, 8))" :"") +
-      (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
-      this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
-      (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
-      (this.state.AnalysisSetting.theme === "ggplot_default" ? "" : "+\n    " + this.state.AnalysisSetting.theme + "(base_family = \"sans\")") + 
-      (this.state.AnalysisSetting.title === "" ? "" : "+\n    ggtitle(\"" + this.state.AnalysisSetting.title + "\")") +
-      (this.state.AnalysisSetting.xlab === "" ? "" : "+\n    xlab(\"" + this.state.AnalysisSetting.xlab + "\")") +
-      (this.state.AnalysisSetting.ylab === "" ? "" : "+\n    ylab(\"" + this.state.AnalysisSetting.ylab + "\")") +
-      (this.state.AnalysisSetting.legendFillLab === "" ? "" : "+\n    labs(color = \"" + this.state.AnalysisSetting.legendFillLab + "\", fill = \""+ 
-      this.state.AnalysisSetting.legendFillLab +"\")") +
-      (this.state.AnalysisSetting.legendShapeLab === "" ? "" : "+\n    labs(shape = \"" + this.state.AnalysisSetting.legendShapeLab + "\")") +
-      (this.state.AnalysisSetting.legendSizeLab === "" ? "" : "+\n    labs(size = \"" + this.state.AnalysisSetting.legendSizeLab + "\")") +
-      (this.state.AnalysisSetting.titleFontSize === "" ? "" : "+\n    theme(plot.title = element_text(size = " + 
-      this.state.AnalysisSetting.titleFontSize + "))") +
-      (this.state.AnalysisSetting.xlabFontSize === "" ? "" : "+\n    theme(axis.title.x = element_text(size = " + 
-      this.state.AnalysisSetting.xlabFontSize + "))") +
-      (this.state.AnalysisSetting.ylabFontSize === "" ? "" : "+\n    theme(axis.title.y = element_text(size = " + 
-      this.state.AnalysisSetting.ylabFontSize + "))") +
-      (this.state.AnalysisSetting.xAxisFontSize === "" ? "" : "+\n    theme(axis.text.x = element_text(size = " + 
-      this.state.AnalysisSetting.xAxisFontSize + "))") +
-      (this.state.AnalysisSetting.yAxisFontSize === "" ? "" : "+\n    theme(axis.text.y = element_text(size = " + 
-      this.state.AnalysisSetting.yAxisFontSize + "))") +
-      (this.state.AnalysisSetting.legendFontSize === "" ? "" : "+\n    theme(legend.title = element_text(size = " + 
-      this.state.AnalysisSetting.legendFontSize + "))") +
-      (this.state.AnalysisSetting.legendKeyFontSize === "" ? "" : "+\n    theme(legend.text = element_text(size = " + 
-      this.state.AnalysisSetting.legendKeyFontSize + "))") +
-      (this.state.AnalysisSetting.facetFontSize === "" ? "" : "+\n    theme(strip.text.x = element_text(size = " + 
-      this.state.AnalysisSetting.facetFontSize + "))") +
-      (this.state.AnalysisSetting.legendPosition === "right" ? "" : "+\n    theme(legend.position = \"" + this.state.AnalysisSetting.legendPosition +"\")") +
-      (this.state.AnalysisSetting.marginalPlot? "%>%\n    ggMarginal(type=\""+ this.state.AnalysisSetting.marginalPlotType +"\")": "") +
-      "\n\n"
+    codeString = codeString +
+    "  ggplot(aes(y = " + this.state.Variables.Vertical[0] + ", x = " + this.state.Variables.Horizontal[0] +
+    (this.state.Variables.FillColor.length > 0 ? ", color = " + this.state.Variables.FillColor[0] : "") +
+    (this.state.Variables.Shape.length > 0 ? ", linetype = " + this.state.Variables.Shape[0] : "") + ")) +\n" +
+    "    geom_line(na.rm = TRUE, size = 1)" +
+    (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
+    this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
+    (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
+    (this.state.AnalysisSetting.theme === "ggplot_default" ? "" : "+\n    " + this.state.AnalysisSetting.theme + "(base_family = \"sans\")") + 
+    (this.state.AnalysisSetting.title === "" ? "" : "+\n    ggtitle(\"" + this.state.AnalysisSetting.title + "\")") +
+    (this.state.AnalysisSetting.xlab === "" ? "" : "+\n    xlab(\"" + this.state.AnalysisSetting.xlab + "\")") +
+    (this.state.AnalysisSetting.ylab === "" ? "" : "+\n    ylab(\"" + this.state.AnalysisSetting.ylab + "\")") +
+    (this.state.AnalysisSetting.legendFillLab === "" ? "" : "+\n    labs(color = \"" + this.state.AnalysisSetting.legendFillLab + "\", fill = \""+ 
+    this.state.AnalysisSetting.legendFillLab +"\")") +
+    (this.state.AnalysisSetting.legendShapeLab === "" ? "" : "+\n    labs(shape = \"" + this.state.AnalysisSetting.legendShapeLab + "\")") +
+    (this.state.AnalysisSetting.legendSizeLab === "" ? "" : "+\n    labs(size = \"" + this.state.AnalysisSetting.legendSizeLab + "\")") +
+    (this.state.AnalysisSetting.titleFontSize === "" ? "" : "+\n    theme(plot.title = element_text(size = " + 
+    this.state.AnalysisSetting.titleFontSize + "))") +
+    (this.state.AnalysisSetting.xlabFontSize === "" ? "" : "+\n    theme(axis.title.x = element_text(size = " + 
+    this.state.AnalysisSetting.xlabFontSize + "))") +
+    (this.state.AnalysisSetting.ylabFontSize === "" ? "" : "+\n    theme(axis.title.y = element_text(size = " + 
+    this.state.AnalysisSetting.ylabFontSize + "))") +
+    (this.state.AnalysisSetting.xAxisFontSize === "" ? "" : "+\n    theme(axis.text.x = element_text(size = " + 
+    this.state.AnalysisSetting.xAxisFontSize + "))") +
+    (this.state.AnalysisSetting.yAxisFontSize === "" ? "" : "+\n    theme(axis.text.y = element_text(size = " + 
+    this.state.AnalysisSetting.yAxisFontSize + "))") +
+    (this.state.AnalysisSetting.legendFontSize === "" ? "" : "+\n    theme(legend.title = element_text(size = " + 
+    this.state.AnalysisSetting.legendFontSize + "))") +
+    (this.state.AnalysisSetting.legendKeyFontSize === "" ? "" : "+\n    theme(legend.text = element_text(size = " + 
+    this.state.AnalysisSetting.legendKeyFontSize + "))") +
+    (this.state.AnalysisSetting.facetFontSize === "" ? "" : "+\n    theme(strip.text.x = element_text(size = " + 
+    this.state.AnalysisSetting.facetFontSize + "))") +
+    (this.state.AnalysisSetting.legendPosition === "right" ? "" : "+\n    theme(legend.position = \"" + this.state.AnalysisSetting.legendPosition +"\")") +
+    "\n\n"
 
-    
+
     
 
     
@@ -388,12 +368,6 @@ export class ScatterplotPanel extends Component {
       case "marginalPlotType":
         AnalysisSettingObj[target] = event.target.value
         break;
-      case "fittedLine":
-      case "confInt":
-      case "byShape":
-      case "byFillColor":
-      case "marginalPlot":
-      case "rug":
       case "originalData":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
@@ -423,7 +397,7 @@ export class ScatterplotPanel extends Component {
   render () {
     return (
       <div className="mt-2"> 
-      {this.props.currentActiveDataVizPanel === "ScatterplotPanel" &&
+      {this.props.currentActiveDataVizPanel === "LineGraphPanel" &&
         <div>
           <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
           title = {this.state.alertTitle}
@@ -431,10 +405,10 @@ export class ScatterplotPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.variableSelection}
           onChange = {this.handlePanelExpansion("variableSelection")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Scatterplot</Typography>
+              <Typography>Line Graph</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <ScatterplotVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              <LineGraphVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
               Variables = {this.state.Variables}
               Checked = {this.state.Checked}
               hideToRight = {this.state.hideToRight}
@@ -451,10 +425,10 @@ export class ScatterplotPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.analysisSetting}
           onChange = {this.handlePanelExpansion("analysisSetting")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Scatterplot Setting</Typography>
+              <Typography>Line Graph Setting</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <ScatterplotDataVizSetting 
+              <LineGraphDataVizSetting 
               Variables = {this.state.Variables}
               CategoricalVarLevels = {this.props.CategoricalVarLevels}
               AnalysisSetting = {this.state.AnalysisSetting}
@@ -478,10 +452,9 @@ export class ScatterplotPanel extends Component {
               needFillLabel = {this.state.Variables.FillColor.length > 0}
               needColorLabel = {false}
               needShapeLabel = {this.state.Variables.Shape.length > 0}
-              needSizeLabel = {this.state.Variables.Size.length > 0}
               needYLim = {false}
               needXLim = {false}
-              needFacetFontSize = {this.state.Variables.Facet.length > 0}
+              needFacetFontSize = {true}
 
               />
             </ExpansionPanelDetails>

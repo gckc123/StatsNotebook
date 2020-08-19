@@ -73,19 +73,19 @@ export class ScatterplotDataVizSetting extends Component {
                         onChange = {(event) => this.props.updateAnalysisSettingCallback(event, "confIntLevel")}></input>% confidence band
                 </div>
 
-                <div className="NMACheckbox pl-3" hidden={!this.props.AnalysisSetting.fittedLine}><Checkbox checked = {this.props.AnalysisSetting.byShape} size="small"
+                <div className="NMACheckbox pl-3" hidden={!this.props.AnalysisSetting.fittedLine || this.props.Variables.Shape.length === 0}><Checkbox checked = {this.props.AnalysisSetting.byShape} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"byShape")}/>By point shape
                 </div>        
 
-                <div className="NMACheckbox pl-3" hidden={!this.props.AnalysisSetting.fittedLine}><Checkbox checked = {this.props.AnalysisSetting.byFillColor} size="small"
+                <div className="NMACheckbox pl-3" hidden={!this.props.AnalysisSetting.fittedLine || this.props.Variables.FillColor === 0}><Checkbox checked = {this.props.AnalysisSetting.byFillColor} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"byFillColor")}/>By fill color
                 </div>        
                 
-                <div className="NMACheckbox" hidden={!this.props.AnalysisSetting.fittedLine}><Checkbox checked = {this.props.AnalysisSetting.rug} size="small"
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.rug} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"rug")}/>Add rug on sides
                 </div>        
                 
-                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.marginalPlot} size="small"
+                <div className="NMACheckbox" hidden={true}><Checkbox checked = {this.props.AnalysisSetting.marginalPlot} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"marginalPlot")}/>Add Marginal Plots <span hidden={!this.props.AnalysisSetting.marginalPlot}>using &nbsp;
                 <select className="select-box" onChange={(event) => this.props.updateAnalysisSettingCallback(event, "marginalPlotType")}>
                     <option value="histogram">Histogram</option>

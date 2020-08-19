@@ -12,6 +12,7 @@ import { ANOVAAnalysisSetting } from "./ANOVAAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
 import { EMMPanel } from './EMMPanel';
 import { Alert } from './Alert.js'
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -80,7 +81,9 @@ export class ANOVAPanel extends Component {
         checkedInteraction: [],
 
         hideToRight: {
+            Outcome: false,
             Covariates: false,
+            Weight: false,
         },
         tentativeScript: "",
         panels: {
@@ -111,9 +114,9 @@ export class ANOVAPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "ANOVAPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    if (this.props.currentActiveAnalysisPanel === "ANOVAPanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
 
       let allVarsInCurrentList = []
@@ -153,6 +156,9 @@ export class ANOVAPanel extends Component {
             checkedInteraction: [...checkedInteractionObj],
           })      
       }
+    }else if((this.props.currentActiveAnalysisPanel === "ANOVAPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -171,8 +177,8 @@ export class ANOVAPanel extends Component {
   }
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
@@ -210,8 +216,8 @@ export class ANOVAPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let interactionArr = [...this.state.interaction]
       let checkedInteractionArr = [...this.state.checkedInteraction]
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
@@ -241,7 +247,7 @@ export class ANOVAPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
     if (currentIndex === -1) {
         CheckedObj[from].push(varname)
@@ -259,7 +265,7 @@ export class ANOVAPanel extends Component {
   }
 
   handleToggleInteraction = (varname, from) => {
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let CheckedIntObj = [...this.state.checkedInteraction]
     let currentIndex = CheckedIntObj.indexOf(varname)
     
@@ -278,11 +284,6 @@ export class ANOVAPanel extends Component {
     this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}})
   }
 
-  handleToggleEMM = (varname, from) => {
-    let CheckObj = {...this.state.Checked}
-    
-  }
-
   changeArrow = (target) => {
       let hideToRightObj = {...this.state.hideToRight}
       if (target !== "Available") {
@@ -297,7 +298,7 @@ export class ANOVAPanel extends Component {
 
   addInteractionTerm = () => {
     let interactionObj = [...this.state.interaction]
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
       this.setState({showAlert: true, 
         alertText: "Please select at least two variables.",
@@ -325,7 +326,7 @@ export class ANOVAPanel extends Component {
   }
 
   delInteractionTerm = () => {
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let interactionObj = this.not(this.state.interaction, this.state.checkedInteraction)
     CheckedObj["CovariatesEMMSelection"] = this.intersection(CheckedObj["CovariatesEMMSelection"], this.state.Variables["Covariates"].concat(interactionObj))
     this.setState({interaction: interactionObj, checkedInteraction: [], Checked: CheckedObj})
@@ -399,8 +400,6 @@ export class ANOVAPanel extends Component {
         catIntTermArr.push(item)
       }
     })
-
-    console.log(catTermArr)
 
     if (this.state.AnalysisSetting[currentPanel].imputedDataset || this.state.AnalysisSetting[currentPanel].imputeMissing) {
       codeString = codeString +
@@ -499,7 +498,7 @@ export class ANOVAPanel extends Component {
 
 
     }
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {

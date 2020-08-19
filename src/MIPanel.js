@@ -10,7 +10,8 @@ import "./App.css";
 import "./AnalysisPanelElements.css";
 import { MIAnalysisSetting } from "./MIAnalysisSetting";
 import { AddInteraction } from './AddInteractions';
-import { Alert } from './Alert.js'
+import { Alert } from './Alert.js';
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -91,9 +92,9 @@ export class MIPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "MIPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    if (this.props.currentActiveAnalysisPanel === "MIPanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
@@ -128,6 +129,9 @@ export class MIPanel extends Component {
             interaction: [...interactionObj],
             checkedInteraction: [...checkedInteractionObj]})      
       }
+    }else if((this.props.currentActiveAnalysisPanel === "MIPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -146,8 +150,8 @@ export class MIPanel extends Component {
   }
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       
@@ -179,8 +183,8 @@ export class MIPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let interactionArr = [...this.state.interaction]
       let checkedInteractionArr = [...this.state.checkedInteraction]
 
@@ -209,7 +213,7 @@ export class MIPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
 
     if (currentIndex === -1) {
@@ -227,7 +231,7 @@ export class MIPanel extends Component {
   }
 
   handleToggleInteraction = (varname, from) => {
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let CheckedIntObj = [...this.state.checkedInteraction]
     let currentIndex = CheckedIntObj.indexOf(varname)
     
@@ -258,7 +262,7 @@ export class MIPanel extends Component {
 
   addInteractionTerm = () => {
     let interactionObj = [...this.state.interaction]
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     if (CheckedObj["CovariatesIntSelection"].length <= 1) {
       this.setState({showAlert: true, 
         alertText: "Please select at least two variables.",
@@ -304,7 +308,7 @@ export class MIPanel extends Component {
 
     
 
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {

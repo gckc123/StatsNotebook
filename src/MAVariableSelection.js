@@ -64,7 +64,10 @@ export class MAVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="MA-Variable-Selection-Box">
-                    <div> Variables</div>
+                    <div> Variables
+                    <StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div></div>
                     <div>Effect size 
                     <StyledTooltip title="For Risk/ Odds/ Hazard ratio, enter the log-effect size here.">

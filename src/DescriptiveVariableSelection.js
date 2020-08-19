@@ -64,7 +64,10 @@ export class DescriptiveVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="Descriptive-Variable-Selection-Box">
-                    <div> Variables</div>
+                    <div>Variables
+                    <StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div></div>
                     <div>Target Variables</div>
                     <div className="Descriptive-Available-Variable-List-Container" 

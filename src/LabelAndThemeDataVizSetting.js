@@ -1,22 +1,13 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import { withStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
 import NativeSelect from '@material-ui/core/NativeSelect';
-import Checkbox from '@material-ui/core/Checkbox';
-import {faArrowUp} from '@fortawesome/free-solid-svg-icons';
-import {faArrowDown} from '@fortawesome/free-solid-svg-icons';
-import {faListUl} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import IconButton from '@material-ui/core/IconButton';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
-import TextField from '@material-ui/core/TextField'
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from "@material-ui/core/Button";
 

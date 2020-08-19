@@ -125,7 +125,10 @@ export class ComputePanel extends Component {
                   runScriptCallback = {this.props.runScriptCallback}
                   tentativeScript = {"currentDataset$" + this.state.targetVar +
                   " <- " + this.state.formula
-                  }/>
+                  }
+                  currentActiveLeftPanel = ""
+                  currentActiveDataVizPanel = ""
+                  currentActiveAnalysisPanel = ""/>
                 </div>
                 <div className = "p-2">
                     <div className="compute-pane-target-var-box pt-2">
