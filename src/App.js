@@ -30,7 +30,6 @@ import { CorrelogramPanel } from './CorrelogramPanel';
 import { LineGraphPanel } from './LineGraphPanel';
 import _ from "lodash";
 
-
 const electron = window.require('electron');
 const mainProcess = electron.remote.require('./start.js');
 const ipcRenderer = electron.ipcRenderer;
@@ -381,8 +380,7 @@ export class App extends Component {
   restorePanelSetting = (index) => {
     
     let tmp = _.cloneDeep(this.state.NotebookBlkList)
-
-    
+ 
     switch (tmp[index].fromLeftPanel) {
       case "AnalysisPanel":
         this.setState({
@@ -393,11 +391,11 @@ export class App extends Component {
           tentativePanelState: {...tmp[index].panelState},
           tentativeScript: tmp[index].genScript,
           setPanelFromNotebook: true,
-        }, () => console.log("Call to panel restoration successfully!"))
+        })
         break;
       case "DataVizPanel":
         this.setState({
-          currentActiveLeftPanel: tmp[index].formLeftPanel,
+          currentActiveLeftPanel: tmp[index].fromLeftPanel,
           currentActiveDataVizPanel: tmp[index].fromPanel,
           currentActiveDataPanel: "",
           currentActiveAnalysisPanel: "",
@@ -651,7 +649,10 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                    imputedDataset = {this.state.imputedDataset}/>
+                    imputedDataset = {this.state.imputedDataset}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
                   </div>
                   
                   <div hidden={this.state.currentActiveDataVizPanel !== "DensityPanel"}>
@@ -661,7 +662,10 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                    imputedDataset = {this.state.imputedDataset}/>
+                    imputedDataset = {this.state.imputedDataset}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "BoxplotPanel"}>
@@ -671,7 +675,10 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                    imputedDataset = {this.state.imputedDataset}/>
+                    imputedDataset = {this.state.imputedDataset}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "BarChartPanel"}>
@@ -681,7 +688,10 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                    imputedDataset = {this.state.imputedDataset}/>
+                    imputedDataset = {this.state.imputedDataset}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "ScatterplotPanel"}>
@@ -691,7 +701,10 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                    imputedDataset = {this.state.imputedDataset}/>
+                    imputedDataset = {this.state.imputedDataset}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "CorrelogramPanel"}>
@@ -701,7 +714,10 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                    imputedDataset = {this.state.imputedDataset}/>
+                    imputedDataset = {this.state.imputedDataset}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
                   </div>
                   
                   <div hidden={this.state.currentActiveDataVizPanel !== "LineGraphPanel"}>
@@ -711,7 +727,10 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveDataVizPanel = {this.state.currentActiveDataVizPanel}
-                    imputedDataset = {this.state.imputedDataset}/>
+                    imputedDataset = {this.state.imputedDataset}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
                   </div>
 
                 </div>

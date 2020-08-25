@@ -160,7 +160,7 @@ export class RegPanel extends Component {
     this.props.currentActiveAnalysisPanel === "MultinomPanel") && !this.props.setPanelFromNotebook){
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
-      let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
+      let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
       let RandomSlopesObj = _.cloneDeep(this.state.RandomSlopes)
       let CheckedRandomSlopesObj = _.cloneDeep(this.state.CheckedRandomSlopes)
       let allVarsInCurrentList = []
@@ -804,7 +804,8 @@ export class RegPanel extends Component {
           
           if (this.state.AnalysisSetting["InteractionPlot"] && terms.length >= 2) {
             codeString = codeString + "emmip(res, " + terms[1] + " ~ " + terms[0] + (terms.length >= 3 ? " | " + terms[2] : "") +
-              numericCode + ",\n  CIs = TRUE, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ", position = \"jitter\")\n\n"
+              numericCode + ",\n  CIs = TRUE, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ", position = \"jitter\"" + 
+              (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = \"response\"": "") +")\n\n"
             
           }
         })

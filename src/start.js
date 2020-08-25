@@ -6,7 +6,8 @@ const path = require('path')
 const isDev = require('electron-is-dev')
 const BrowserWindow = electron.BrowserWindow
 
-const zmq = require('zeromq')
+const zmq = require('zeromq');
+const { exec } = require('child_process');
 
 let mainWindow = null; // #A
 
@@ -28,7 +29,7 @@ app.on('ready', () => {
     show:false,
     width: 1366,
     height: 768,
-    title: "PandaPIG",
+    title: "PandaPIG3000",
   });
   //mainWindow.removeMenu()
 
@@ -40,6 +41,29 @@ app.on('ready', () => {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    console.log(path.join(__dirname, '../extraResources/R/bin/R'))
+
+    exec("echo StatsNotebookServer::start_server() |\""+path.join(__dirname, '../extraResources/R/bin/R')+"\" --no-save", (err, stdout, stderr) => {
+      if (err) {
+        console.log(err)
+        console.log("Unable to start R.")
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      console.log(`stderr: ${stderr}`);
+    })
+
+  })
+
+  mainWindow.on('close', () => {
+    let CloseRCode = {
+      RequestType: "RCode",
+      Script: "off",
+      fromBlk: ""
+    }
+    let CodeString = JSON.stringify(CloseRCode)
+    send2R(CodeString)
+    console.log("sending code to shut down R.")
   })
 
   mainWindow.on('closed', () => {
@@ -137,3 +161,4 @@ const sendFileName = (file) => {
 const showRReply = (reply) => {
   mainWindow.webContents.send('RecvROutput', reply)
 }
+

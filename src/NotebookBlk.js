@@ -168,7 +168,7 @@ export class NotebookBlk extends Component {
         return (
             <div className={`pt-2 pb-2 pr-2 pl-5 notebook-block mt-2 ${this.props.ActiveBlkID === this.props.notebookState.NotebookBlkID ? "active-block" : "inactive-block"}`}
                 onClick={() => this.props.gainFocusCallback(this.props.index)}>
-                    <div>
+                    <div hidden={true}>
                         <StyledIconButton size="small" onClick={() => this.dumpStatus()}><CloseIcon /></StyledIconButton><span className="Warning">Dump notebook status</span>
                     </div>
                     <div hidden = {!this.state.showMessage}>

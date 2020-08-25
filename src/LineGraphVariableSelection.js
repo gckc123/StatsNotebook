@@ -65,7 +65,10 @@ export class LineGraphVariableSelection extends Component {
                 <div className="LineGraph-Variable-Selection-Box">
                     <div >Variables</div>
                     <div ></div>
-                    <div>Vertical Axis</div>
+                    <div>Vertical Axis
+                    <StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div className="LineGraph-Available-Variable-List-Container" 
                     onClick={() => this.props.changeArrowCallback("Available")}>
                         {this.genVariableSelectionList("Available")}

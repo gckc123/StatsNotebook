@@ -63,7 +63,10 @@ export class ScatterplotVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="Scatterplot-Variable-Selection-Box">
-                    <div >Variables</div>
+                    <div >Variables
+                    <StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div ></div>
                     <div>Vertical Axis</div>
                     <div className="Scatterplot-Available-Variable-List-Container" 

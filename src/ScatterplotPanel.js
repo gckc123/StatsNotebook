@@ -11,6 +11,7 @@ import "./AnalysisPanelElements.css";
 import { ScatterplotDataVizSetting } from "./ScatterplotDataVizSetting";
 import { LabelAndThemeDataVizSetting } from "./LabelAndThemeDataVizSetting";
 import { Alert } from './Alert.js'
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -138,10 +139,10 @@ export class ScatterplotPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveDataVizPanel === "ScatterplotPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
-      let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
+    if (this.props.currentActiveDataVizPanel === "ScatterplotPanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
+      let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -161,6 +162,9 @@ export class ScatterplotPanel extends Component {
           this.setState({Variables:{...VariablesObj}})
           this.setState({Checked: {...CheckedObj}})
       }
+    }else if((this.props.currentActiveDataVizPanel === "ScatterplotPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -175,8 +179,8 @@ export class ScatterplotPanel extends Component {
 
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let toRightVars = []
     
 
@@ -225,8 +229,8 @@ export class ScatterplotPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
@@ -243,7 +247,7 @@ export class ScatterplotPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
 
     if (currentIndex === -1) {
@@ -348,7 +352,7 @@ export class ScatterplotPanel extends Component {
     
 
     
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {

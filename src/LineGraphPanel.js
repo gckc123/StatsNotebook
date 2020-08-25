@@ -10,7 +10,8 @@ import "./App.css";
 import "./AnalysisPanelElements.css";
 import { LineGraphDataVizSetting } from "./LineGraphDataVizSetting";
 import { LabelAndThemeDataVizSetting } from "./LabelAndThemeDataVizSetting";
-import { Alert } from './Alert.js'
+import { Alert } from './Alert.js';
+import _ from "lodash";
 
 const ExpansionPanel = withStyles({
   root: {
@@ -135,9 +136,9 @@ export class LineGraphPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveDataVizPanel === "LineGraphPanel") {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+    if (this.props.currentActiveDataVizPanel === "LineGraphPanel" && !this.props.setPanelFromNotebook) {
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
@@ -158,6 +159,9 @@ export class LineGraphPanel extends Component {
           this.setState({Variables:{...VariablesObj}})
           this.setState({Checked: {...CheckedObj}})
       }
+    }else if((this.props.currentActiveDataVizPanel === "LineGraphPanel" && this.props.setPanelFromNotebook)) {
+      this.setState({...this.props.tentativePanelState})
+      this.props.setPanelFromNotebookToFalseCallback()
     }
     // Need to check if any treatment variable is removed?
   }
@@ -172,8 +176,8 @@ export class LineGraphPanel extends Component {
 
 
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let toRightVars = []
     
 
@@ -222,8 +226,8 @@ export class LineGraphPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
@@ -240,7 +244,7 @@ export class LineGraphPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
 
     if (currentIndex === -1) {
@@ -328,7 +332,7 @@ export class LineGraphPanel extends Component {
     
 
     
-    this.props.updateTentativeScriptCallback(codeString) 
+    this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {

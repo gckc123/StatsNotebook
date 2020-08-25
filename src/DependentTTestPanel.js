@@ -101,7 +101,7 @@ export class DependentTTestPanel extends Component {
     if (this.props.currentActiveAnalysisPanel === "DependentTTestPanel" && !this.props.setPanelFromNotebook) {
       let VariablesObj = {...this.state.Variables}
       let CheckedObj = {...this.state.Checked}
-      let CurrentVariableList = Object.keys(this.props.CurrentVariableList)
+      let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
 
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
