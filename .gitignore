@@ -3,6 +3,9 @@
 # extraResources
 /extraResources
 
+# distribution
+/dist
+
 # dependencies
 /node_modules
 /.pnp

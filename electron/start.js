@@ -36,21 +36,24 @@ app.on('ready', () => {
   mainWindow.loadURL(
     isDev
       ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`,
+      : `file://${path.join(__dirname, '../index.html')}`,
   )
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-    console.log(path.join(__dirname, '../extraResources/R/bin/R'))
+    
+    let RPath = (isDev? path.join(__dirname, '../extraResources/R/bin/R') : path.join(process.resourcesPath, 'extraResources/R/bin/R'))
 
-    exec("echo StatsNotebookServer::start_server() |\""+path.join(__dirname, '../extraResources/R/bin/R')+"\" --no-save", (err, stdout, stderr) => {
+    exec("echo StatsNotebookServer::start_server() |\""+ RPath +"\" --no-save", (err, stdout, stderr) => {
       if (err) {
         console.log(err)
         console.log("Unable to start R.")
+        
         return;
       }
       console.log(`stdout: ${stdout}`);
       console.log(`stderr: ${stderr}`);
+      
     })
 
   })

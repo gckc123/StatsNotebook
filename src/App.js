@@ -31,7 +31,7 @@ import { LineGraphPanel } from './LineGraphPanel';
 import _ from "lodash";
 
 const electron = window.require('electron');
-const mainProcess = electron.remote.require('./start.js');
+const mainProcess = electron.remote.require('../electron/start.js');
 const ipcRenderer = electron.ipcRenderer;
 
 export class App extends Component {

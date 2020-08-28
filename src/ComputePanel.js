@@ -1,48 +1,12 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import "./Notebook.css";
-import {VariableSelectionList} from './VariableSelectionList';
 import Button from '@material-ui/core/Button';
-import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
-import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
 import "./DataPanelElements.css"; 
 import {List} from 'react-virtualized';
-import { VariableTypeIcon } from './VariableTypeIcon';
-import {faPlay} from '@fortawesome/free-solid-svg-icons';
-import {faShare} from '@fortawesome/free-solid-svg-icons';
 import { AnalysisPanelBar } from "./AnalysisPanelBar";
-
-const StyledTooltip = withStyles({
-    tooltip: {
-      fontSize: "12px"
-    }
-  })(Tooltip);
-  
-
-const StyledButton = withStyles({
-    root: {
-        '&:hover': {
-            color: '#40a9ff',
-            opacity: 1,
-        },
-        '&:focus': {
-            outline: 'none',
-        },
-    },
-     label: {
-        textTransform: 'none',
-     }   
-})(Button);
-
-const styles = {
-    floatingLabelFocusStyle: {
-        color: "#FFFFFF"
-    }
-}
 
 export class ComputePanel extends Component {
     

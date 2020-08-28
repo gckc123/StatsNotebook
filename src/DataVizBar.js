@@ -5,18 +5,10 @@ import "./App.css";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
-import BoxplotIcon from "./icon/boxplot.svg";
-import RegressionIcon from "./icon/regression.svg";
-import MediationIcon from "./icon/Mediation.svg";
-import MissingDataIcon from "./icon/missingdata.svg";
-import MetaAnalysisIcon from "./icon/Meta_analysis.svg";
 import DensityIcon from "./icon/Density.svg";
 import PieChartIcon from "./icon/PieChart.svg";
 import missingdataIcon from "./icon/missingdata.svg"
 import LineIcon from "./icon/Line.svg"
-import RobotIcon from "./icon/robot.svg";
-
-
 
 const StyledButton = withStyles({
     root: {

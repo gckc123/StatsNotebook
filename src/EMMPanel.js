@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import {VariableSelectionList} from './VariableSelectionList';
 import Button from '@material-ui/core/Button';
-import {faArrowRight, faGrinTongueSquint} from '@fortawesome/free-solid-svg-icons';
+import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';

@@ -1,33 +1,25 @@
 {
-  "name": "electron-react",
+  "name": "StatsNotebook",
   "version": "0.1.0",
   "private": true,
-  "main": "src/start.js",
+  "main": "electron/start.js",
   "homepage": "./",
   "build": {
     "files": [
       "build/**/*",
       "node_modules/**/*"
     ],
-    "publish": {
-      "provider": "",
-      "repo": "",
-      "owner": ""
-    },
-    "appId": "some.id.ofyours",
     "directories": {
       "buildResources": "assets"
     },
-    "win": {
-      "category": "your.app.category.type",
-      "iconUrl": ""
-    },
-    "mac": {
-      "category": "your.app.category.type",
-      "iconUrl": ""
-    },
     "extraResources": [
-      "./extraResources/**"
+      {
+        "from": "./extraResources/",
+        "to": "extraResources",
+        "filter": [
+          "**/*"
+        ]
+      }
     ]
   },
   "dependencies": {
@@ -43,7 +35,6 @@
     "ace-builds": "^1.4.11",
     "bootstrap": "^4.4.1",
     "draft-js": "^0.11.5",
-    "electron": "^8.2.3",
     "electron-is-dev": "^1.2.0",
     "jQuery": "^1.7.4",
     "lodash": "^4.17.15",
@@ -73,7 +64,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build-electron": "mkdir build/extraResources && robocopy electron build/electron /S & robocopy extraResources build/extraResources /S",
+    "package": "electron-builder build --win -c.extraMetadata.main=build/electron/start.js --publish never"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -91,7 +84,7 @@
     ]
   },
   "devDependencies": {
+    "electron": "^8.5.0",
     "electron-builder": "^22.8.0"
-  },
-  "package": "electron-builder build --mac --win -c.extraMetadata.main=build/electron/main.js --publish never"
+  }
 }

@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import { withStyles } from '@material-ui/core/styles';
-import Checkbox from '@material-ui/core/Checkbox';
 import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField'

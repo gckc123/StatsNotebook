@@ -6,14 +6,6 @@ import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
-import Tooltip from '@material-ui/core/Tooltip';
-
-const StyledTooltip = withStyles({
-    tooltip: {
-      fontSize: "12px"
-    }
-  })(Tooltip);
 
 const StyledButton = withStyles({
     root: {

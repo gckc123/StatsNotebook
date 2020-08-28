@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import "./Notebook.css";
-import {VariableSelectionList} from './VariableSelectionList';
+
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import {faLessThan} from '@fortawesome/free-solid-svg-icons';
@@ -10,7 +10,7 @@ import {faGreaterThan} from '@fortawesome/free-solid-svg-icons';
 import {faGreaterThanEqual} from '@fortawesome/free-solid-svg-icons';
 import {faEquals} from '@fortawesome/free-solid-svg-icons';
 import {faNotEqual} from '@fortawesome/free-solid-svg-icons';
-import {faPowerOff} from '@fortawesome/free-solid-svg-icons';
+
 
 import {faArrowDown} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -19,9 +19,8 @@ import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
 import "./DataPanelElements.css"; 
 import {List} from 'react-virtualized';
-import { VariableTypeIcon } from './VariableTypeIcon';
-import {faPlay} from '@fortawesome/free-solid-svg-icons';
-import {faShare} from '@fortawesome/free-solid-svg-icons';
+
+
 import { AnalysisPanelBar } from "./AnalysisPanelBar";
 
 const StyledTooltip = withStyles({
