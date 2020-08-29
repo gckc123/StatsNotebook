@@ -1,12 +1,28 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import "./Notebook.css";
-import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
 import "./DataPanelElements.css"; 
 import {List} from 'react-virtualized';
 import { AnalysisPanelBar } from "./AnalysisPanelBar";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import { withStyles } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
+import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
+import IconButton from '@material-ui/core/IconButton'
+
+const StyledTooltip = withStyles({
+    tooltip: {
+      fontSize: "12px"
+    }
+  })(Tooltip);
+  
+const StyledIconButton = withStyles({
+    root: {
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+})(IconButton);
 
 export class ComputePanel extends Component {
     
@@ -27,7 +43,8 @@ export class ComputePanel extends Component {
                 "Row Sum": "rowSums(cbind(??,??), na.rm = TRUE)",
                 "Square root": "sqrt(??)",
                 "Uniform Random Number": "runif(nrow(currentDataset))",
-            }
+            },
+            sortAvailable: 0,
         }
     }
 
@@ -53,7 +70,7 @@ export class ComputePanel extends Component {
     _rowRenderer = ({index, key, style}) => {
         return (
             <div key = {key} style = {{...style}} className = "pl-2 ComputeFormulaVarList">
-                <div onClick = {() => this.addVars2Formula(this.props.CurrentVariableListSorted[index])}>{this.props.CurrentVariableListSorted[index]}</div>
+                <div onClick = {() => this.addVars2Formula(this.props.CurrentVariableList[this.state.sortAvailable][index])}>{this.props.CurrentVariableList[this.state.sortAvailable][index]}</div>
             </div>
         )
     }
@@ -77,6 +94,10 @@ export class ComputePanel extends Component {
     addExtraBlkAndClear = (script, run) => {
         this.props.addExtraBlkCallback(script, run)
         this.setState({targetVar: "", formula: ""})
+    }
+
+    setSortAvailable = () => {
+        this.setState({sortAvailable: (this.state.sortAvailable === 0 ? 1 : 0)})
     }
 
     render () {
@@ -107,14 +128,19 @@ export class ComputePanel extends Component {
                         onKeyDown={(event) => this.setState({currentCursorPosition: event.target.selectionStart})}
                         onChange={(event) => {this.handleChange(event, "formula")}}></textarea></div>
                     <div className="compute-pane-var-formula-box">
-                        <div>Variable</div>
+                        <div>Variable
+                        <StyledTooltip title="Sort alphabetically, from capital to lower case." placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.setSortAvailable()}>
+                            <FontAwesomeIcon icon={faSortAlphaDown} size="1x" color={this.state.sortAvailable === 1? "hotpink" : "grey"}/></StyledIconButton>
+                        </span></StyledTooltip>
+                        </div>
                         <div className= "pl-2">Function</div>
                         <div>
                             <List
                                 style={{border: "1px solid #e8e8e8"}}
                                 width={243}
                                 height={300}
-                                rowCount={this.props.CurrentVariableListSorted.length}
+                                rowCount={this.props.CurrentVariableList[0].length}
                                 rowHeight={25}
                                 rowRenderer = {this._rowRenderer}
                             />

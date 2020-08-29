@@ -93,16 +93,17 @@ export class DependentTTestPanel extends Component {
         showAlert: false,
         alertText: "",
         alertTitle: "",
+        sortAvailable: false,
     }
   }
 
   componentDidUpdate() {
     //Update variable list
     if (this.props.currentActiveAnalysisPanel === "DependentTTestPanel" && !this.props.setPanelFromNotebook) {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
-
+      let CurrentVariableListByFileOrder = [...CurrentVariableList]
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -118,7 +119,11 @@ export class DependentTTestPanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-          VariablesObj["Available"].sort()
+          if (this.state.sortAvailable) {
+            VariablesObj["Available"].sort()
+          }else{
+            VariablesObj["Available"] = this.intersection(CurrentVariableListByFileOrder, VariablesObj["Available"])
+          }
 
           this.setState({Variables:{...VariablesObj}, 
             Checked: {...CheckedObj}, 
@@ -139,9 +144,20 @@ export class DependentTTestPanel extends Component {
       return array1.filter((item) => array2.indexOf(item) === -1)
   }
 
+  setSortAvailable = () => {
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    if (this.state.sortAvailable) {
+      /*Changing to file order */
+      VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+    }else {
+      VariablesObj["Available"].sort()
+    }
+    this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
+  }
+
   handleToRight = (target, maxElement) => {
-    let VariablesObj = {...this.state.Variables}
-    let CheckedObj = {...this.state.Checked}
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let AnalysisSettingObj = {...this.state.AnalysisSetting}
     let toRightVars = []
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
@@ -179,13 +195,17 @@ export class DependentTTestPanel extends Component {
   }
 
   handleToLeft = (from) => {
-      let VariablesObj = {...this.state.Variables}
-      let CheckedObj = {...this.state.Checked}
+      let VariablesObj = _.cloneDeep(this.state.Variables)
+      let CheckedObj = _.cloneDeep(this.state.Checked)
 
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
-      VariablesObj["Available"].sort()
+      if (this.state.sortAvailable) {
+        VariablesObj["Available"].sort()
+      }else{
+        VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+      }
 
 
 
@@ -197,7 +217,7 @@ export class DependentTTestPanel extends Component {
   
   handleToggle = (varname, from) => {
     
-    let CheckedObj = {...this.state.Checked}
+    let CheckedObj = _.cloneDeep(this.state.Checked)
     let currentIndex = CheckedObj[from].indexOf(varname);
     if (currentIndex === -1) {
         CheckedObj[from].push(varname)
@@ -324,6 +344,8 @@ export class DependentTTestPanel extends Component {
               handleToRightCallback = {this.handleToRight}
               handleToLeftCallback = {this.handleToLeft}
               addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              setSortAvailableCallback = {this.setSortAvailable}
+              sortAvailable = {this.state.sortAvailable}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

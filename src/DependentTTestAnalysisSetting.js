@@ -28,7 +28,7 @@ export class DependentTTestAnalysisSetting extends Component {
 
                     <div className="NMACheckbox"><Checkbox size="small" 
                     checked = {this.props.AnalysisSetting[currentPanel].robust}
-                    onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"robust")}/>Robust Independent T-test
+                    onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"robust")}/>Robust Dependent T-test
                         <StyledTooltip title={<div>Yuen's test will be conducted on trimmed mean. <br/><br/> Use this test if there are extreme observations.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                     </div>

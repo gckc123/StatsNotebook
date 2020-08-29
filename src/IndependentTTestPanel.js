@@ -103,7 +103,7 @@ export class IndependentTTestPanel extends Component {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
-
+      let CurrentVariableListByFileOrder = [...CurrentVariableList]
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -119,7 +119,11 @@ export class IndependentTTestPanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-          VariablesObj["Available"].sort()
+          if (this.state.sortAvailable) {
+            VariablesObj["Available"].sort()
+          }else{
+            VariablesObj["Available"] = this.intersection(CurrentVariableListByFileOrder, VariablesObj["Available"])
+          }
 
           this.setState({Variables:{...VariablesObj}, 
             Checked: {...CheckedObj}, 
@@ -138,6 +142,17 @@ export class IndependentTTestPanel extends Component {
 
   not = (array1, array2) => {
       return array1.filter((item) => array2.indexOf(item) === -1)
+  }
+
+  setSortAvailable = () => {
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    if (this.state.sortAvailable) {
+      /*Changing to file order */
+      VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+    }else {
+      VariablesObj["Available"].sort()
+    }
+    this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
   }
 
   handleToRight = (target, maxElement) => {
@@ -186,7 +201,11 @@ export class IndependentTTestPanel extends Component {
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
-      VariablesObj["Available"].sort()
+      if (this.state.sortAvailable) {
+        VariablesObj["Available"].sort()
+      }else{
+        VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+      }
 
 
 
@@ -231,8 +250,6 @@ export class IndependentTTestPanel extends Component {
   buildCode = () => {
 
     let codeString =""
-    let currentPanel = this.props.currentActiveAnalysisPanel
-
     
     this.state.Variables.Outcome.forEach((item) =>{
       codeString = codeString + "t.test(" + item + " ~ " + this.state.Variables.Covariates[0] + ", data = currentDataset, var.equal = "+
@@ -306,8 +323,7 @@ export class IndependentTTestPanel extends Component {
 
   render () {
     let analysisType = "Independent sample T-test"
-    let currentPanel = this.props.currentActiveAnalysisPanel
-  
+ 
     return (
       <div className="mt-2">    
       {(this.props.currentActiveAnalysisPanel === "IndependentTTestPanel") &&
@@ -332,6 +348,8 @@ export class IndependentTTestPanel extends Component {
               handleToRightCallback = {this.handleToRight}
               handleToLeftCallback = {this.handleToLeft}
               addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              setSortAvailableCallback = {this.setSortAvailable}
+              sortAvailable = {this.state.sortAvailable}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

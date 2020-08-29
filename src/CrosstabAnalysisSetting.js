@@ -28,26 +28,26 @@ export class CrosstabAnalysisSetting extends Component {
                 </div>
                 <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.ColPercent} size="small"
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"ColPercent")}
-                        disabled={this.props.Variables.ColVars.length == 0 || this.props.Variables.SplitBy.length > 0}/>Column Percentage
+                        disabled={this.props.Variables.ColVars.length === 0 || this.props.Variables.SplitBy.length > 0}/>Column Percentage
                         <StyledTooltip title="Column percentage is not available when the analysis is split by other variables.">
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                 </div>
                 <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.OverallPercent} size="small"
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"OverallPercent")}
-                        disabled={this.props.Variables.ColVars.length == 0 || this.props.Variables.SplitBy.length > 0}/>Overall Percentage
+                        disabled={this.props.Variables.ColVars.length === 0 || this.props.Variables.SplitBy.length > 0}/>Overall Percentage
                         <StyledTooltip title="Overall percentage is not available when the analysis is split by other variables.">
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                         </div>
                 
                 <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.ChisqTest} size="small"
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"ChisqTest")}
-                        disabled={this.props.Variables.ColVars.length == 0 || this.props.Variables.SplitBy.length > 0}/>Chi-sq Test
+                        disabled={this.props.Variables.ColVars.length === 0 || this.props.Variables.SplitBy.length > 0}/>Chi-sq Test
                         <StyledTooltip title={<div>Chi-sq test is used to examine association between two categorical variables. Use Fisher's test if the any of the expected cell count is less than 5.<br/><br/>
                         Not available when the analysis is split by other variables.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
                 <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.FisherTest} size="small"
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"FisherTest")}
-                        disabled={this.props.Variables.ColVars.length == 0 || this.props.Variables.SplitBy.length > 0}/>Fisher's Exact Test
+                        disabled={this.props.Variables.ColVars.length === 0 || this.props.Variables.SplitBy.length > 0}/>Fisher's Exact Test
                         <StyledTooltip title={<div>Fisher's test is for small sample and might throw an error for large sample.<br/><br/>
                         Not available when the analysis is split by other variables.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>

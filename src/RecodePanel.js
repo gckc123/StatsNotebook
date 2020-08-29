@@ -1,17 +1,13 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import "./Notebook.css";
-
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
 import {faLessThan} from '@fortawesome/free-solid-svg-icons';
 import {faLessThanEqual} from '@fortawesome/free-solid-svg-icons';
 import {faGreaterThan} from '@fortawesome/free-solid-svg-icons';
 import {faGreaterThanEqual} from '@fortawesome/free-solid-svg-icons';
 import {faEquals} from '@fortawesome/free-solid-svg-icons';
 import {faNotEqual} from '@fortawesome/free-solid-svg-icons';
-
-
 import {faArrowDown} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
@@ -19,7 +15,8 @@ import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
 import "./DataPanelElements.css"; 
 import {List} from 'react-virtualized';
-
+import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
+import IconButton from '@material-ui/core/IconButton'
 
 import { AnalysisPanelBar } from "./AnalysisPanelBar";
 
@@ -28,15 +25,6 @@ const StyledTooltip = withStyles({
       fontSize: "12px"
     }
   })(Tooltip);
-
-const OrangeIconButton = withStyles({
-    root: {
-        '&:focus': {
-            outline: 'none',
-        },
-        color: "orange",
-    },
-})(IconButton);
 
 
 const StyledButton = withStyles({
@@ -54,11 +42,14 @@ const StyledButton = withStyles({
      }   
 })(Button);
 
-const styles = {
-    floatingLabelFocusStyle: {
-        color: "#FFFFFF"
-    }
-}
+const StyledIconButton = withStyles({
+    root: {
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+})(IconButton);
+
 
 export class RecodePanel extends Component {
     
@@ -70,6 +61,7 @@ export class RecodePanel extends Component {
             newVar: "",
             newValue: "",
             rule: "",
+            sortAvailable: 0,
         }
     }
 
@@ -85,7 +77,7 @@ export class RecodePanel extends Component {
     _rowRenderer = ({index, key, style}) => {
         return (
             <div key = {key} style = {{...style}} className = "pl-2 ComputeFormulaVarList">
-                <div onClick = {() => this.add2Condition("currentDataset$"+this.props.CurrentVariableListSorted[index])}>{this.props.CurrentVariableListSorted[index]}</div>
+                <div onClick = {() => this.add2Condition("currentDataset$"+this.props.CurrentVariableList[this.state.sortAvailable][index])}>{this.props.CurrentVariableList[this.state.sortAvailable][index]}</div>
             </div>
         )
     }
@@ -112,6 +104,10 @@ export class RecodePanel extends Component {
         this.setState({condition: "", newVar: "", newValue: "", rule: "", currentCursorPosition: 0})
     }
 
+    setSortAvailable = () => {
+        this.setState({sortAvailable: (this.state.sortAvailable === 0 ? 1 : 0)})
+    }
+
     render () {
         
         return (
@@ -133,7 +129,13 @@ export class RecodePanel extends Component {
                     </div>
                 <div className = "pl-2 pt-2 pr-2 Filter-pane-box">
     
-                    <div>Variable</div>
+                    <div>Variable
+                    <StyledTooltip title="Sort alphabetically, from capital to lower case." placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.setSortAvailable()}>
+                            <FontAwesomeIcon icon={faSortAlphaDown} size="1x" color={this.state.sortAvailable === 1? "hotpink" : "grey"}/></StyledIconButton>
+                    </span></StyledTooltip>
+
+                    </div>
                     <div>New Value <StyledTooltip title={<div>If the new variable is a categorical variable, the new value needs to be wrapped with " " (double quotation mark).
                             <br/>For exapmle, the value "abc" below needs to be wrapped with " ". <br/>
                             currentDataset$variableX == "abc"
@@ -147,7 +149,7 @@ export class RecodePanel extends Component {
                             style={{border: "1px solid #e8e8e8"}}
                             width={175}
                             height={250}
-                            rowCount={this.props.CurrentVariableListSorted.length}
+                            rowCount={this.props.CurrentVariableList[0].length}
                             rowHeight={25}
                             rowRenderer = {this._rowRenderer}
                         />

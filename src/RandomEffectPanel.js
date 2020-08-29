@@ -8,8 +8,6 @@ import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
-import {faArrowAltCircleLeft} from '@fortawesome/free-regular-svg-icons';
-import {faArrowAltCircleRight} from '@fortawesome/free-regular-svg-icons';
 
 const StyledIconButton = withStyles({
     root: {

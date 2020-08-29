@@ -6,6 +6,15 @@ import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
+import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
+import IconButton from '@material-ui/core/IconButton'
+
+const StyledTooltip = withStyles({
+    tooltip: {
+      fontSize: "12px"
+    }
+  })(Tooltip);
 
 const StyledButton = withStyles({
     root: {
@@ -21,6 +30,14 @@ const StyledButton = withStyles({
         textTransform: 'none',
      }   
 })(Button);
+
+const StyledIconButton = withStyles({
+    root: {
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+})(IconButton);
 
 export class BarChartVariableSelection extends Component {
     
@@ -55,7 +72,12 @@ export class BarChartVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="Histogram-Variable-Selection-Box">
-                    <div >Variables</div>
+                    <div >Variables
+                    <StyledTooltip title="Sort alphabetically, from capital to lower case." placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.props.setSortAvailableCallback()}>
+                            <FontAwesomeIcon icon={faSortAlphaDown} size="1x" color={this.props.sortAvailable? "hotpink" : "grey"}/></StyledIconButton>
+                        </span></StyledTooltip>
+                    </div>
                     <div ></div>
                     <div>Horizontal Axis</div>
                     <div className="Histogram-Available-Variable-List-Container" 

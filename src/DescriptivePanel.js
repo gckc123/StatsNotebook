@@ -105,6 +105,7 @@ export class DescriptivePanel extends Component {
         showAlert: false,
         alertText: "",
         alertTitle: "",
+        sortAvailable: false,
     }
   }
 
@@ -114,6 +115,7 @@ export class DescriptivePanel extends Component {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
+      let CurrentVariableListByFileOrder = [...CurrentVariableList]
       let allVarsInCurrentList = []
       let TargetsCatArr = [...this.state.TargetsCat]
       let TargetsNumArr = [...this.state.TargetsNum]
@@ -134,7 +136,11 @@ export class DescriptivePanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-          VariablesObj["Available"].sort()
+          if (this.state.sortAvailable) {
+            VariablesObj["Available"].sort()
+          }else{
+            VariablesObj["Available"] = this.intersection(CurrentVariableListByFileOrder, VariablesObj["Available"])
+          }
 
           this.setState({Variables:{...VariablesObj}, TargetsCat: [...TargetsCatArr], TargetsNum: [...TargetsNumArr], Checked: {...CheckedObj}})
       }
@@ -153,6 +159,16 @@ export class DescriptivePanel extends Component {
       return array1.filter((item) => array2.indexOf(item) === -1)
   }
 
+  setSortAvailable = () => {
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    if (this.state.sortAvailable) {
+      /*Changing to file order */
+      VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+    }else {
+      VariablesObj["Available"].sort()
+    }
+    this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
+  }
 
   handleToRight = (target, maxElement) => {
     let VariablesObj = _.cloneDeep(this.state.Variables)
@@ -229,7 +245,12 @@ export class DescriptivePanel extends Component {
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
-      VariablesObj["Available"].sort()
+      if (this.state.sortAvailable) {
+        VariablesObj["Available"].sort()
+      }else{
+        VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+      }
+
 
       if (from === "Targets") {
         TargetsCatArr = this.not(TargetsCatArr, CheckedObj[from])
@@ -520,6 +541,8 @@ export class DescriptivePanel extends Component {
                 handleToRightCallback = {this.handleToRight}
                 handleToLeftCallback = {this.handleToLeft}
                 addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                setSortAvailableCallback = {this.setSortAvailable}
+                sortAvailable = {this.state.sortAvailable}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

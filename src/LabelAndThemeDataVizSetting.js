@@ -1,9 +1,6 @@
 import React, {Component} from 'react';
 import "./AnalysisPanelElements.css";
 import { withStyles } from '@material-ui/core/styles';
-import NativeSelect from '@material-ui/core/NativeSelect';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from '@material-ui/core/DialogActions';
@@ -25,40 +22,6 @@ const StyledButton = withStyles({
         textTransform: 'none',
      }   
 })(Button);
-
-const StyledTooltip = withStyles({
-    tooltip: {
-      fontSize: "12px"
-    }
-  })(Tooltip);
-
-  const StyledIconButton = withStyles({
-    root: {
-        '&:hover': {
-            color: '#40a9ff',
-            opacity: 1,
-        },
-        '&:focus': {
-            outline: 'none',
-        },
-    },
-})(IconButton);
-
-const StyledNativeSelect = withStyles({
-    root: {
-        '&:focus': {
-            outline: 'none',
-            background: 'white',
-        },
-    },
-    select: {
-        paddingLeft: '5px',
-        "&:focus": {
-            border: "0px",
-            outline: "0px",
-        }
-    }
-  })(NativeSelect);
 
 export class LabelAndThemeDataVizSetting extends Component {
 

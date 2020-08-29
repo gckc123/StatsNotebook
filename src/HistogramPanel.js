@@ -120,6 +120,7 @@ export class HistogramPanel extends Component {
         showAlert: false,
         alertText: "",
         alertTitle: "",
+        sortAvailable: false,
     }
   }
 
@@ -129,6 +130,7 @@ export class HistogramPanel extends Component {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
+      let CurrentVariableListByFileOrder = [...CurrentVariableList]
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -143,7 +145,11 @@ export class HistogramPanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-          VariablesObj["Available"].sort()
+          if (this.state.sortAvailable) {
+            VariablesObj["Available"].sort()
+          }else{
+            VariablesObj["Available"] = this.intersection(CurrentVariableListByFileOrder, VariablesObj["Available"])
+          }
 
           this.setState({Variables:{...VariablesObj}})
           this.setState({Checked: {...CheckedObj}})
@@ -163,6 +169,16 @@ export class HistogramPanel extends Component {
       return array1.filter((item) => array2.indexOf(item) === -1)
   }
 
+  setSortAvailable = () => {
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    if (this.state.sortAvailable) {
+      /*Changing to file order */
+      VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+    }else {
+      VariablesObj["Available"].sort()
+    }
+    this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
+  }
 
   handleToRight = (target, maxElement) => {
     let VariablesObj = _.cloneDeep(this.state.Variables)
@@ -224,7 +240,11 @@ export class HistogramPanel extends Component {
         this.setState({TreatmentLvs: [...this.getTreatmentLv(VariablesObj)]}, () => console.log(this.state.TreatmentLvs))       
       }
 
-      VariablesObj["Available"].sort()
+      if (this.state.sortAvailable) {
+        VariablesObj["Available"].sort()
+      }else{
+        VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+      }
 
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},
@@ -284,7 +304,7 @@ export class HistogramPanel extends Component {
       codeString = codeString + 
       "  ggplot(aes(x = " + item + (this.state.Variables.FillColor.length > 0 ? ", "+ 
       (this.state.AnalysisSetting.Polygon? "color" : "fill") + " = " + this.state.Variables.FillColor[0] : "") +
-      "))" + " +\n  " +
+      ")) +\n  " +
       (this.state.AnalysisSetting.Polygon ? "  geom_freqpoly" :"  geom_histogram") + "(" + 
       (this.state.AnalysisSetting.Density ? "aes(y = ..density..), " : "") +
       (this.state.AnalysisSetting.SetBinWidth ? "binwidth = " + this.state.AnalysisSetting.BinWidth + ", ": "") + 
@@ -415,6 +435,8 @@ export class HistogramPanel extends Component {
               handleToRightCallback = {this.handleToRight}
               handleToLeftCallback = {this.handleToLeft}
               addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              setSortAvailableCallback = {this.setSortAvailable}
+              sortAvailable = {this.state.sortAvailable}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

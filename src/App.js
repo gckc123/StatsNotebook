@@ -100,7 +100,7 @@ export class App extends Component {
           tmp[Reply2BlkIndex].Busy = false
           tmp[Reply2BlkIndex].NotebookBlkROutput = [...tmp[Reply2BlkIndex].NotebookBlkROutput, {OutputType: ["Normal"],
             Output: ["--- End Of Execution ---"]}];
-          this.setState({NotebookBlkList:[...tmp]}, console.log(this.state.NotebookBlkList))
+          this.setState({NotebookBlkList:[...tmp]})
         }
       }else if(ResultsJSON.OutputType[0] === "Graphics") {
         let tmp = _.cloneDeep(this.state.NotebookBlkList)
@@ -455,8 +455,7 @@ export class App extends Component {
 
                   <div hidden={this.state.currentActiveDataPanel !== "ComputePanel"}>
                     <ComputePanel CategoricalVarLevels = {this.state.CategoricalVarLevels}
-                    CurrentVariableListSorted = {Object.keys(this.state.CurrentVariableList).sort()}
-                    CurrentVariableList = {this.state.CurrentVariableList}
+                    CurrentVariableList = {[Object.keys(this.state.CurrentVariableList), Object.keys(this.state.CurrentVariableList).sort()]}
                     ncol = {this.state.ncol}
                     dataPanelHeight = {this.state.dataPanelHeight}
                     dataPanelWidth = {this.state.dataPanelWidth}
@@ -467,8 +466,7 @@ export class App extends Component {
                   }
                   <div hidden={this.state.currentActiveDataPanel !== "FilterPanel"}>
                     <FilterPanel CategoricalVarLevels = {this.state.CategoricalVarLevels}
-                    CurrentVariableListSorted = {Object.keys(this.state.CurrentVariableList).sort()}
-                    CurrentVariableList = {this.state.CurrentVariableList}
+                    CurrentVariableList = {[Object.keys(this.state.CurrentVariableList), Object.keys(this.state.CurrentVariableList).sort()]}
                     ncol = {this.state.ncol}
                     dataPanelHeight = {this.state.dataPanelHeight}
                     dataPanelWidth = {this.state.dataPanelWidth}
@@ -478,8 +476,7 @@ export class App extends Component {
 
                   <div hidden={this.state.currentActiveDataPanel !== "RecodePanel"}>
                     <RecodePanel CategoricalVarLevels = {this.state.CategoricalVarLevels}
-                    CurrentVariableListSorted = {Object.keys(this.state.CurrentVariableList).sort()}
-                    CurrentVariableList = {this.state.CurrentVariableList}
+                    CurrentVariableList = {[Object.keys(this.state.CurrentVariableList), Object.keys(this.state.CurrentVariableList).sort()]}
                     ncol = {this.state.ncol}
                     dataPanelHeight = {this.state.dataPanelHeight}
                     dataPanelWidth = {this.state.dataPanelWidth}

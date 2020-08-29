@@ -96,6 +96,7 @@ export class MIPanel extends Component {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
+      let CurrentVariableListByFileOrder = [...CurrentVariableList]
       let allVarsInCurrentList = []
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
@@ -122,7 +123,11 @@ export class MIPanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
-          VariablesObj["Available"].sort()
+          if (this.state.sortAvailable) {
+            VariablesObj["Available"].sort()
+          }else{
+            VariablesObj["Available"] = this.intersection(CurrentVariableListByFileOrder, VariablesObj["Available"])
+          }
 
           this.setState({Variables:{...VariablesObj}, 
             Checked: {...CheckedObj}, 
@@ -144,8 +149,19 @@ export class MIPanel extends Component {
       return array1.filter((item) => array2.indexOf(item) === -1)
   }
 
+  setSortAvailable = () => {
+    let VariablesObj = _.cloneDeep(this.state.Variables)
+    if (this.state.sortAvailable) {
+      /*Changing to file order */
+      VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+    }else {
+      VariablesObj["Available"].sort()
+    }
+    this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
+  }
+
   notInInt = (term, intArray) => {
-    let pattern = "^"+term+"\\*|\\*"+term+"\\*|"+"\\*"+term+"$"
+    let pattern = "^"+term+"\\*|\\*"+term+"\\*|\\*"+term+"$"
     return intArray.filter((item) => item.search(pattern) === -1)
   }
 
@@ -191,7 +207,12 @@ export class MIPanel extends Component {
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
 
-      VariablesObj["Available"].sort()
+      if (this.state.sortAvailable) {
+        VariablesObj["Available"].sort()
+      }else{
+        VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
+      }
+
 
       if (from === "Covariates") {
         interactionArr = this.state.interaction.filter((item) => {
@@ -367,6 +388,8 @@ export class MIPanel extends Component {
               handleToRightCallback = {this.handleToRight}
               handleToLeftCallback = {this.handleToLeft}
               addExtraBlkCallback = {this.props.addExtraBlkCallback}
+              setSortAvailableCallback = {this.setSortAvailable}
+              sortAvailable = {this.state.sortAvailable}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

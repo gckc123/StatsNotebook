@@ -18,7 +18,7 @@ import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
 import "./DataPanelElements.css"; 
 import {List} from 'react-virtualized';
-
+import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
 import { AnalysisPanelBar } from "./AnalysisPanelBar";
 
 const StyledTooltip = withStyles({
@@ -36,6 +36,13 @@ const OrangeIconButton = withStyles({
     },
 })(IconButton);
 
+const StyledIconButton = withStyles({
+    root: {
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+})(IconButton);
 
 const StyledButton = withStyles({
     root: {
@@ -59,6 +66,7 @@ export class FilterPanel extends Component {
         this.state = {
             currentCursorPosition: 0,
             filter: "",
+            sortAvailable: 0,
         }
     }
 
@@ -74,7 +82,7 @@ export class FilterPanel extends Component {
     _rowRenderer = ({index, key, style}) => {
         return (
             <div key = {key} style = {{...style}} className = "pl-2 ComputeFormulaVarList">
-                <div onClick = {() => this.add2Filter(this.props.CurrentVariableListSorted[index])}>{this.props.CurrentVariableListSorted[index]}</div>
+                <div onClick = {() => this.add2Filter(this.props.CurrentVariableList[this.state.sortAvailable][index])}>{this.props.CurrentVariableList[this.state.sortAvailable][index]}</div>
             </div>
         )
     }
@@ -83,7 +91,9 @@ export class FilterPanel extends Component {
         this.setState({filter: event.target.value})
     }
 
-
+    setSortAvailable = () => {
+        this.setState({sortAvailable: (this.state.sortAvailable === 0 ? 1 : 0)})
+    }
 
     render () {
         
@@ -102,7 +112,12 @@ export class FilterPanel extends Component {
                 </div>
                 <div className = "p-2 Filter-pane-box">
     
-                    <div className = "pt-2">Variable</div>
+                    <div className = "pt-2">Variable
+                    <StyledTooltip title="Sort alphabetically, from capital to lower case." placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.setSortAvailable()}>
+                            <FontAwesomeIcon icon={faSortAlphaDown} size="1x" color={this.state.sortAvailable === 1? "hotpink" : "grey"}/></StyledIconButton>
+                        </span></StyledTooltip>
+                    </div>
                     <div className = "pt-2">Filter<StyledTooltip title={<div>For values of a categorical variable, the value needs to be wrapped by " "
                             <br/>For exapmle, the value "abc" below needs to be wrapped with " ".<br/>
                             currentDataset$variableX == "abc"
@@ -117,7 +132,7 @@ export class FilterPanel extends Component {
                             style={{border: "1px solid #e8e8e8"}}
                             width={180}
                             height={400}
-                            rowCount={this.props.CurrentVariableListSorted.length}
+                            rowCount={this.props.CurrentVariableList[0].length}
                             rowHeight={25}
                             rowRenderer = {this._rowRenderer}
                         />

@@ -6,8 +6,9 @@ import {faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@material-ui/core/Tooltip';
+import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
+import IconButton from '@material-ui/core/IconButton'
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -29,6 +30,14 @@ const StyledButton = withStyles({
         textTransform: 'none',
      }   
 })(Button);
+
+const StyledIconButton = withStyles({
+    root: {
+        '&:focus': {
+            outline: 'none',
+        },
+    },
+})(IconButton);
 
 export class MediationVariableSelection extends Component {
     
@@ -63,8 +72,11 @@ export class MediationVariableSelection extends Component {
         return (
             <div className="analysis-pane">
                 <div className="Variable-Selection-Box">
-                    <div >Variables<StyledTooltip title="Variables are sorted alphabetically, from capital to lower letters.">
-                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
+                    <div >Variables
+                    <StyledTooltip title="Sort alphabetically, from capital to lower case." placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.props.setSortAvailableCallback()}>
+                            <FontAwesomeIcon icon={faSortAlphaDown} size="1x" color={this.props.sortAvailable? "hotpink" : "grey"}/></StyledIconButton>
+                        </span></StyledTooltip></div>
                     <div ></div>
                     <div>Outcome</div>
                     <div className="Available-Variable-List-Container" 
