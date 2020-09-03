@@ -8,7 +8,8 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
-import IconButton from '@material-ui/core/IconButton'
+import IconButton from '@material-ui/core/IconButton';
+import {faUndoAlt} from '@fortawesome/free-solid-svg-icons';
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -76,6 +77,10 @@ export class CorrelogramVariableSelection extends Component {
                     <StyledTooltip title="Sort alphabetically, from capital to lower case." placement="top"><span className="pl-2">
                         <StyledIconButton size="small" onClick={() => this.props.setSortAvailableCallback()}>
                             <FontAwesomeIcon icon={faSortAlphaDown} size="1x" color={this.props.sortAvailable? "hotpink" : "grey"}/></StyledIconButton>
+                        </span></StyledTooltip>
+                    <StyledTooltip title="Reset variable lists." placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.props.resetVarListCallback()}>
+                            <FontAwesomeIcon icon={faUndoAlt} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
                     </div>
                     <div ></div>

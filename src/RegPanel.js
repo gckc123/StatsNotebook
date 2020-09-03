@@ -243,6 +243,35 @@ export class RegPanel extends Component {
     this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
   }
 
+  resetVarList = () => {
+    let VariablesObj  = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
+
+    for (let key in this.state.Variables) {
+      if (key === "Available") {
+        if (this.state.sortAvailable) {
+          VariablesObj[key] = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")).sort()
+        }else {
+          VariablesObj[key] = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
+        }
+      }
+      VariablesObj[key] = []
+    }
+
+    for (let key in this.state.Checked) {
+      CheckedObj[key] = []
+    }
+
+    this.setState({Variables: {...VariablesObj},
+      Checked: {...CheckedObj},
+      RandomSlopes: {},
+      CheckedRandomSlopes: {},
+      interaction: [],
+      checkedInteraction: [],
+    })
+
+  }
+
   notInInt = (term, intArray) => {
     let pattern = "^"+term+"\\*|\\*"+term+"\\*|\\*"+term+"$"
     return intArray.filter((item) => item.search(pattern) === -1)
@@ -955,6 +984,7 @@ export class RegPanel extends Component {
               handleToLeftCallback = {this.handleToLeft}
               addExtraBlkCallback = {this.props.addExtraBlkCallback}
               setSortAvailableCallback = {this.setSortAvailable}
+              resetVarListCallback = {this.resetVarList}
               sortAvailable = {this.state.sortAvailable}
               />
             </ExpansionPanelDetails>

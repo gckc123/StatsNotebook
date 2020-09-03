@@ -68,7 +68,7 @@ export class BarChartPanel extends Component {
             Facet: [],
             
         }, 
-        TreatmentLvs : [], 
+
         Checked: {
             Available: [],
             Horizontal: [],
@@ -179,6 +179,31 @@ export class BarChartPanel extends Component {
     this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
   }
 
+  resetVarList = () => {
+    let VariablesObj  = _.cloneDeep(this.state.Variables)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
+
+    for (let key in this.state.Variables) {
+      if (key === "Available") {
+        if (this.state.sortAvailable) {
+          VariablesObj[key] = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")).sort()
+        }else {
+          VariablesObj[key] = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
+        }
+      }
+      VariablesObj[key] = []
+    }
+
+    for (let key in this.state.Checked) {
+      CheckedObj[key] = []
+    }
+
+    this.setState({Variables: {...VariablesObj},
+      Checked: {...CheckedObj},
+    })
+
+  }
+
   handleToRight = (target, maxElement) => {
     let VariablesObj = _.cloneDeep(this.state.Variables)
     let CheckedObj = _.cloneDeep(this.state.Checked)
@@ -234,10 +259,6 @@ export class BarChartPanel extends Component {
       let CheckedObj = _.cloneDeep(this.state.Checked)
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
-
-      if (from === "Treatment1" || from === "Treatment2") {    
-        this.setState({TreatmentLvs: [...this.getTreatmentLv(VariablesObj)]}, () => console.log(this.state.TreatmentLvs))       
-      }
 
       if (this.state.sortAvailable) {
         VariablesObj["Available"].sort()
@@ -436,6 +457,7 @@ export class BarChartPanel extends Component {
               handleToLeftCallback = {this.handleToLeft}
               addExtraBlkCallback = {this.props.addExtraBlkCallback}
               setSortAvailableCallback = {this.setSortAvailable}
+              resetVarListCallback = {this.resetVarList}
               sortAvailable = {this.state.sortAvailable}
               />
             </ExpansionPanelDetails>
