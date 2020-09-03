@@ -31,7 +31,10 @@ app.on('ready', () => {
     height: 768,
     title: "PandaPIG3000",
   });
-  //mainWindow.removeMenu()
+
+  if (!isDev) {
+    mainWindow.removeMenu()
+  }
 
   mainWindow.loadURL(
     isDev
@@ -135,7 +138,7 @@ const savingFile = exports.savingFile = (content, workingDir) => {
   const file = dialog.showSaveDialogSync(mainWindow, {
     title: 'Save Notebook',
     filters: [
-      {name: 'Notebook Files', extensions: ['rnb']}
+      {name: 'Notebook File', extensions: ['rnb']}
     ]
   });
   if (!file) 

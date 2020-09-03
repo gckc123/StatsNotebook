@@ -27,7 +27,7 @@
 
 .notebook-title-grid {
   display: grid;
-  grid-template-columns: auto 25px 30px 30px;
+  grid-template-columns: auto 25px 30px 30px 30px;
   padding-top: 2px;
   padding-bottom: 5px;
 }

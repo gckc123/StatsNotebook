@@ -65,6 +65,7 @@ export class CrosstabPanel extends Component {
             SplitBy: [],
             RowVars: [],
             ColVars: [],
+            Weight: [],
         }, 
 
         Checked: {
@@ -72,11 +73,13 @@ export class CrosstabPanel extends Component {
             SplitBy: [],
             RowVars: [],
             ColVars: [],
+            Weight: [],
         },
         hideToRight: {
             SplitBy: false,
             RowVars: false,
             ColVars: false,
+            Weight: false,
         },
         tentativeScript: "",
         panels: {
@@ -84,6 +87,7 @@ export class CrosstabPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
+          OriginalData: true,
           RowPercent: true,
           ColPercent: false,
           OverallPercent: false,
@@ -177,7 +181,7 @@ export class CrosstabPanel extends Component {
         }
         
 
-      }else if (target === "RowVars" || target === "ColVars") {
+      }else if (target === "RowVars" || target === "ColVars" || target === "Weight") {
         
         toRightVars = CheckedObj["Available"].filter((item) =>
           this.props.CurrentVariableList[item][0] !== "Character"
@@ -258,42 +262,92 @@ export class CrosstabPanel extends Component {
 
   buildCode = () => {
     let codeString = "library(tidyverse)\n\n"
+    let dataset = ""
+
+    console.log(this.props.imputedDataset)
+
+    if (this.props.imputedDataset) {
+      if (this.state.AnalysisSetting.OriginalData) {
+        codeString = codeString + "dataSubset <- currentDataset %>%\n  filter(.imp == 0)\n\n"
+      }else {
+        codeString = codeString + "dataSubset <- currentDataset %>%\n  filter(.imp == 1)\n\n"
+      }
+      dataset = "dataSubset"
+    }else{
+      dataset = "currentDataset"
+    }
+
+    if (this.state.Variables.Weight.length > 0) {
+      codeString = codeString + "library(survey)\nclus <- svydesign(id=~1, weights =~ "+ 
+        this.state.Variables.Weight[0] + ", data = "+ dataset + ")\n\n"
+    }
 
     this.state.Variables["RowVars"].forEach((rowItem) => {
-      if (this.state.Variables["ColVars"].length > 0){ 
-        this.state.Variables["ColVars"].forEach((colItem) => {
-          codeString = codeString + "tab <- currentDataset %>%\n  select(" +
-          rowItem + ", " + colItem + (this.state.Variables["SplitBy"].length > 0 ? ", " + 
-            this.state.Variables["SplitBy"].join(", ") : "") + ") %>%\n  " +
-            "table("+ (this.state.AnalysisSetting["IncludeNA"] ? "useNA=\"always\"" : "") + ")\n\ntab\n\n"
+      if (this.state.Variables.Weight.length === 0) {
+        if (this.state.Variables["ColVars"].length > 0){ 
+          this.state.Variables["ColVars"].forEach((colItem) => {
+            codeString = codeString + "tab <- "+ dataset +" %>%\n  select(" +
+            rowItem + ", " + colItem + (this.state.Variables["SplitBy"].length > 0 ? ", " + 
+              this.state.Variables["SplitBy"].join(", ") : "") + ") %>%\n  " +
+              "table("+ (this.state.AnalysisSetting["IncludeNA"] ? "useNA=\"always\"" : "") + ")\n\ntab\n\n"
 
-          if (this.state.Variables["SplitBy"].length === 0) {
-            if (this.state.AnalysisSetting["RowPercent"]) {
-              codeString = codeString + "tab %>%\n  prop.table(1)\n\n"
-            }
+            if (this.state.Variables["SplitBy"].length === 0) {
+              if (this.state.AnalysisSetting["RowPercent"]) {
+                codeString = codeString + "tab %>%\n  prop.table(1)\n\n"
+              }
 
-            if (this.state.AnalysisSetting["ColPercent"]) {
-              codeString = codeString + "tab %>%\n  prop.table(2)\n\n"
-            }
+              if (this.state.AnalysisSetting["ColPercent"]) {
+                codeString = codeString + "tab %>%\n  prop.table(2)\n\n"
+              }
 
-            if (this.state.AnalysisSetting["OverallPercent"]) {
-              codeString = codeString + "tab %>%\n  prop.table()\n\n"
-            }
+              if (this.state.AnalysisSetting["OverallPercent"]) {
+                codeString = codeString + "tab %>%\n  prop.table()\n\n"
+              }
 
-            if (this.state.AnalysisSetting["ChisqTest"]) {
-              codeString = codeString + "tab %>%\n chisq.test()"
+              if (this.state.AnalysisSetting["ChisqTest"]) {
+                codeString = codeString + "tab %>%\n chisq.test()\n\n"
+              }
+              
+              if (this.state.AnalysisSetting["FisherTest"]) {
+                codeString = codeString + "tab %>%\n fisher.test()\n\n"
+              }
             }
-            
-            if (this.state.AnalysisSetting["FisherTest"]) {
-              codeString = codeString + "tab %>%\n fisher.test()"
-            }
+          })
+        }else{
+          codeString = codeString + "tab <- "+ dataset + " %>%\n  select(" +
+          rowItem + ") %>%\n  table(dnn = \""+ rowItem + "\""+ (this.state.AnalysisSetting["IncludeNA"] ? ", useNA=\"always\"" : "") +")\n\ntab\n\n"
+          if (this.state.AnalysisSetting["RowPercent"]) {
+            codeString = codeString + "tab %>%\n  prop.table()\n\n"
           }
-        })
-      }else{
-        codeString = codeString + "tab <- currentDataset %>%\n  select(" +
-        rowItem + ") %>%\n  table(dnn = \""+ rowItem + "\""+ (this.state.AnalysisSetting["IncludeNA"] ? "useNA=\"always\"" : "") +")\n\ntab\n\n"
-        if (this.state.AnalysisSetting["RowPercent"]) {
-          codeString = codeString + "tab %>%\n  prop.table()\n\n"
+        }
+      }else {
+        
+        if (this.state.Variables["ColVars"].length > 0) {
+          this.state.Variables["ColVars"].forEach((colItem) => {
+            codeString = codeString + "tab <- svytable(~" + rowItem + "+" + colItem + ", clus" +
+              (this.state.AnalysisSetting["IncludeNA"] ? ", exclude = NULL, na.action = na.pass": "") + ")" + 
+              "\nsummary(tab)\n\n"
+
+              if (this.state.AnalysisSetting["RowPercent"]) {
+                codeString = codeString + "tab %>%\n  prop.table(1)\n\n"
+              }
+
+              if (this.state.AnalysisSetting["ColPercent"]) {
+                codeString = codeString + "tab %>%\n  prop.table(2)\n\n"
+              }
+
+              if (this.state.AnalysisSetting["OverallPercent"]) {
+                codeString = codeString + "tab %>%\n  prop.table()\n\n"
+              }
+          })
+        }else{
+          codeString = codeString + "tab <- svytable(~" + rowItem + ", clus" + 
+          (this.state.AnalysisSetting["IncludeNA"] ? ", exclude = NULL, na.action = na.pass" : "") + ")" + 
+          "\ntab\n\n"
+
+          if (this.state.AnalysisSetting["RowPercent"]) {
+            codeString = codeString + "tab %>%\n  prop.table()\n\n"
+          }
         }
       }
     })
@@ -317,6 +371,7 @@ export class CrosstabPanel extends Component {
       case "IncludeNA":
       case "ChisqTest":
       case "FisherTest":
+      case "OriginalData":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -377,7 +432,8 @@ export class CrosstabPanel extends Component {
               Variables = {this.state.Variables}
               CategoricalVarLevels = {this.props.CategoricalVarLevels}
               AnalysisSetting = {this.state.AnalysisSetting}
-              updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+              imputedDataset = {this.props.imputedDataset}/>
           </ExpansionPanelDetails>
         </ExpansionPanel>  
     </div>}  

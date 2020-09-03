@@ -29,6 +29,11 @@ import { ScatterplotPanel } from './ScatterplotPanel';
 import { CorrelogramPanel } from './CorrelogramPanel';
 import { LineGraphPanel } from './LineGraphPanel';
 import _ from "lodash";
+import { HotKeys } from "react-hotkeys";
+
+const keyMap = {
+    ADD: "alt+a"
+}
 
 const electron = window.require('electron');
 const mainProcess = electron.remote.require('../electron/start.js');
@@ -253,10 +258,12 @@ export class App extends Component {
       Title: "--- Analysis Title Here ---",
       fromLeftPanel: fromLeftPanel,
       fromPanel: fromPanel,
+      selected: false,
       //panelState: JSON.parse(JSON.stringify(this.state.tentativePanelState)),
       panelState: _.cloneDeep(this.state.tentativePanelState),
       genScript: genScript,
       varState: {...this.state.CurrentVariableList},
+      needUpdate: false
     }]
     if (runScript) {
         this.setState({ActiveBlkID: randomID,
@@ -267,6 +274,7 @@ export class App extends Component {
           ActiveScript: script,
           NotebookBlkList: [...updatedNotebookBlkList]})
     }  
+    console.log(this.state.NotebookBlkList)
   }
 
   gainFocus = (index) => {
@@ -274,8 +282,50 @@ export class App extends Component {
     this.setState({ActiveScript: tmp[index].NotebookBlkScript, ActiveBlkID: tmp[index].NotebookBlkID})
   }
 
+  mergeBlk = () => {
+    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    let selectedBlk = this.state.NotebookBlkList.filter((item) => item.selected)
+    let ActiveScript = ""
+    let ActiveBlkID = "'"
+
+    if (selectedBlk.length >= 2) {
+      let combinedScript = ""
+      let combinedEditorHTML = ""
+      let combinedNotebookBlkROutput = []
+      selectedBlk.forEach((blk, index) => {
+        combinedScript = combinedScript + "\n\n## Merged from block " + index+ " ##\n\n" + blk.NotebookBlkScript
+        combinedEditorHTML = combinedEditorHTML + "<p><br>MERGE FROM BLOCK "+ index +"<br><p>" + blk.editorHTML
+        combinedNotebookBlkROutput = combinedNotebookBlkROutput.concat(blk.NotebookBlkROutput)
+        console.log("Merging")
+        console.log(combinedScript)
+      })
+
+      let add2BlkIndex = this.state.NotebookBlkList.findIndex((blk) => blk.selected)
+      tmp[add2BlkIndex].selected = false
+      tmp[add2BlkIndex].NotebookBlkScript = combinedScript
+      tmp[add2BlkIndex].NotebookBlkROutput = combinedNotebookBlkROutput
+      tmp[add2BlkIndex].editorHTML = combinedEditorHTML
+      tmp[add2BlkIndex].needUpdate = true
+      ActiveScript = tmp[add2BlkIndex].NotebookBlkScript
+      ActiveBlkID = tmp[add2BlkIndex].NotebookBlkID
+
+      tmp = tmp.filter((blk) => !blk.selected)
+      this.setState({NotebookBlkList: [...tmp], ActiveBlkID: ActiveBlkID, ActiveScript: ActiveScript})
+    }
+
+    
+    
+    
+  }
+
+  setNotebookBlkUpdate2False = (index) => {
+    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    tmp[index].needUpdate = false
+    this.setState({NotebookBlkList: [...tmp]})
+  }
+
   delBlk = () => {
-    let tmp = this.state.NotebookBlkList.filter( (item) => item.NotebookBlkID !== this.state.ActiveBlkID)
+    let tmp = this.state.NotebookBlkList.filter( (item) => !item.selected)
     this.setState({NotebookBlkList: [...tmp], ActiveScript: "", ActiveBlkID: null})
   }
 
@@ -310,6 +360,12 @@ export class App extends Component {
     }
   }
 
+  selectNotebookBlk = (index) => {
+    let tmp = _.cloneDeep(this.state.NotebookBlkList)
+    tmp[index].selected = !tmp[index].selected
+    this.setState({NotebookBlkList: [...tmp]})
+  }
+
   getData = () => {
     let ScriptJSON = {
       RequestType: "getData",
@@ -336,27 +392,71 @@ export class App extends Component {
     mainProcess.getCPUCount();
   }
 
-  runScript = () => {  
+  runScript = (fromNotebookBlk = false) => {  
     let tmp = _.cloneDeep(this.state.NotebookBlkList)
-    let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
-    if (CurrentActiveIndex >= 0) {
-      tmp[CurrentActiveIndex].NotebookBlkROutput = [];
-      tmp[CurrentActiveIndex].Busy = true;
-      
-      this.setState({NotebookBlkList: [...tmp]})
-      let ScriptJSON = {
-        RequestType: "RCode",
-        Script: this.state.ActiveScript,
-        fromBlk: this.state.ActiveBlkID,
+    let need2ResetDataState = false
+    let selectedBlk = []
+    let multipleBlk = false
+    let incActiveBlk = false
+    
+    if (fromNotebookBlk) {
+      selectedBlk = this.state.NotebookBlkList.filter((item) => item.selected)
+      if (selectedBlk.length > 0) {
+        multipleBlk = true
       }
 
-      let regex = /currentDataset <- read_csv\(|currentDataset <- read_sav\(|currentDataset <- read_dta\(/;
-      if (ScriptJSON.Script.match(regex)) {
-        this.resetDataState()
+      if (selectedBlk.findIndex((item) => item.NotebookBlkID === this.state.ActiveBlkID) === -1) {
+        incActiveBlk = true
       }
+    }
 
-      let StriptString = JSON.stringify(ScriptJSON)
-      mainProcess.send2R(StriptString);
+    if (multipleBlk) {
+      selectedBlk.forEach((blk) => {
+        let currentIndex = this.state.NotebookBlkList.findIndex((item) => item.NotebookBlkID === blk.NotebookBlkID)
+        tmp[currentIndex].NotebookBlkROutput = [];
+        tmp[currentIndex].Busy = true;
+        tmp[currentIndex].selected = false;
+
+        let ScriptJSON = {
+          RequestType: "RCode",
+          Script: blk.NotebookBlkScript,
+          fromBlk: blk.NotebookBlkID,
+        }
+
+        let regex = /currentDataset <- read_csv\(|currentDataset <- read_sav\(|currentDataset <- read_dta\(/;
+        if (ScriptJSON.Script.match(regex)) {
+          need2ResetDataState = true          
+        }
+
+        let StriptString = JSON.stringify(ScriptJSON)
+        mainProcess.send2R(StriptString);
+      })
+    }
+    
+    if(!multipleBlk || incActiveBlk){
+      let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
+      if (CurrentActiveIndex >= 0) {
+        tmp[CurrentActiveIndex].NotebookBlkROutput = [];
+        tmp[CurrentActiveIndex].Busy = true;
+        
+        let ScriptJSON = {
+          RequestType: "RCode",
+          Script: this.state.ActiveScript,
+          fromBlk: this.state.ActiveBlkID,
+        }
+
+        let regex = /currentDataset <- read_csv\(|currentDataset <- read_sav\(|currentDataset <- read_dta\(/;
+        if (ScriptJSON.Script.match(regex)) {
+          need2ResetDataState = true          
+        }
+
+        let StriptString = JSON.stringify(ScriptJSON)
+        mainProcess.send2R(StriptString);
+      }
+    }
+    this.setState({NotebookBlkList: [...tmp]})
+    if (need2ResetDataState) {
+      this.resetDataState()
     }
     this.getVariableList();
     this.getData();
@@ -426,6 +526,7 @@ export class App extends Component {
             savingFileCallback = {this.savingFile}
             getCPUCountCallback = {this.getCPUCount}
             newNotebookCallback = {this.newNotebook}/>
+            
             <div className="main-pane">
               <div className="left-pane pl-2 pr-2 mb-2" ref={this.DataPanelContainerRef}>
                 
@@ -569,6 +670,7 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
+                    imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
@@ -581,6 +683,7 @@ export class App extends Component {
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
+                    imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
@@ -733,12 +836,13 @@ export class App extends Component {
                 </div>
 
               </div>
-              <div className="right-pane pl-2 pr-2 mb-2">
+              <div className="right-pane pl-2 pr-2 mb-2"><HotKeys keyMap={keyMap} handlers={{ADD: event => this.addExtraBlk("",false)}}>
                   <Notebook
                     NotebookBlkList = {this.state.NotebookBlkList}
                     addExtraBlkCallback={this.addExtraBlk}
                     gainFocusCallback={this.gainFocus}
                     delBlkCallback = {this.delBlk}
+                    mergeBlkCallback = {this.mergeBlk}
                     reorderNotebookBlkCallback = {this.reorderNotebookBlk}
                     updateAEditorValueCallback = {this.updateAEditorValue}
                     runScriptCallback={this.runScript}
@@ -747,10 +851,13 @@ export class App extends Component {
                     toggleNotebookBlkCallback = {this.toggleNotebookBlk}
                     ActiveBlkID = {this.state.ActiveBlkID}
                     restorePanelSettingCallback = {this.restorePanelSetting}
+                    selectNotebookBlkCallback = {this.selectNotebookBlk}
+                    setNotebookBlkUpdate2FalseCallback = {this.setNotebookBlkUpdate2False}
                     CurrentVariableList = {this.state.CurrentVariableList}
                   />  
-              </div>
+              </HotKeys></div>
             </div>
+            
          </div>          
       )
   };

@@ -274,7 +274,7 @@
 .Reg-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 40px 25px 150px 25px 100px 25px 40px;
+    grid-template-rows: 25px 40px 25px 150px 25px 100px 25px 41px;
     margin: 0px;
     padding: 0px;
 }
@@ -300,14 +300,14 @@
 .Descriptive-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 300px 25px 100px;
+    grid-template-rows: 25px 250px 25px 80px 25px 40px;
     margin: 0px;
     padding: 0px;
 }
 
 .Descriptive-Available-Variable-List-Container {
     grid-row-start: 2;
-    grid-row-end: 5;
+    grid-row-end: 7;
 }
 
 .Descriptive-Analysis-Box-3 {
@@ -331,14 +331,14 @@
 .Crosstab-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 130px 25px 130px 25px 80px;
+    grid-template-rows: 25px 120px 25px 120px 25px 80px 25px 40px;
     margin: 0px;
     padding: 0px;
 }
 
 .Crosstab-Available-Variable-List-Container {
     grid-row-start: 2;
-    grid-row-end: 7;
+    grid-row-end: 9;
 }
 
 .EMM-Variable-Selection-Box {
@@ -378,7 +378,7 @@
 .DependentTTest-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 150px 25px 150px;
+    grid-template-rows: 25px 150px 25px 151px;
     margin: 0px;
     padding: 0px;
 }
@@ -392,7 +392,7 @@
 .Histogram-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 150px 25px 25px 40px 25px 40px;
+    grid-template-rows: 25px 150px 25px 25px 40px 25px 41px;
     margin: 0px;
     padding: 0px;
 }
@@ -489,7 +489,7 @@
 .LineGraph-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 40px 25px 40px 25px 25px 40px 25px 40px 25px 40px;
+    grid-template-rows: 25px 40px 25px 40px 25px 25px 40px 25px 40px 25px 41px;
     margin: 0px;
     padding: 0px;
 }

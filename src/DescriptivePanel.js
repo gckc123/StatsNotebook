@@ -64,6 +64,7 @@ export class DescriptivePanel extends Component {
             Available: [],
             SplitBy: [],
             Targets: [],
+            Weight: [],
         }, 
         TargetsCat : [], 
         TargetsNum :[],
@@ -71,10 +72,12 @@ export class DescriptivePanel extends Component {
             Available: [],
             SplitBy: [],
             Targets: [],
+            Weight: [],
         },
         hideToRight: {
             SplitBy: false,
             Targets: false,
+            Weight: false,
         },
         tentativeScript: "",
         panels: {
@@ -82,6 +85,7 @@ export class DescriptivePanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
+          OriginalData: true,
           Mean: true,
           Median: false,
           SD: true,
@@ -193,7 +197,6 @@ export class DescriptivePanel extends Component {
             alertTitle: "Alert"
           })
         }
-        
 
       }else if (target === "Targets") {
         
@@ -219,6 +222,18 @@ export class DescriptivePanel extends Component {
 
         TargetsCatArr = TargetsCatArr.concat(toRightVarsCat)
         TargetsNumArr = TargetsNumArr.concat(toRightVarsNum)
+      }else if (target === "Weight") {
+        toRightVars = CheckedObj["Available"].filter((item) =>
+          this.props.CurrentVariableList[item][0] === "Numeric"
+
+        )
+
+        if (toRightVars.length !== CheckedObj["Available"].length) {
+          this.setState({showAlert: true, 
+            alertText: "Only numeric variable can be used as weighting variable.",
+            alertTitle: "Alert"
+          })
+        }
       }
 
       VariablesObj["Available"] = this.not(VariablesObj["Available"],toRightVars)
@@ -294,177 +309,212 @@ export class DescriptivePanel extends Component {
 
   buildCode = () => {
     let codeString = "library(tidyverse)\nlibrary(e1071)\nlibrary(ggplot2)\nlibrary(GGally)\n\n"
+    
+    if (this.state.Variables["Weight"].length > 0) {
+      codeString = codeString + "library(survey)\n\n"
+    }
+
+    let dataset = ""
+    if (this.props.imputedDataset) {
+      if (this.state.AnalysisSetting.OriginalData) {
+        codeString = codeString + "dataSubset <- currentDataset %>%\n  filter(.imp == 0)\n\n"
+      }else {
+        codeString = codeString + "dataSubset <- currentDataset %>%\n  filter(.imp == 1)\n\n"
+      }
+      dataset = "dataSubset"
+    }else{
+      dataset = "currentDataset"
+    }
+
     let analysisVars = this.state.Variables["Targets"].concat(this.state.Variables["SplitBy"])
 
     codeString = codeString + "print(\"Sample size and missing data\")\n\n"
-    codeString = codeString + "currentDataset %>%\n  summarize(count = n()" 
+    codeString = codeString + dataset + " %>%\n  summarize(count = n()" 
     analysisVars.forEach((item) => {
       codeString = codeString + ", \n  mis_" + item + " = sum(is.na(" + item + "))"
     })
     codeString = codeString + "\n  )\n\n"
     
-    codeString = codeString + "print(\"Descriptive Statistics\")\n\n"
-    if (this.state.TargetsNum.length > 0) {
-      codeString = codeString + "currentDataset %>%\n  "
-      if (this.state.Variables["SplitBy"].length > 0) {
-        codeString = codeString + "group_by(" + this.state.Variables["SplitBy"].join(", ") + ") %>%\n  "  
-      }
-      codeString = codeString + "summarize(count = n()"
 
-      if (this.state.AnalysisSetting["Mean"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  M_" + item + " = mean(" + item + ", na.rm = TRUE)"
-        })
-      }
 
-      if (this.state.AnalysisSetting["Median"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  Mdn_" + item + " = median(" + item + ", na.rm = TRUE)"
-        })
-      }
+    if (this.state.Variables.Weight.length === 0) {
+      codeString = codeString + "print(\"Descriptive Statistics\")\n\n"
+      if (this.state.TargetsNum.length > 0) {
+        codeString = codeString + dataset + " %>%\n  "
+        if (this.state.Variables["SplitBy"].length > 0) {
+          codeString = codeString + "group_by(" + this.state.Variables["SplitBy"].join(", ") + ") %>%\n  "  
+        }
+        codeString = codeString + "summarize(count = n()"
 
-      if (this.state.AnalysisSetting["SD"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  SD_" + item + " = sd(" + item + ", na.rm = TRUE)"
-        })
-      }
+        if (this.state.AnalysisSetting["Mean"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  M_" + item + " = mean(" + item + ", na.rm = TRUE)"
+          })
+        }
 
-      if (this.state.AnalysisSetting["Variance"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  Var_" + item + " = var(" + item + ", na.rm = TRUE)"
-        })
-      }
+        if (this.state.AnalysisSetting["Median"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  Mdn_" + item + " = median(" + item + ", na.rm = TRUE)"
+          })
+        }
 
-      if (this.state.AnalysisSetting["IQR"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  IQR_" + item + " = IQR(" + item + ", na.rm = TRUE)"
-        })
-      }
+        if (this.state.AnalysisSetting["SD"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  SD_" + item + " = sd(" + item + ", na.rm = TRUE)"
+          })
+        }
 
-      if (this.state.AnalysisSetting["MaxMin"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  Min_" + item + " = min(" + item + ", na.rm = TRUE)"
-          codeString = codeString + ",\n  Max_" + item + " = max(" + item + ", na.rm = TRUE)"
-        })
-      }
-      
-      if (this.state.AnalysisSetting["Q2527"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  Q25_" + item + " = quantile(" + item + ", probs = 0.25, na.rm = TRUE)"
-          codeString = codeString + ",\n  Q75_" + item + " = quantile(" + item + ", probs = 0.75, na.rm = TRUE)"
-        })
-      }
+        if (this.state.AnalysisSetting["Variance"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  Var_" + item + " = var(" + item + ", na.rm = TRUE)"
+          })
+        }
 
-      if (this.state.AnalysisSetting["Skewness"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  Skew_" + item + " = skewness(" + item + ", na.rm = TRUE)"
-        })
-      }
+        if (this.state.AnalysisSetting["IQR"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  IQR_" + item + " = IQR(" + item + ", na.rm = TRUE)"
+          })
+        }
 
-      if (this.state.AnalysisSetting["Kurtosis"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  Kurt_" + item + " = kurtosis(" + item + ", na.rm = TRUE)"
-        })
-      }
+        if (this.state.AnalysisSetting["MaxMin"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  Min_" + item + " = min(" + item + ", na.rm = TRUE)"
+            codeString = codeString + ",\n  Max_" + item + " = max(" + item + ", na.rm = TRUE)"
+          })
+        }
+        
+        if (this.state.AnalysisSetting["Q2575"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  Q25_" + item + " = quantile(" + item + ", probs = 0.25, na.rm = TRUE)"
+            codeString = codeString + ",\n  Q75_" + item + " = quantile(" + item + ", probs = 0.75, na.rm = TRUE)"
+          })
+        }
 
-      if (this.state.AnalysisSetting["Normality"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString = codeString + ",\n  Norm_" + item + " = shapiro.test(" + item + ")$p.value"
-        })
-      }
+        if (this.state.AnalysisSetting["Skewness"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  Skew_" + item + " = skewness(" + item + ", na.rm = TRUE)"
+          })
+        }
 
-      codeString = codeString + "\n  ) %>% \n  print(width = 1000, n = 500)\n" 
-      
-      if (this.state.AnalysisSetting["QQPlot"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString =  codeString + "\nggplot(currentDataset) +\n  geom_qq(aes(sample=" + 
-          item + "))"
-          if (this.state.Variables["SplitBy"].length > 0) {
-            codeString = codeString + " +\n  facet_wrap(~"+  this.state.Variables["SplitBy"].join(" + ") +")"
+        if (this.state.AnalysisSetting["Kurtosis"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  Kurt_" + item + " = kurtosis(" + item + ", na.rm = TRUE)"
+          })
+        }
+
+        if (this.state.AnalysisSetting["Normality"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString = codeString + ",\n  Norm_" + item + " = shapiro.test(" + item + ")$p.value"
+          })
+        }
+
+        codeString = codeString + "\n  ) %>% \n  print(width = 1000, n = 500)\n" 
+        
+        if (this.state.AnalysisSetting["QQPlot"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString =  codeString + "\nggplot("+ dataset + ") +\n  geom_qq(aes(sample=" + 
+            item + "))"
+            if (this.state.Variables["SplitBy"].length > 0) {
+              codeString = codeString + " +\n  facet_wrap(~"+  this.state.Variables["SplitBy"].join(" + ") +")"
+            }
+            codeString = codeString + "\n"
+          })
+        }
+
+        if (this.state.TargetsNum.length > 1 && this.state.AnalysisSetting["CorrelationMatrix"]) {
+          if (this.state.Variables["SplitBy"].length === 0) {
+            codeString = codeString + "\n"+ dataset +" %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  as.matrix() %>% Hmisc::rcorr("+ 
+            (this.state.AnalysisSetting.Spearman ? ", type = \"spearman\"": "")+ ")"
+          }else {
+            codeString = codeString + "\n"+ dataset +" %>% split(list(.$" + this.state.Variables["SplitBy"].join(", .$") + ")) %>% \n  map(select, c(" +
+              this.state.TargetsNum.join(", ") +")) %>%\n  map(as.matrix) %>% map(Hmisc::rcorr"+ 
+              (this.state.AnalysisSetting.Spearman ? ", type =\"spearman\"": "") +")" 
           }
           codeString = codeString + "\n"
-        })
-      }
+        }
 
-      if (this.state.TargetsNum.length > 1 && this.state.AnalysisSetting["CorrelationMatrix"]) {
-        if (this.state.Variables["SplitBy"].length === 0) {
-          codeString = codeString + "\ncurrentDataset %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  as.matrix() %>% Hmisc::rcorr("+ 
-          (this.state.AnalysisSetting.Spearman ? ", type = \"spearman\"": "")+ ")"
-        }else {
-          codeString = codeString + "\ncurrentDataset %>% split(list(.$" + this.state.Variables["SplitBy"].join(", .$") + ")) %>% \n  map(select, c(" +
-            this.state.TargetsNum.join(", ") +")) %>%\n  map(as.matrix) %>% map(Hmisc::rcorr"+ 
-            (this.state.AnalysisSetting.Spearman ? ", type =\"spearman\"": "") +")" 
+        if (this.state.AnalysisSetting["Histogram"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString =  codeString + "\nggplot("+ dataset +") +\n  geom_histogram(aes(x=" + 
+            item + "), color = \"white\")"
+            if (this.state.Variables["SplitBy"].length > 0) {
+              codeString = codeString + " +\n  facet_wrap(~"+  this.state.Variables["SplitBy"].join(" + ") +")"
+            }
+            codeString = codeString + "\n"
+          })
+        }
+
+        if (this.state.AnalysisSetting["Density"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString =  codeString + "\nggplot("+ dataset +") +\n  geom_density(aes(x=" + 
+            item + "))"
+            if (this.state.Variables["SplitBy"].length > 0) {
+              codeString = codeString + " +\n  facet_wrap(~"+  this.state.Variables["SplitBy"].join(" + ") +")"
+            }
+            codeString = codeString + "\n"
+          })
+        }
+
+        if (this.state.AnalysisSetting["Boxplot"]) {
+          this.state.TargetsNum.forEach((item) => {
+            codeString =  codeString + "\nggplot("+ dataset +") +\n  geom_boxplot(aes(y=" + 
+            item + (this.state.Variables["SplitBy"].length > 0 ? ", x="+ this.state.Variables["SplitBy"][0] : "") + 
+            (this.state.Variables["SplitBy"].length >1 ? ", fill = "+ this.state.Variables["SplitBy"][1] : "") + "))"
+            if (this.state.Variables["SplitBy"].length > 2) {
+              codeString = codeString + " +\n  facet_wrap(~" +  this.state.Variables["SplitBy"][2] +
+              (this.state.Variables["SplitBy"].length > 3 ? " + " + this.state.Variables["SplitBy"][3] : "" ) + ")"
+            }
+            codeString = codeString + "\n"
+          })
+        }
+
+        if (this.state.AnalysisSetting["ScatterplotMatrix"]) {
+          codeString = codeString + "\n"+ dataset + " %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  ggpairs(progress = FALSE)\n\n" 
+        }
+      }
+      
+      if (this.state.TargetsCat.length > 0) {
+        
+        this.state.TargetsCat.forEach((item) => {
+          codeString = codeString + dataset + " %>%\n  drop_na(" + item + ") %>%\n  " + 
+            (this.state.Variables["SplitBy"].length > 0 ? "group_by(" + this.state.Variables["SplitBy"].join(", ") + ", "+ item
+            +") %>%\n  " : "group_by("+ item + ") %>%\n  ") +
+            "summarize(count = n()) %>% \n  spread(key = " + 
+            item + ", value = count)\n\n"
+
+        })      
+
+        
+
+        if (this.state.AnalysisSetting["BarChart"]) {
+          this.state.TargetsCat.forEach((item) => {
+            codeString =  codeString + "\nggplot("+ dataset +") +\n  geom_bar(stat = \"count\", aes(x=" + 
+            item + 
+            (this.state.Variables["SplitBy"].length > 0 ? ", fill = "+ this.state.Variables["SplitBy"][0] + "), position=position_dodge()" : ")") + ")"
+            if (this.state.Variables["SplitBy"].length > 1) {
+              codeString = codeString + " +\n  facet_wrap(~" +  this.state.Variables["SplitBy"][1] +
+              (this.state.Variables["SplitBy"].length > 2 ? " + " + this.state.Variables["SplitBy"][2] : "" ) + ")"
+            }
+            codeString = codeString + "\n"
+          })
+        }
+      }
+    }else {
+      codeString = codeString + "clus <- svydesign(id=~1, weights =~ "+ 
+      this.state.Variables.Weight[0] +", data = "+ dataset +")\n\n"
+      this.state.TargetsNum.forEach((item) => {
+        if (this.state.AnalysisSetting["Mean"]) {
+          codeString = codeString + "svymean(~" + item + ", clus, na.rm = TRUE)\n"
+        }
+        if (this.state.AnalysisSetting["Median"] || (this.state.AnalysisSetting["Q2575"])) {
+          codeString = codeString + "svyquantile(~" + item + ", clus, c(.25, .50, .75),  na.rm = TRUE)\n"
         }
         codeString = codeString + "\n"
-      }
-
-      if (this.state.AnalysisSetting["Histogram"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString =  codeString + "\nggplot(currentDataset) +\n  geom_histogram(aes(x=" + 
-          item + "), color = \"white\")"
-          if (this.state.Variables["SplitBy"].length > 0) {
-            codeString = codeString + " +\n  facet_wrap(~"+  this.state.Variables["SplitBy"].join(" + ") +")"
-          }
-          codeString = codeString + "\n"
-        })
-      }
-
-      if (this.state.AnalysisSetting["Density"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString =  codeString + "\nggplot(currentDataset) +\n  geom_density(aes(x=" + 
-          item + "))"
-          if (this.state.Variables["SplitBy"].length > 0) {
-            codeString = codeString + " +\n  facet_wrap(~"+  this.state.Variables["SplitBy"].join(" + ") +")"
-          }
-          codeString = codeString + "\n"
-        })
-      }
-
-      if (this.state.AnalysisSetting["Boxplot"]) {
-        this.state.TargetsNum.forEach((item) => {
-          codeString =  codeString + "\nggplot(currentDataset) +\n  geom_boxplot(aes(y=" + 
-          item + (this.state.Variables["SplitBy"].length > 0 ? ", x="+ this.state.Variables["SplitBy"][0] : "") + 
-          (this.state.Variables["SplitBy"].length >1 ? ", fill = "+ this.state.Variables["SplitBy"][1] : "") + "))"
-          if (this.state.Variables["SplitBy"].length > 2) {
-            codeString = codeString + " +\n  facet_wrap(~" +  this.state.Variables["SplitBy"][2] +
-            (this.state.Variables["SplitBy"].length > 3 ? " + " + this.state.Variables["SplitBy"][3] : "" ) + ")"
-          }
-          codeString = codeString + "\n"
-        })
-      }
-
-      if (this.state.AnalysisSetting["ScatterplotMatrix"]) {
-        codeString = codeString + "\ncurrentDataset %>% select(" + this.state.TargetsNum.join(", ")+") %>%\n  ggpairs(progress = FALSE)\n\n" 
-      }
-    }
-    
-    if (this.state.TargetsCat.length > 0) {
-      
+      })
       this.state.TargetsCat.forEach((item) => {
-        codeString = codeString + "currentDataset %>%\n  drop_na(" + item + ") %>%\n  " + 
-          (this.state.Variables["SplitBy"].length > 0 ? "group_by(" + this.state.Variables["SplitBy"].join(", ") + ", "+ item
-          +") %>%\n  " : "group_by("+ item + ") %>%\n  ") +
-          "summarize(count = n()) %>% \n  spread(key = " + 
-          item + ", value = count)\n\n"
-
-      })      
-
-      
-
-      if (this.state.AnalysisSetting["BarChart"]) {
-        this.state.TargetsCat.forEach((item) => {
-          codeString =  codeString + "\nggplot(currentDataset) +\n  geom_bar(stat = \"count\", aes(x=" + 
-          item + 
-          (this.state.Variables["SplitBy"].length > 0 ? ", fill = "+ this.state.Variables["SplitBy"][0] + "), position=position_dodge()" : ")") + ")"
-          if (this.state.Variables["SplitBy"].length > 1) {
-            codeString = codeString + " +\n  facet_wrap(~" +  this.state.Variables["SplitBy"][1] +
-            (this.state.Variables["SplitBy"].length > 2 ? " + " + this.state.Variables["SplitBy"][2] : "" ) + ")"
-          }
-          codeString = codeString + "\n"
-        })
-      }
+        codeString = codeString + "svymean(~" + item + ", clus, na.rm = TRUE)\n\n"
+      })
     }
-
     this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
@@ -496,6 +546,7 @@ export class DescriptivePanel extends Component {
       case "Boxplot":
       case "ScatterplotMatrix":
       case "BarChart":
+      case "OriginalData":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -556,7 +607,8 @@ export class DescriptivePanel extends Component {
                 Variables = {this.state.Variables}
                 CategoricalVarLevels = {this.props.CategoricalVarLevels}
                 AnalysisSetting = {this.state.AnalysisSetting}
-                updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+                updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+                imputedDataset = {this.props.imputedDataset}/>
             </ExpansionPanelDetails>
           </ExpansionPanel>    
         </div>

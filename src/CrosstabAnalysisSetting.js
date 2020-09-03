@@ -22,7 +22,8 @@ export class CrosstabAnalysisSetting extends Component {
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"IncludeNA")}/>Include Missing (NA)
                         </div>
                 <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.RowPercent} size="small"
-                        onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"RowPercent")}/>Row Percentage
+                        onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"RowPercent")}
+                        disabled={this.props.Variables.SplitBy.length > 0}/>Row Percentage
                         <StyledTooltip title="Row percentage is not available when the analysis is split by other variables.">
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                 </div>
@@ -47,10 +48,17 @@ export class CrosstabAnalysisSetting extends Component {
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
                 <div className="AnalysisSettingCheckBox"><Checkbox checked = {this.props.AnalysisSetting.FisherTest} size="small"
                         onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"FisherTest")}
-                        disabled={this.props.Variables.ColVars.length === 0 || this.props.Variables.SplitBy.length > 0}/>Fisher's Exact Test
+                        disabled={this.props.Variables.ColVars.length === 0 || this.props.Variables.SplitBy.length > 0 || this.props.Variables.Weight.length > 0}/>Fisher's Exact Test
                         <StyledTooltip title={<div>Fisher's test is for small sample and might throw an error for large sample.<br/><br/>
-                        Not available when the analysis is split by other variables.</div>}>
+                        Not available when the analysis is split by other variables.<br/>
+                        Not available when the data is weighted.</div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
+                <div className="AnalysisSettingCheckBox" hidden = {!this.props.imputedDataset}><Checkbox checked = {this.props.AnalysisSetting.OriginalData} size="small"
+                        
+                        onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"OriginalData")}/>Use original data
+                        <StyledTooltip title={<div>For imputed dataset, the original data will be analyzed. Uncheck this to analyze the first imputed dataset.</div>}>
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                        </div>
             </div>
             </div>
         )

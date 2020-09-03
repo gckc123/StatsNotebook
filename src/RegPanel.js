@@ -622,7 +622,7 @@ export class RegPanel extends Component {
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "library(car)\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
                 "\noutlierTest(res)\ninfIndexPlot(res)\nresidualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\nvif(res)"
+                "  geom_qq() +\n  geom_qq_line()\nvif(res)\n\n"
               }
             }
           }

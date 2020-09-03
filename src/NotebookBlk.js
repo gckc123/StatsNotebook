@@ -17,6 +17,8 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { faLaptopCode } from '@fortawesome/free-solid-svg-icons';
 import CloseIcon from '@material-ui/icons/Close';
 import Tooltip from '@material-ui/core/Tooltip';
+import { faCheckSquare } from '@fortawesome/free-regular-svg-icons';
+import { faSquare } from '@fortawesome/free-regular-svg-icons';
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -68,6 +70,17 @@ export class NotebookBlk extends Component {
             Title: this.props.notebookState.Title,
             editorHTML: this.props.notebookState.editorHTML,
         })
+    }
+
+    componentDidUpdate() {
+        if (this.props.notebookState.needUpdate) {
+            this.setState({
+                Script: this.props.notebookState.NotebookBlkScript,
+                Title: this.props.notebookState.Title,
+                editorHTML: this.props.notebookState.editorHTML,
+            })
+            this.props.setNotebookBlkUpdate2FalseCallback(this.props.index)
+        }
     }
 
     onLoad = (editor) => {
@@ -136,8 +149,9 @@ export class NotebookBlk extends Component {
                     this.props.restorePanelSettingCallback(this.props.index)
                 }else{
                     this.setState({message: "The variable type of the following variables does not match with the their original types when the codes are generated: " +
-                    mismatchVarType.join(", ") + ". This indicates that the dataset might have changed since the codes were generated.<br/>The analysis menu will not be restored."
-                })
+                    mismatchVarType.join(", ") + ". This indicates that the dataset might have changed since the codes were generated. The restored menu might not generate the same results.",
+                    showMessage: true
+                }, () => this.props.restorePanelSettingCallback(this.props.index))
                 }
             }else{
                 let notInCurrentList = this.not(notebookStateVarName, Object.keys(this.props.CurrentVariableList))
@@ -148,10 +162,11 @@ export class NotebookBlk extends Component {
                 notInCurrentList.join(", ") + ". " : "")  +
                 (notInNotebookVarList.length > 0 ? "The following variables are in the current variable list but not in the variable list when the codes were generated: " +
                 notInNotebookVarList.join(", ") + ". " : "") +
-                "This analysis menu will not be restored.", showMessage: true})
+                "The restored menu might not generate the same results.", showMessage: true}, () => this.props.restorePanelSettingCallback(this.props.index))
             }
         }else{
-            this.setState({message: "The codes in this block has been changed since they were generated from menu. The analysis menu will not be restored.", showMessage: true})
+            this.setState({message: "The codes in this block has been changed since they were generated from menu. The restored menu might not generate the same results.", showMessage: true},
+            () => this.props.restorePanelSettingCallback(this.props.index))
         }
     }
 
@@ -172,7 +187,7 @@ export class NotebookBlk extends Component {
                         <StyledIconButton size="small" onClick={() => this.dumpStatus()}><CloseIcon /></StyledIconButton><span className="Warning">Dump notebook status</span>
                     </div>
                     <div hidden = {!this.state.showMessage}>
-                        <StyledIconButton size="small" onClick={() => this.closeMessage()}><CloseIcon /></StyledIconButton><span className="Warning">{this.state.message}</span>
+                        <StyledIconButton size="small" onClick={() => this.closeMessage()}><CloseIcon fontSize="small"/></StyledIconButton><span className="Warning">{this.state.message}</span>
                     </div>
                     <div className="notebook-title-grid" style={{width: this.props.ElementWidth}}>
                         <div>
@@ -193,6 +208,11 @@ export class NotebookBlk extends Component {
                         </div>
                         <div><StyledTooltip title="Show text editor"><StyledIconButton size="small" onClick={()=>{this.props.toggleEditorCallback(this.props.index)}}>
                             <FontAwesomeIcon icon={faEdit} /></StyledIconButton></StyledTooltip></div>
+                        <div>
+                            <StyledTooltip title="click this to select multiple block"><StyledIconButton size="small" onClick={()=>{this.props.selectNotebookBlkCallback(this.props.index)}}>
+                            <FontAwesomeIcon icon={(this.props.notebookState.selected ? faCheckSquare : faSquare) } /></StyledIconButton></StyledTooltip>
+                            
+                        </div>
                     </div>
                     <div hidden = {!this.props.notebookState.Expanded}>
                     <AceEditor 
@@ -209,7 +229,13 @@ export class NotebookBlk extends Component {
                         name: 'runScript', 
                         bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'}, 
                         exec: this.updateAndRun
-                      }]}                        
+                      },
+                      {
+                          name: 'add',
+                          bindKey: {win: 'Alt-a', mac: 'Alt-a'},
+                          exec: () => this.props.addExtraBlkCallback("", false)
+                      }
+                    ]}                        
                     name={this.props.notebookState.NotebookBlkID} 
                     editorProps={{ $blockScrolling: true }}
                     />

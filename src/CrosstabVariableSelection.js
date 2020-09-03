@@ -9,6 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
 import IconButton from '@material-ui/core/IconButton'
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -103,7 +104,12 @@ export class CrosstabVariableSelection extends Component {
 
 
                     <div></div>
-                    <div>Split by</div>
+                    <div>Split by
+                    <StyledTooltip title="'Split by' will be ignored if the data is weighted."><span className="pl-2">
+                        
+                            <FontAwesomeIcon icon={faInfoCircle} size="1x"/>
+                        </span></StyledTooltip>
+                    </div>
                     <div><center>
                         {this.genArrowButton("SplitBy", 10000)}
                     </center></div>
@@ -111,6 +117,14 @@ export class CrosstabVariableSelection extends Component {
                         {this.genVariableSelectionList("SplitBy")}
                     </div>
                     
+                    <div></div>
+                    <div>Weight</div>
+                    <div><center>
+                        {this.genArrowButton("Weight", 10000)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("Weight")}>
+                        {this.genVariableSelectionList("Weight")}
+                    </div>
                 </div>
             </div>
         )

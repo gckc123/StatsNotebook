@@ -146,15 +146,15 @@ class RegressionMenu extends Component {
                 open = {open}
                 onClose={this.props.handleClose}>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick = {() => this.setAnalysisPanel("LRPanel")}>Linear Regression (For numeric outcome)</MenuItem>
+                onClick = {() => this.setAnalysisPanel("LRPanel")}>Linear Regression (Numeric outcome)</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick = {() => this.setAnalysisPanel("LogitPanel")}>Logistic Regression (For binary outcome)</MenuItem>                        
+                onClick = {() => this.setAnalysisPanel("LogitPanel")}>Logistic Regression (Binary outcome)</MenuItem>                        
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick = {() => this.setAnalysisPanel("PoiPanel")}>Poisson Regression (For count outcome)</MenuItem>
+                onClick = {() => this.setAnalysisPanel("PoiPanel")}>Poisson Regression (Count outcome)</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick = {() => this.setAnalysisPanel("NbPanel")}>Negative Binomial Regression (For over-dispersed count outcome)</MenuItem>
+                onClick = {() => this.setAnalysisPanel("NbPanel")}>Negative Binomial Regression (Over-dispersed count outcome)</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
-                onClick = {() => this.setAnalysisPanel("MultinomPanel")}>Multinomial Logistic Regression (For categorical outcome with more than two levels)</MenuItem>
+                onClick = {() => this.setAnalysisPanel("MultinomPanel")}>Multinomial Logistic Regression (Categorical outcome with more than two levels)</MenuItem>
                
             </Menu>
         )

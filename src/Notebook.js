@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {NotebookBar} from "./Notebookbar";
 import {NotebookBlk} from "./NotebookBlk";
-import "./App.css"
+import "./App.css";
 
 
 export class Notebook extends Component {
@@ -37,7 +37,8 @@ export class Notebook extends Component {
                 addExtraBlkCallback={this.props.addExtraBlkCallback} 
                 reorderNotebookBlkCallback = {this.props.reorderNotebookBlkCallback}
                 delBlkCallback={this.props.delBlkCallback}
-                runScriptCallback={this.props.runScriptCallback}/>
+                runScriptCallback={this.props.runScriptCallback}
+                mergeBlkCallback = {this.props.mergeBlkCallback}/>
                 <div className="notebook-blk">
                 {
                     this.props.NotebookBlkList.map( (Blk, index) =>
@@ -48,7 +49,7 @@ export class Notebook extends Component {
                         CurrentVariableList = {this.props.CurrentVariableList}
 
                         notebookState = {Blk}
-
+                        addExtraBlkCallback={this.props.addExtraBlkCallback}
                         runScriptCallback={this.props.runScriptCallback}
                         gainFocusCallback={this.props.gainFocusCallback}
                         updateAEditorValueCallback={this.props.updateAEditorValueCallback}
@@ -56,11 +57,13 @@ export class Notebook extends Component {
                         toggleNotebookBlkCallback = {this.props.toggleNotebookBlkCallback}
                         updateNotebookBlkStateCallback = {this.props.updateNotebookBlkStateCallback}
                         restorePanelSettingCallback = {this.props.restorePanelSettingCallback}
+                        selectNotebookBlkCallback = {this.props.selectNotebookBlkCallback}
+                        setNotebookBlkUpdate2FalseCallback = {this.props.setNotebookBlkUpdate2FalseCallback}
                         
                         />                        
                         )
                 }
-                </div>   
+                </div> 
             </div>
         )
     }
