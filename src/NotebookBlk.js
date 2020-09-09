@@ -243,10 +243,20 @@ export class NotebookBlk extends Component {
                         {
                             this.props.notebookState.NotebookBlkROutput.map( (output, index) =>  {      
                                     if (output.OutputType[0] === "Normal" || output.OutputType[0] === "Warning" || output.OutputType[0] === "Message" || output.OutputType[0] === "Error") {                        
+                                        
+                                        let tmpOutput = output.Output[0].replace(/\\n/g,"\\r\\n")
+                                        tmpOutput = tmpOutput.split("\n")
+                                        
                                         return (
                                             <div key={index}>
                                                 <div style={{color: "black", fontWeight: "bold"}}>######################################################</div>
-                                                <div><code className={output.OutputType} key={index}>{output.Output}</code></div>
+                                                <div><code className={output.OutputType} key={index}>{
+                                                    tmpOutput.map((line) => {
+                                                        return (
+                                                            <>{line}<br/></>
+                                                        )
+                                                    })
+                                                }</code></div>
                                             </div>
                                         )
                                     }else if (output.OutputType[0] === "Graphics")

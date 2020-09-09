@@ -93,6 +93,8 @@ export class MediationPanel extends Component {
           Digits: 3,
           Simulation: 1000,
           ImputeData: true,
+          ImputedDataset: false,
+          M: 20,
         },
         showAlert: false,
         alertText: "",
@@ -320,10 +322,16 @@ export class MediationPanel extends Component {
       case "ControlLv":
       case "Digits":
       case "Simulation":
+      case "M":
         AnalysisSettingObj[target] = event.target.value
         break;
       case "ImputeData":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        AnalysisSettingObj["ImputedDataset"] = false
+        break;
+      case "ImputedDataset":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        AnalysisSettingObj["ImputeData"] = false
         break;
       default:
         break;

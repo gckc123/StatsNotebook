@@ -69,7 +69,7 @@ app.on('ready', () => {
     }
     let CodeString = JSON.stringify(CloseRCode)
     send2R(CodeString)
-    console.log("sending code to shut down R.")
+    //console.log("sending code to shut down R.")
   })
 
   mainWindow.on('closed', () => {
@@ -80,9 +80,9 @@ app.on('ready', () => {
 });
 
 ReplyFromR.on("message",function() {
-  console.log("Received reply from R");
+  //console.log("Received reply from R");
   var args = Array.apply(null, arguments);
-  console.log(args)
+  //console.log(args)
   showRReply(args[1].toString('utf8'));
 })
 
@@ -124,7 +124,7 @@ const getFileFromUser = exports.getFileFromUser = (fileType) => {
   console.log("Opening file")
   if (file) { 
     if (fileType === "CSV" || fileType === "SPSS" || fileType === "STATA") {
-      sendFileName(file) 
+      sendFileName(file, "open") 
     }else{
       if (fileType === "Notebook") {
         let notebookContent = fs.readFileSync(file[0]).toString();
@@ -149,19 +149,72 @@ const savingFile = exports.savingFile = (content, workingDir) => {
   fs.writeFileSync(file, content);
 }
 
+const savingDataFile = exports.savingDataFile = (fileType, workingDir) => {
+  let fileTypeName = ""
+  let fileExtension = ""
+  switch (fileType) {
+    case "CSV":
+      fileTypeName = "CSV File"
+      fileExtension = ["csv", "CSV"]
+      break;
+    case "SPSS":
+      fileTypeName = "SPSS File"
+      fileExtension = ["sav","SAV"]
+      break;
+    case "STATA":
+      fileTypeName = "STATA File"
+      fileExtension = ["dta","DTA"]
+      break;
+    case "Notebook":
+      fileTypeName = "Notebook file"
+      fileExtension = ["rnb", "RNB"]
+      break;
+    default:
+      break;
+  }
+  const file = dialog.showSaveDialogSync(mainWindow, {
+    title: 'Save Data File as ' + fileType,
+    filters: [
+      {name: fileType, extensions: fileExtension}
+    ]
+  });
+  if (!file) 
+  {
+    console.log("Cannot write to file.")
+    return
+  }else {
+    sendFileName(file, "save") 
+  };
+  
+}
+
 const send2R = exports.send2R = (codes) => {
-  console.log("Before replacement", codes)
+  //console.log("Before replacement", codes)
   codes = codes.replace(/\\r\\n/g,"\\n").replace(/\\r/g,"\\n")
-  console.log("Sending codes to R: ", codes);
+  //console.log("Sending codes to R: ", codes);
   RequestToR.send(codes);
 }
 
-const sendFileName = (file) => {
-  let directory = path.dirname(file[0])
-  let filename = path.basename(file[0])
-  let ext = path.extname(file[0])
+const sendFileName = (file, action = "open") => {
+  let directory = ""
+  let filename = ""
+  let ext = ""
+  if (action === "open") {
+    directory = path.dirname(file[0])
+    filename = path.basename(file[0])
+    ext = path.extname(file[0])
+  }else
+  {
+    directory = path.dirname(file)
+    filename = path.basename(file)
+    ext = path.extname(file)
+  }
   let os = process.platform
-  mainWindow.webContents.send('data-file-opened', directory, filename, ext, os);
+  if (action === "open") {
+    mainWindow.webContents.send('data-file-opened', directory, filename, ext, os);
+  }else{
+    mainWindow.webContents.send('data-file-saved', directory, filename, ext, os);
+  }
 }
 
 const showRReply = (reply) => {

@@ -5,6 +5,16 @@ import FormControl from '@material-ui/core/FormControl';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import Tooltip from '@material-ui/core/Tooltip';
+import TextField from '@material-ui/core/TextField'
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
+const StyledTooltip = withStyles({
+    tooltip: {
+      fontSize: "12px"
+    }
+  })(Tooltip);
 
 const StyledNativeSelect = withStyles({
     root: {
@@ -105,9 +115,27 @@ export class MediationAnalysisSetting extends Component {
 
                 <Divider className="mt-2 mb-2"/>
 
-                <Checkbox checked ={this.props.AnalysisSetting.ImputeData}
-                onClick = {(event) => this.props.updateAnalysisSettingCallback(event, "ImputeData")} size="small"/>Impute missing data
-                    
+                <div className="NMACheckbox"><Checkbox checked ={this.props.AnalysisSetting.ImputedDataset}
+                onClick = {(event) => this.props.updateAnalysisSettingCallback(event, "ImputedDataset")} size="small"/>This is an imputed dataset</div>
+                <div className="NMACheckbox"><Checkbox checked ={this.props.AnalysisSetting.ImputeData}
+                onClick = {(event) => this.props.updateAnalysisSettingCallback(event, "ImputeData")} size="small"/>Impute missing data</div>
+                <div className ="NMA-Analysis-Box pl-3" hidden = {!this.props.AnalysisSetting.ImputeData}>
+                        <div className="InvisibleBottomBorder pl-4 pt-1">Number of imputation:
+                        <StyledTooltip title="The actual number depends on the number of computer cores and may be slightly more than the number specified.">
+                            <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                        </div>
+                        <div className="pt-1">
+                        <TextField
+                            type="number"
+                            inputProps= {{
+                                style: {fontSize: 15}
+                            }}
+                            className = "Analysis-Setting-TextField"
+                            defaultValue = {this.props.AnalysisSetting.M}
+                            onChange={(event) => this.props.updateAnalysisSettingCallback(event, "M")}
+                        ></TextField>
+                        </div>
+                </div>
             </div>
         )
     }

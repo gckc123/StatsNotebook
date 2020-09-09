@@ -107,7 +107,10 @@ export class NMAVariableSelection extends Component {
                     </div>
                     <div></div>
                     <div>Effect size 
-                    <StyledTooltip title="For Risk/ Odds/ Hazard ratio, enter the log-effect size here.">
+                    <StyledTooltip title={<div>The type of effect size can be specified in analysis setting below. <br/>
+                        For Risk/ Odds/ Hazard ratio, the effect size will be log-transformed.<br/>
+                        Alternatively, the log-RR/ log-OR/ log-RR can be entered directly.
+                        </div>}>
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
                     <div><center>
                         {this.genArrowButton("EffectSize", 1)}
@@ -116,7 +119,11 @@ export class NMAVariableSelection extends Component {
                         {this.genVariableSelectionList("EffectSize")}
                     </div>
                     <div></div>
-                    <div>Standard Error</div>
+                    <div>Std. Error/ Upper bound of C.I.
+                    <StyledTooltip title={<div>If Risk/ Odds/ Hazard ratio is entered above, enter the upper bound of the confidence interval. Specify the level of confidence in analysis setting and the standard error will be computed.<br/>
+                    Alternatively, the standard error for log-RR/ log-OR/ log-HR can be entered here.</div>}>
+                        <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div><center>
                         {this.genArrowButton("SE", 1)}
                     </center></div>

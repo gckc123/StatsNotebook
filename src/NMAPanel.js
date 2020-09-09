@@ -97,6 +97,9 @@ export class NMAPanel extends Component {
           NetworkPlot: true,
           HeatPlot: true, 
           FunnelPlot: true,
+          FixedEffect: false,
+          ConfForSE: 95,
+          showConfForSE: false,
 
         },
         showAlert: false,
@@ -323,26 +326,58 @@ export class NMAPanel extends Component {
   }
 
   buildCode = () => {
-    let codeString = "library(netmeta)\nnma_res <- netmeta::netmeta( TE = " + this.state.Variables.EffectSize + 
-    ",\n seTE = " + this.state.Variables.SE + 
+    let codeString = ""
+    let ESforAnalysis = this.state.AnalysisSetting.ESType
+    switch(this.state.AnalysisSetting.ESType) {
+      case "logOR":
+        ESforAnalysis = "OR"
+        break;
+      case "logRR":
+        ESforAnalysis = "RR"
+        break;
+      case "logHR":
+        ESforAnalysis = "HR"
+        break;
+      default:
+        break;
+    }  
+    
+    let EffectSize = this.state.Variables.EffectSize
+
+    console.log(ESforAnalysis)
+
+    let SE = this.state.Variables.SE
+    if (this.state.AnalysisSetting.ESType === "OR" || this.state.AnalysisSetting.ESType === "RR" || this.state.AnalysisSetting.ESType === "HR") {
+      codeString = "currentDataset$logES <- log(currentDataset$" + this.state.Variables.EffectSize + ")\n"  
+      EffectSize = "logES"
+      codeString = codeString + "currentDataset$logStdErr <- (log(currentDataset$" + this.state.Variables.SE + ")" + "- currentDataset$logES)/qnorm(1-((1-"+
+      this.state.AnalysisSetting.ConfForSE /100 +")/2))\n\n"
+      SE = "logStdErr"
+    }
+
+    codeString = codeString + "library(netmeta)\nnma_res <- netmeta::netmeta( TE = " + EffectSize + 
+    ",\n seTE = " + SE + 
     ",\ntreat1 = " + this.state.Variables.Treatment1 +
     ",\ntreat2 = " + this.state.Variables.Treatment2 +
     ",\nstudlab = " + this.state.Variables.StudyLab + 
-    ",\ndata = currentDataset, \nsm = \"" + this.state.AnalysisSetting.ESType + 
+    ",\ndata = currentDataset, \nsm = \"" + ESforAnalysis + 
     "\",\nlevel = " + this.state.AnalysisSetting.ConfLv/100 + 
-    ",\nlevel.comb = " + this.state.AnalysisSetting.ConfLv/100 +")" 
-    codeString = codeString + "\nsummary(nma_res) \nnetsplit(nma_res)"
+    ",\nlevel.comb = " + this.state.AnalysisSetting.ConfLv/100 +
+    (this.state.AnalysisSetting.FixedEffect? ", comb.fixed = TRUE, comb.random = FALSE": ", comb.fixed = FALSE, comb.random = TRUE") + ")" 
+    codeString = codeString + "\n\nnma_res \n\nnetsplit(nma_res)"
     if (this.state.AnalysisSetting.ForestPlot) {
         codeString = codeString + 
         "\nforest(netsplit(nma_res, reference.group=\""+ this.state.AnalysisSetting.ForestPlotRef + "\"))"
     }
     if (this.state.AnalysisSetting.NetworkPlot) {
         codeString = codeString +
-        "\nnetgraph(nma_res)"
+        "\nnetgraph(nma_res"+
+        (this.state.AnalysisSetting.FixedEffect? ", thickness = \"se.fixed\"" : ", thickness =\"se.random\"")+")"
     }
     if (this.state.AnalysisSetting.HeatPlot) {
         codeString = codeString +
-        "\nnetheat(nma_res)"
+        "\nnetheat(nma_res"+ 
+        (this.state.AnalysisSetting.FixedEffect? "":", random = TRUE")+")"
     }
     if (this.state.AnalysisSetting.FunnelPlot) {
       codeString = codeString + "\nfunnel(nma_res, order = c(\"" + this.state.TreatmentLvs.join("\", \"") +
@@ -364,12 +399,14 @@ export class NMAPanel extends Component {
       case "ESType":
       case "ConfLv":
       case "ForestPlotRef":
+      case "ConfForSE":
         AnalysisSettingObj[target] = event.target.value
         break;
       case "ForestPlot":
       case "NetworkPlot":
       case "HeatPlot":
       case "FunnelPlot":
+      case "FixedEffect":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:

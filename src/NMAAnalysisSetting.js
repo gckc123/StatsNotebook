@@ -84,12 +84,25 @@ export class NMAAnalysisSetting extends Component {
                                 <option value="RR">Risk Ratio</option>
                                 <option value="OR">Odds Ratio</option>
                                 <option value="HR">Hazard ratio</option>
+                                <option value="logRR">Log Risk Ratio</option>
+                                <option value="logOR">Log Odds Ratio</option>
+                                <option value="logHR">Log Hazard ratio</option>
                                 <option value="RD">Risk Difference</option>
                                 <option value="MD">Mean difference</option>
                                 <option value="SMD">Standardized mean difference</option>
                             </StyledNativeSelect>
                         </FormControl>
                     </div>
+
+                    <div className="InvisibleBottomBorder pl-3" hidden = {!(this.props.AnalysisSetting.ESType === "RR" ||
+                        this.props.AnalysisSetting.ESType === "OR" || this.props.AnalysisSetting.ESType === "HR")}>
+                        C.I. for Std. Err. Calculation:</div> 
+                    <div hidden = {!(this.props.AnalysisSetting.ESType === "RR" ||
+                        this.props.AnalysisSetting.ESType === "OR" || this.props.AnalysisSetting.ESType === "HR")}><input className="NMAAnalysisSettingInput"
+                    value = {this.props.AnalysisSetting.ConfForSE}
+                    onChange = {(event) => this.props.updateAnalysisSettingCallback(event,"ConfForSE")}
+                    ></input>%</div>
+
                     <div className="InvisibleBottomBorder">Confidence Interval:</div> 
                     <div><input className="NMAAnalysisSettingInput"
                     value = {this.props.AnalysisSetting.ConfLv}
@@ -103,6 +116,8 @@ export class NMAAnalysisSetting extends Component {
                         {this.genForestPlotRef()}
                     </div>
                 </div>
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.FixedEffect} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"FixedEffect")}/>Fixed effect model</div>
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.HeatPlot} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"HeatPlot")}/>Heat plot</div>     
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.NetworkPlot} size="small"

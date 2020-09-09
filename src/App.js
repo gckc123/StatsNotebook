@@ -86,6 +86,7 @@ export class App extends Component {
           tmp[Reply2BlkIndex].NotebookBlkROutput = [...tmp[Reply2BlkIndex].NotebookBlkROutput, {OutputType: ResultsJSON.OutputType,
             Output: ResultsJSON.Output}];
           this.setState({NotebookBlkList:[...tmp]})
+          
         }
       }else if (ResultsJSON.OutputType[0] === "getVariableList") {  
         let imputedDataset = false
@@ -140,6 +141,34 @@ export class App extends Component {
         case ".dta":
         case ".DTA":
           script = script + `library(tidyverse)\nlibrary(haven)\ncurrentDataset <- read_dta("${filename}")`
+          break;
+        default:
+          break;
+      }
+      this.addExtraBlk(script, true) 
+    })
+
+    ipcRenderer.on('data-file-saved', (event, directory, filename, ext, os) => {
+      
+      if (os === "win32") {
+        directory = directory.replace(/\\/g,"\\\\")
+      }
+      
+      let script = `setwd("${directory}") \n`;
+      switch (ext) {
+        case ".csv":
+        case ".CSV":
+          script = script + "library(tidyverse)\n"
+          script = script + `write_csv(currentDataset, "${filename}")`
+          break;
+        case ".sav":
+        case ".SAV":
+          script = script + "library(tidyverse)\nlibrary(haven)\n"
+          script = script + `write_sav(currentDataset, "${filename}")`
+          break;
+        case ".dta":
+        case ".DTA":
+          script = script + `library(tidyverse)\nlibrary(haven)\nwrite_dta(currentDataset, "${filename}")`
           break;
         default:
           break;
@@ -234,6 +263,10 @@ export class App extends Component {
 
   selectDataVizPanel = (panel) => {
     this.setState({currentActiveDataVizPanel: panel})
+  }
+
+  savingDataFile = (fileType, workingDir) => {
+    mainProcess.savingDataFile(fileType)
   }
 
   savingFile = () => {
@@ -525,7 +558,9 @@ export class App extends Component {
             selectDataVizPanelCallback = {this.selectDataVizPanel}
             savingFileCallback = {this.savingFile}
             getCPUCountCallback = {this.getCPUCount}
-            newNotebookCallback = {this.newNotebook}/>
+            newNotebookCallback = {this.newNotebook}
+            addExtraBlkCallback = {this.addExtraBlk}
+            savingDataFileCallback = {this.savingDataFile}/>
             
             <div className="main-pane">
               <div className="left-pane pl-2 pr-2 mb-2" ref={this.DataPanelContainerRef}>

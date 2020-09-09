@@ -62,12 +62,58 @@ class OpenFileMenu extends Component {
     }
 }
 
+class SaveFileMenu extends Component {
+
+    saveFile = (fileType) => {
+        switch(fileType) {
+            case "CSV":
+            case "SPSS":
+            case "STATA":
+                this.props.savingDataFileCallback(fileType);
+                break;
+            case "RNB":
+                this.props.savingFileCallback();
+                break;
+            default:
+                break;
+        }
+        
+        this.props.handleClose()
+    }
+
+    render () {
+        let open = Boolean(this.props.anchorEl)
+        return (
+            <Menu anchorEl={this.props.anchorEl}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                keepMounted
+                transformOrigin = {{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                open = {open}
+                onClose={this.props.handleClose}>
+                <MenuItem onClick={() => this.saveFile("CSV")} disableRipple style = {MenuItemStyle}>CSV</MenuItem>
+                <MenuItem onClick={() => this.saveFile("SPSS")} disableRipple style = {MenuItemStyle}>SPSS</MenuItem>
+                <MenuItem onClick={() => this.saveFile("STATA")} disableRipple style = {MenuItemStyle}>STATA</MenuItem>
+                <Divider />
+                <MenuItem onClick={() => this.saveFile("RNB")} disableRipple style = {MenuItemStyle}>Notebook</MenuItem>
+            </Menu>
+        )
+    }
+}
+
 export class SettingBar extends Component {
     
     constructor(props) {
         super(props);
         this.state = {
             anchorEl: null,
+            anchorSaveMenu: null,
         }
     }
 
@@ -77,6 +123,14 @@ export class SettingBar extends Component {
 
     handleClose = (event) => {
         this.setState({anchorEl: null})
+    }
+
+    handleSaveMenu = (event) => {
+        this.setState({anchorSaveMenu: event.currentTarget})
+    }
+
+    handleSaveClose = (event) => {
+        this.setState({anchorSaveMenu: null})
     }
 
     render () {
@@ -90,9 +144,13 @@ export class SettingBar extends Component {
                 </StyledButton>
                 <OpenFileMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
                     openFileCallback = {this.props.openFileCallback}/>
-                <StyledButton disableRipple onClick={this.props.savingFileCallback}>
+                <StyledButton disableRipple onClick={this.handleSaveMenu}>
                     <FontAwesomeIcon icon={faSave}/><div className='ml-1'>Save</div>
                 </StyledButton>
+                <SaveFileMenu handleClose = {this.handleSaveClose} anchorEl = {this.state.anchorSaveMenu}
+                    savingFileCallback = {this.props.savingFileCallback}
+                    addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                    savingDataFileCallback = {this.props.savingDataFileCallback}/>
             </div>
         )
     }

@@ -94,7 +94,9 @@ export class TopNavTabs extends Component {
         <TabPanel CurrentTab={this.state.CurrentTab} index={0}>
           <SettingBar openFileCallback = {this.props.openFileCallback}
           savingFileCallback = {this.props.savingFileCallback}
-          newNotebookCallback = {this.props.newNotebookCallback}/>
+          newNotebookCallback = {this.props.newNotebookCallback}
+          addExtraBlkCallback = {this.props.addExtraBlkCallback}
+          savingDataFileCallback = {this.props.savingDataFileCallback}/>
         </TabPanel>
         <TabPanel CurrentTab={this.state.CurrentTab} index={1}>
           <DataBar selectDataPanelCallback = {this.props.selectDataPanelCallback}/>
