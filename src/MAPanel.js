@@ -92,6 +92,7 @@ export class MAPanel extends Component {
         },
         AnalysisSetting: {
           ConfLv: 95,
+          LogES: false,
           Exponentiate: false,
           FixedEffect: false,
           Leave1Out: true,
@@ -99,6 +100,8 @@ export class MAPanel extends Component {
           ForestPlot: true,
           FunnelPlot: true,
           DiagnosticPlot: true,
+          ConfForSE: 95,
+          showConfForSE: false,
         },
         showAlert: false,
         alertText: "",
@@ -352,8 +355,21 @@ export class MAPanel extends Component {
   }
 
   buildCode = () => {
-    let codeString = "library(metafor)\n\nma_res <- rma( yi = " + this.state.Variables.EffectSize + 
-    ",\n vi = " + this.state.Variables.SE + 
+    let codeString = "library(metafor)\n\n"
+
+    let EffectSize = this.state.Variables.EffectSize
+    let SE = this.state.Variables.SE
+
+    if (this.state.AnalysisSetting.LogES) {
+      codeString = codeString + "currentDataset$logES <- log(currentDataset$" + this.state.Variables.EffectSize + ")\n"  
+      EffectSize = "logES"
+      codeString = codeString + "currentDataset$logStdErr <- (log(currentDataset$" + this.state.Variables.SE + ")" + "- currentDataset$logES)/qnorm(1-((1-"+
+      this.state.AnalysisSetting.ConfForSE /100 +")/2))\n\n"
+      SE = "logStdErr"
+    }
+
+    codeString = codeString + "ma_res <- rma( yi = " + EffectSize + 
+    ",\n vi = " + SE + 
     (this.state.Variables.Covariates.length > 0 ? (",\n mod = ~ " + this.state.Variables.Covariates.join(" + ") +
      (this.state.interaction.length > 0 ?  (" + " + this.state.interaction.join(" + ")): "") ) : "") + 
     ",\n data = currentDataset,\n level = " + this.state.AnalysisSetting.ConfLv/100 +
@@ -381,6 +397,7 @@ export class MAPanel extends Component {
     
     switch (target) {
       case "ConfLv":
+      case "ConfForSE":
         AnalysisSettingObj[target] = event.target.value
         break;
       case "Exponentiate":
@@ -390,6 +407,7 @@ export class MAPanel extends Component {
       case "ForestPlot":
       case "FunnelPlot":
       case "DiagnosticPlot":
+      case "LogES":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:

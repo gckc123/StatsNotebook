@@ -344,11 +344,9 @@ export class NMAPanel extends Component {
     
     let EffectSize = this.state.Variables.EffectSize
 
-    console.log(ESforAnalysis)
-
     let SE = this.state.Variables.SE
     if (this.state.AnalysisSetting.ESType === "OR" || this.state.AnalysisSetting.ESType === "RR" || this.state.AnalysisSetting.ESType === "HR") {
-      codeString = "currentDataset$logES <- log(currentDataset$" + this.state.Variables.EffectSize + ")\n"  
+      codeString = codeString + "currentDataset$logES <- log(currentDataset$" + this.state.Variables.EffectSize + ")\n"  
       EffectSize = "logES"
       codeString = codeString + "currentDataset$logStdErr <- (log(currentDataset$" + this.state.Variables.SE + ")" + "- currentDataset$logES)/qnorm(1-((1-"+
       this.state.AnalysisSetting.ConfForSE /100 +")/2))\n\n"

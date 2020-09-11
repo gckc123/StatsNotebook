@@ -87,7 +87,7 @@ export class MAVariableSelection extends Component {
                     </div>
                     <div></div>
                     <div>Effect size 
-                    <StyledTooltip title="For Risk/ Odds/ Hazard ratio, enter the log-effect size here.">
+                    <StyledTooltip title="For Risk/ Odds/ Hazard ratio, either enter the log-effect size here or select log-transformation in analysis setting below.">
                         <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip></div>
                     <div className="MA-Available-Variable-List-Container" 
                     onClick={() => this.props.changeArrowCallback("Available")}>
@@ -101,7 +101,7 @@ export class MAVariableSelection extends Component {
                     </div>
 
                     <div></div>
-                    <div>Standard Error</div>
+                    <div>Std. Error/ Upper bound of C.I.</div>
                     <div><center>
                         {this.genArrowButton("SE", 1)}
                     </center></div>

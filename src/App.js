@@ -634,13 +634,15 @@ export class App extends Component {
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MediationPanel"}>
                     <MediationPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}
                     addExtraBlkCallback = {this.addExtraBlk}
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    CPU = {this.state.CPU}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "NMAPanel"}>

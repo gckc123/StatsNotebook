@@ -66,7 +66,9 @@ export class MediationPanel extends Component {
             Exposure: [],
             Mediator: [],
             Covariate: []
-        }, 
+        },
+        ExposureLvs: [], 
+
         Checked: {
             Available: [],
             Outcome: [],
@@ -95,6 +97,9 @@ export class MediationPanel extends Component {
           ImputeData: true,
           ImputedDataset: false,
           M: 20,
+          incint: false,
+          incmmint: false,
+          catExposure: false,
         },
         showAlert: false,
         alertText: "",
@@ -161,7 +166,7 @@ export class MediationPanel extends Component {
   resetVarList = () => {
     let VariablesObj  = _.cloneDeep(this.state.Variables)
     let CheckedObj = _.cloneDeep(this.state.Checked)
-
+    
     for (let key in this.state.Variables) {
       if (key === "Available") {
         if (this.state.sortAvailable) {
@@ -212,15 +217,24 @@ export class MediationPanel extends Component {
   handleToRight = (target, maxElement) => {
     let VariablesObj = _.cloneDeep(this.state.Variables)
     let CheckedObj = _.cloneDeep(this.state.Checked)
+    let AnalysisSettingObj = _.cloneDeep(this.state.AnalysisSetting)
+    let ExposureLvsArr = [...this.state.ExposureLvs]
+
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
         if (target === "Outcome" || target === "Mediator") {
           this.add2ModelSelection(CheckedObj["Available"])
         }
+        if (target === "Exposure") {
+          if (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Factor") {
+            AnalysisSettingObj["catExposure"] = true
+            ExposureLvsArr = [...this.props.CategoricalVarLevels[CheckedObj["Available"][0]]]
+            console.log(ExposureLvsArr)
+          }
+        }
         CheckedObj["Available"] = []
-        this.setState({Variables: {...VariablesObj}},
-            () => this.setState({Checked: {...CheckedObj}}))  
+        this.setState({Variables: {...VariablesObj}, AnalysisSetting: {...AnalysisSettingObj}, ExposureLvs: [...ExposureLvsArr]})  
     }else{
         if (CheckedObj["Available"].length > 0) {
             this.setState({showAlert: true, 
@@ -234,10 +248,18 @@ export class MediationPanel extends Component {
   handleToLeft = (from) => {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
+      let AnalysisSettingObj = _.cloneDeep(this.state.AnalysisSetting)
+      let ExposureLvsArr = [...this.state.ExposureLvs]
+
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
       if (from === "Outcome" || from === "Mediator") {
         this.removeFromModelSelection(CheckedObj[from])
+      }
+
+      if (from === "Exposure") {  
+        AnalysisSettingObj["catExposure"] = false
+        ExposureLvsArr = []
       }
 
       if (this.state.sortAvailable) {
@@ -248,7 +270,7 @@ export class MediationPanel extends Component {
 
 
       CheckedObj[from] = []
-      this.setState({Variables: {...VariablesObj}},
+      this.setState({Variables: {...VariablesObj}, ExposureLvs: [...ExposureLvsArr], AnalysisSetting: {...AnalysisSettingObj}},
           () => this.setState({Checked: {...CheckedObj}}))
   }
   
@@ -286,21 +308,78 @@ export class MediationPanel extends Component {
 
 
   buildCode = () => {
+
+    let codeString = ""
+    
     let mediatorModels = this.state.Variables.Mediator.map((item) => {
       return this.state.AnalysisSetting.Models[item]
     }) 
-    let codeString = "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
+
+    if (this.state.AnalysisSetting.ImputeData) {
+      if (Object.keys(this.props.CurrentVariableList).indexOf(".imp") !== -1) {
+        codeString = codeString + "currentDataset <- currentDataset[which(currentDataset$.imp == 0),]\n" +
+        "currentDataset <- currentDataset[!(names(currentDataset) %in% c(\".id\", \".imp\"))]\n\n"
+      }
+    }
+
+    codeString = codeString + "library(mice)\n"
+    let formula = []
+    let method = []
+    let formulaCode = "formulas <- make.formulas(currentDataset)\n"
+
+    let analysisVars = this.state.Variables.Covariate.concat(this.state.Variables.Outcome).concat(this.state.Variables.Exposure).concat(this.state.Variables.Mediator)
+
+    let intTerm = []
+
+    if (this.state.AnalysisSetting.incint) {
+      this.state.Variables.Mediator.forEach((med) => {
+        intTerm.push(med + "*" + this.state.Variables.Exposure)
+      })
+    }
+
+    if (this.state.AnalysisSetting.incmmint && this.state.Variables.Mediator.length >= 2) {
+      this.state.Variables.Mediator.forEach((med, index) => {
+        for(let i = index+1; i < this.state.Variables.Mediator.length; i++) {
+          intTerm.push(med + "*" + this.state.Variables.Mediator[i])
+        }
+      })
+    }
+
+    analysisVars.forEach((variable) => {
+      let predictor = analysisVars.filter((item) => item !== variable)
+      formula.push("formulas$"+variable+" =" + variable + " ~ " + 
+      predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
+      intTerm.join(" + "))
+    })
+
+    let notIncludedVars = this.not(this.state.Variables.Available, analysisVars)
+      notIncludedVars.forEach((variable) => {
+        if (variable !== ".id" && variable !== ".imp") {
+          method.push("meth[\""+variable+"\"] <- \"\"")
+        }
+    })
+
+    formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
+    let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
+    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\nimputedDataset <- parlmice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
+      this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
+      ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE)\n\n"
+
+    codeString = codeString + "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
     "med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
     "treat = \""+ this.state.Variables.Exposure[0] + "\",\n"+
     (this.state.Variables.Covariate.length > 0 ? "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n" : "")+
     "ymodel = \""+ this.state.AnalysisSetting.Models[this.state.Variables.Outcome[0]] +"\",\n"+
     "mmodel = c(\"" + mediatorModels.join("\" ,\"") +"\"),\n"+
     "treat_lv = " + this.state.AnalysisSetting.TreatLv + 
-    ", control_lv = " + this.state.AnalysisSetting.ControlLv +
-    ", conf.level = " + this.state.AnalysisSetting.ConfLv/100 + ",\n" +
+    ", control_lv = " + this.state.AnalysisSetting.ControlLv + 
+    ", incint = " + (this.state.AnalysisSetting.incint? "TRUE": "FALSE") + 
+    ", inc_mmint = " + (this.state.AnalysisSetting.incmmint ? "TRUE" : "FALSE") +
+    ",\n conf.level = " + this.state.AnalysisSetting.ConfLv/100 + ",\n" +
     "data = currentDataset, sim = "+ this.state.AnalysisSetting.Simulation + 
     ", digits = " + this.state.AnalysisSetting.Digits + ",\n" + 
-    "HTML_report = FALSE, complete_analysis = "+ (!this.state.AnalysisSetting.ImputeData).toString().toUpperCase() +")"
+    "HTML_report = FALSE, complete_analysis = "+ (!this.state.AnalysisSetting.ImputeData).toString().toUpperCase() + ",\n  imputed_data = " +
+    (this.state.AnalysisSetting.ImputeData || this.state.AnalysisSetting.ImputedDataset? "TRUE":"FALSE") + ")"
     this.props.updateTentativeScriptCallback(codeString, this.state)
   }
 
@@ -332,6 +411,10 @@ export class MediationPanel extends Component {
       case "ImputedDataset":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         AnalysisSettingObj["ImputeData"] = false
+        break;
+      case "incint":
+      case "incmmint":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
         break;
@@ -390,7 +473,8 @@ export class MediationPanel extends Component {
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
               <MediationAnalysisSetting Variables = {this.state.Variables} 
               AnalysisSetting = {this.state.AnalysisSetting}
-              updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>
+              updateAnalysisSettingCallback = {this.updateAnalysisSetting}
+              CurrentVariableList = {this.props.CurrentVariableList}/>
               
             </ExpansionPanelDetails>
           </ExpansionPanel>  

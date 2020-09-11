@@ -25,6 +25,21 @@ export class MAAnalysisSetting extends Component {
                     ></input>%</div>
                 </div> 
 
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.LogES} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"LogES")} />Log transformation required for the effect size
+                    <StyledTooltip title="If the effect size was Odd ratio, risk ratio or hazard ratio, log transformation is required.">
+                    <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                </div> 
+
+                <div className = "NMA-Analysis-Box">
+                    <div className="InvisibleBottomBorder pl-3" hidden = {!this.props.AnalysisSetting.LogES}>
+                    &nbsp;	&nbsp;	&nbsp;C.I. for Std. Err. Calculation:</div> 
+                    <div hidden = {!this.props.AnalysisSetting.LogES}><input className="NMAAnalysisSettingInput"
+                    value = {this.props.AnalysisSetting.ConfForSE}
+                    onChange = {(event) => this.props.updateAnalysisSettingCallback(event,"ConfForSE")}
+                    ></input>%</div>
+                </div>
+
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.FixedEffect} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"FixedEffect")} />Fixed Effect Model
                     <StyledTooltip title="Random effect model is used by default.">

@@ -36,6 +36,7 @@ export class MediationAnalysisSetting extends Component {
     
     genModelSelection = () => {
         let varList = this.props.Variables.Outcome.concat(this.props.Variables.Mediator)
+
         return (
             varList.map((item) => {
                 return (
@@ -64,6 +65,10 @@ export class MediationAnalysisSetting extends Component {
         )
     }
 
+    getExposureLvs = () => {
+        
+    }
+
     render () {
         return (
             <div>
@@ -80,11 +85,41 @@ export class MediationAnalysisSetting extends Component {
                     <div className="InvisibleBottomBorder">Treatment level:</div>
                     <div><input className="ModelSelectionInput" 
                     onChange={(event) => this.props.updateAnalysisSettingCallback(event,"TreatLv")} 
-                    value={this.props.AnalysisSetting.TreatLv}/></div>
+                    value={this.props.AnalysisSetting.TreatLv} hidden = {this.props.AnalysisSetting.catExposure}/>
+                    <FormControl>
+                                <StyledNativeSelect hidden = {!this.props.AnalysisSetting.catExposure}
+                                value={this.props.AnalysisSetting.Simulation}
+                                onChange={(event) => this.props.updateAnalysisSettingCallback(event, "TreatLv")}
+                                inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
+                                <option value={100}>100</option>
+                                <option value={1000}>1000</option>
+                                <option value={2000}>2000</option>
+                                <option value={5000}>5000</option>
+                                <option value={10000}>10000</option>
+                                <option value={20000}>20000</option>
+                                <option value={50000}>50000</option>
+                                </StyledNativeSelect>
+                    </FormControl>
+                    </div>
                     <div className="InvisibleBottomBorder">Control level:</div>
                     <div><input className="ModelSelectionInput" 
                     onChange={(event) => this.props.updateAnalysisSettingCallback(event,"ControlLv")}
-                    value={this.props.AnalysisSetting.ControlLv}/></div>
+                    value={this.props.AnalysisSetting.ControlLv} hidden = {this.props.AnalysisSetting.catExposure}/>
+                    <FormControl>
+                                <StyledNativeSelect hidden = {!this.props.AnalysisSetting.catExposure}
+                                value={this.props.AnalysisSetting.Simulation}
+                                onChange={(event) => this.props.updateAnalysisSettingCallback(event, "ControlLv")}
+                                inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
+                                <option value={100}>100</option>
+                                <option value={1000}>1000</option>
+                                <option value={2000}>2000</option>
+                                <option value={5000}>5000</option>
+                                <option value={10000}>10000</option>
+                                <option value={20000}>20000</option>
+                                <option value={50000}>50000</option>
+                                </StyledNativeSelect>
+                    </FormControl>
+                    </div>
                     <div className="InvisibleBottomBorder">Confidence Intervel:</div>
                     <div><input className="ModelSelectionInput"
                     onChange={(event) => this.props.updateAnalysisSettingCallback(event,"ConfLv")} 
@@ -136,6 +171,10 @@ export class MediationAnalysisSetting extends Component {
                         ></TextField>
                         </div>
                 </div>
+                <div className="NMACheckbox"><Checkbox checked ={this.props.AnalysisSetting.incint}
+                onClick = {(event) => this.props.updateAnalysisSettingCallback(event, "incint")} size="small"/>Include exposure-mediator interaction</div>
+                <div className="NMACheckbox" hidden={this.props.Variables["Mediator"].length < 2}><Checkbox checked ={this.props.AnalysisSetting.incmmint}
+                onClick = {(event) => this.props.updateAnalysisSettingCallback(event, "incmmint")} size="small"/>Include two-way mediator-mediator interaction</div>
             </div>
         )
     }
