@@ -220,6 +220,9 @@ export class MediationPanel extends Component {
     let AnalysisSettingObj = _.cloneDeep(this.state.AnalysisSetting)
     let ExposureLvsArr = [...this.state.ExposureLvs]
 
+    console.log(VariablesObj[target].length)
+    console.log(CheckedObj["Available"])
+
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
         VariablesObj["Available"] = this.not(VariablesObj["Available"],CheckedObj["Available"])
         VariablesObj[target] = VariablesObj[target].concat(CheckedObj["Available"])
@@ -229,12 +232,14 @@ export class MediationPanel extends Component {
         if (target === "Exposure") {
           if (this.props.CurrentVariableList[CheckedObj["Available"][0]][0] === "Factor") {
             AnalysisSettingObj["catExposure"] = true
+            AnalysisSettingObj["TreatLv"] = ""
+            AnalysisSettingObj["ControlLv"] = ""
             ExposureLvsArr = [...this.props.CategoricalVarLevels[CheckedObj["Available"][0]]]
-            console.log(ExposureLvsArr)
+            
           }
         }
         CheckedObj["Available"] = []
-        this.setState({Variables: {...VariablesObj}, AnalysisSetting: {...AnalysisSettingObj}, ExposureLvs: [...ExposureLvsArr]})  
+        this.setState({Variables: {...VariablesObj}, AnalysisSetting: {...AnalysisSettingObj}, ExposureLvs: [...ExposureLvsArr], Checked: {...CheckedObj}})  
     }else{
         if (CheckedObj["Available"].length > 0) {
             this.setState({showAlert: true, 
@@ -259,6 +264,8 @@ export class MediationPanel extends Component {
 
       if (from === "Exposure") {  
         AnalysisSettingObj["catExposure"] = false
+        AnalysisSettingObj["TreatLv"] = 1
+        AnalysisSettingObj["ControlLv"] = 0
         ExposureLvsArr = []
       }
 
@@ -311,6 +318,19 @@ export class MediationPanel extends Component {
 
     let codeString = ""
     
+    let Exposure = [...this.state.Variables.Exposure]
+
+    if (this.state.AnalysisSetting.catExposure) {
+      codeString = codeString + "currentDataset$" + this.state.Variables.Exposure[0] + "_" + this.state.AnalysisSetting.TreatLv + " = NA\n" + 
+      "currentDataset$"+ this.state.Variables.Exposure[0] + "_" + this.state.AnalysisSetting.TreatLv + "[currentDataset$" + this.state.Variables.Exposure[0] + 
+      " == \"" + this.state.AnalysisSetting.TreatLv + "\"] <- 1\n" + 
+      "currentDataset$"+ this.state.Variables.Exposure[0] + "_" + this.state.AnalysisSetting.TreatLv + "[currentDataset$" + this.state.Variables.Exposure[0] + 
+      " == \"" + this.state.AnalysisSetting.ControlLv + "\"] <- 0\n\n"
+      Exposure[0] = this.state.Variables.Exposure[0] + "_" + this.state.AnalysisSetting.TreatLv
+      
+
+    }
+
     let mediatorModels = this.state.Variables.Mediator.map((item) => {
       return this.state.AnalysisSetting.Models[item]
     }) 
@@ -327,13 +347,13 @@ export class MediationPanel extends Component {
     let method = []
     let formulaCode = "formulas <- make.formulas(currentDataset)\n"
 
-    let analysisVars = this.state.Variables.Covariate.concat(this.state.Variables.Outcome).concat(this.state.Variables.Exposure).concat(this.state.Variables.Mediator)
+    let analysisVars = this.state.Variables.Covariate.concat(this.state.Variables.Outcome).concat(Exposure).concat(this.state.Variables.Mediator)
 
     let intTerm = []
 
     if (this.state.AnalysisSetting.incint) {
       this.state.Variables.Mediator.forEach((med) => {
-        intTerm.push(med + "*" + this.state.Variables.Exposure)
+        intTerm.push(med + "*" + Exposure)
       })
     }
 
@@ -367,7 +387,7 @@ export class MediationPanel extends Component {
 
     codeString = codeString + "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
     "med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
-    "treat = \""+ this.state.Variables.Exposure[0] + "\",\n"+
+    "treat = \""+ Exposure[0] + "\",\n"+
     (this.state.Variables.Covariate.length > 0 ? "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n" : "")+
     "ymodel = \""+ this.state.AnalysisSetting.Models[this.state.Variables.Outcome[0]] +"\",\n"+
     "mmodel = c(\"" + mediatorModels.join("\" ,\"") +"\"),\n"+
@@ -474,7 +494,8 @@ export class MediationPanel extends Component {
               <MediationAnalysisSetting Variables = {this.state.Variables} 
               AnalysisSetting = {this.state.AnalysisSetting}
               updateAnalysisSettingCallback = {this.updateAnalysisSetting}
-              CurrentVariableList = {this.props.CurrentVariableList}/>
+              CurrentVariableList = {this.props.CurrentVariableList}
+              ExposureLvs = {this.state.ExposureLvs}/>
               
             </ExpansionPanelDetails>
           </ExpansionPanel>  

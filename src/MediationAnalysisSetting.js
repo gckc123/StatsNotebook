@@ -66,7 +66,18 @@ export class MediationAnalysisSetting extends Component {
     }
 
     getExposureLvs = () => {
-        
+        return (
+            <>
+            <option value={""}>--- Select ---</option>
+            {this.props.ExposureLvs.map((item) =>{
+                return (
+                    <React.Fragment key={item}>
+                        <option value={item}>{item}</option>
+                    </React.Fragment>
+                )
+            })}
+            </>
+        )
     }
 
     render () {
@@ -88,16 +99,10 @@ export class MediationAnalysisSetting extends Component {
                     value={this.props.AnalysisSetting.TreatLv} hidden = {this.props.AnalysisSetting.catExposure}/>
                     <FormControl>
                                 <StyledNativeSelect hidden = {!this.props.AnalysisSetting.catExposure}
-                                value={this.props.AnalysisSetting.Simulation}
+                                value={this.props.AnalysisSetting.TreatLv}
                                 onChange={(event) => this.props.updateAnalysisSettingCallback(event, "TreatLv")}
                                 inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
-                                <option value={100}>100</option>
-                                <option value={1000}>1000</option>
-                                <option value={2000}>2000</option>
-                                <option value={5000}>5000</option>
-                                <option value={10000}>10000</option>
-                                <option value={20000}>20000</option>
-                                <option value={50000}>50000</option>
+                                {this.getExposureLvs()}
                                 </StyledNativeSelect>
                     </FormControl>
                     </div>
@@ -107,16 +112,10 @@ export class MediationAnalysisSetting extends Component {
                     value={this.props.AnalysisSetting.ControlLv} hidden = {this.props.AnalysisSetting.catExposure}/>
                     <FormControl>
                                 <StyledNativeSelect hidden = {!this.props.AnalysisSetting.catExposure}
-                                value={this.props.AnalysisSetting.Simulation}
+                                value={this.props.AnalysisSetting.ControlLv}
                                 onChange={(event) => this.props.updateAnalysisSettingCallback(event, "ControlLv")}
                                 inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
-                                <option value={100}>100</option>
-                                <option value={1000}>1000</option>
-                                <option value={2000}>2000</option>
-                                <option value={5000}>5000</option>
-                                <option value={10000}>10000</option>
-                                <option value={20000}>20000</option>
-                                <option value={50000}>50000</option>
+                                {this.getExposureLvs()}
                                 </StyledNativeSelect>
                     </FormControl>
                     </div>
