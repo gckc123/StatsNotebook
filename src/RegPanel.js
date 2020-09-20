@@ -525,11 +525,13 @@ export class RegPanel extends Component {
     if (this.state.AnalysisSetting[currentPanel].imputeMissing) {
 
       if (Object.keys(this.props.CurrentVariableList).indexOf(".imp") !== -1) {
-        codeString = codeString + "currentDataset <- currentDataset[which(currentDataset$.imp == 0),]\n" +
+        codeString = codeString + 
+        "currentDataset <- currentDataset[which(currentDataset$.imp == 0),]\n" +
         "currentDataset <- currentDataset[!(names(currentDataset) %in% c(\".id\", \".imp\"))]\n\n"
       }   
 
-      codeString = codeString + "library(mice)\n"
+      codeString = codeString + "\"Impute missing data\"\n" + 
+      "library(mice)\n"
       let formula = []
       let method = []
       let formulaCode = "formulas <- make.formulas(currentDataset)\n"
@@ -585,7 +587,7 @@ export class RegPanel extends Component {
             if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
               codeString = codeString + 
               "\nres <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmrob(" + formulaFixedPart + 
-              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + "\n))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " +
+              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + "\n))\nsummary(pool(res), conf.int = TRUE, conf.level = " +
               this.state.AnalysisSetting[currentPanel].confLv/100 +")\n\n"
             }else {
               codeString = codeString + "res <- lmrob(" + this.state.Variables.Outcome[0] + " ~ " + this.state.Variables.Covariates.join(" + ") +
@@ -603,14 +605,14 @@ export class RegPanel extends Component {
               codeString = codeString +
               "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmer(" + formulaFixedPart + 
               formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+              "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
               this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "res1 <- res$analyses[[1]]\n" +
                 "library(car)\n\nres.std <- resid(res1)/sd(resid(res1))\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res1)\ninfIndexPlot(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\nvif(res1)\n\n"
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\noutlierTest(res1)\ninfIndexPlot(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res1)\n\n"
               }
 
             }else{
@@ -622,36 +624,37 @@ export class RegPanel extends Component {
                 this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "library(car)\n\nres.std <- resid(res)/sd(resid(res))\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res)\ninfIndexPlot(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\nvif(res)\n\n"
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\noutlierTest(res)\ninfIndexPlot(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res)\n\n"
               }
             }
 
           }else {
             if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-              codeString = codeString + 
+              codeString = codeString + "\"Linear regression\"\n" + 
               "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lm(" + formulaFixedPart + 
               (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+              "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
               this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "res1 <- res$analyses[[1]]\n" +
                 "library(car)\n\nres.std <- rstandard(res1)\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res1)\ninfIndexPlot(res1)\nresidualPlots(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\nvif(res1)\n\n"
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\noutlierTest(res1)\ninfIndexPlot(res1)\n\n\"Residual plots, curvature tests and normality plot\"\nresidualPlots(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res1)\n\n"
               }
 
             }else {
-              codeString = codeString + "res <- lm(" + formulaFixedPart + 
+              codeString = codeString + "\"Linear regression\"\n"
+              +"res <- lm(" + formulaFixedPart + 
               (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              ",\n  data=currentDataset)\nsummary(res)\nconfint(res, level = " +
-              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+              ",\n  data=currentDataset)\nsummary(res)\ncbind(coef(res), confint(res, level = " +
+              this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "library(car)\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\noutlierTest(res)\ninfIndexPlot(res)\nresidualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\nvif(res)\n\n"
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .01 might be considered as outliers and might need further investigation.\"\noutlierTest(res)\ninfIndexPlot(res)\n\n\"Residual plots, curvature tests and normality plot\"\nresidualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res)\n\n"
               }
             }
           }
@@ -678,7 +681,7 @@ export class RegPanel extends Component {
                 "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glmer(" + formulaFixedPart + 
                 formulaRandompart + ",\n  " + family +
                 (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-                "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
                 this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
                 this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
             }else
@@ -705,7 +708,7 @@ export class RegPanel extends Component {
                 "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glm(" + formulaFixedPart + 
                 ",\n  " + family +
                 (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-                "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
                 this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
                 this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
 
@@ -718,12 +721,12 @@ export class RegPanel extends Component {
             }else {
               codeString = codeString + "res <- glm(" + formulaFixedPart + ",\n  " + family + 
               (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
-              this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
+              ",\n  data = currentDataset)\nsummary(res)\n\"Model coefficients and confidence intervals\"\ncbind(coef(res), confint(res, level = "+
+              this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\"))\n\n"
 
               if (this.state.AnalysisSetting[currentPanel].expCoeff) {
                 codeString = codeString + 
-                "exp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
+                "\"Odds ratios and confidence intervals\"\nexp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
               }
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
@@ -751,7 +754,7 @@ export class RegPanel extends Component {
           "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  " +
           regType + "(" + formulaFixedPart + 
           (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-          "))\npool(res)\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+          "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
           this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
           this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
         }else{
@@ -865,7 +868,8 @@ export class RegPanel extends Component {
       }
     }
    
-
+    codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
+      "\"R Core Team (2020). The R Project for Statistical Computing. [Computer software]. Retrieved from https://r-project.org\"\n"
     this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 

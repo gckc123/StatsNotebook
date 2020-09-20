@@ -383,6 +383,9 @@ export class MAPanel extends Component {
     (this.state.AnalysisSetting.Leave1Out && this.state.Variables.Covariates.length === 0 ? ("\n\nleave1out(ma_res)") : "") +
     (this.state.AnalysisSetting.TrimAndFill && this.state.Variables.Covariates.length === 0 ? ("\n\nma_res_tf <- trimfill(ma_res)\nsummary(ma_res_tf)\nfunnel(ma_res_tf)") : "")
     
+    codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
+      "\"R Core Team (2020). The R Project for Statistical Computing. [Computer software]. Retrieved from https://r-project.org\"\n" +
+      "\"Viechtbauer, W. (2010). Conducting meta-analyses in R with the metafor package. Journal of Statistical Software 36(3): 1-48.\"\n"
     this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 

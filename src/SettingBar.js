@@ -9,6 +9,10 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem"
 import "./App.css";
 import { Divider } from '@material-ui/core';
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 const StyledButton = withStyles({
     root: {
@@ -55,6 +59,8 @@ class OpenFileMenu extends Component {
                 <MenuItem onClick={() => this.openFile("CSV")} disableRipple style = {MenuItemStyle}>CSV</MenuItem>
                 <MenuItem onClick={() => this.openFile("SPSS")} disableRipple style = {MenuItemStyle}>SPSS</MenuItem>
                 <MenuItem onClick={() => this.openFile("STATA")} disableRipple style = {MenuItemStyle}>STATA</MenuItem>
+                <Divider />
+                <MenuItem onClick={() => this.props.handleExampleDataDialogOpenCallback()} disableRipple style = {MenuItemStyle}>Example data</MenuItem>
                 <Divider />
                 <MenuItem onClick={() => this.openFile("Notebook")} disableRipple style = {MenuItemStyle}>Notebook</MenuItem>
             </Menu>
@@ -114,6 +120,7 @@ export class SettingBar extends Component {
         this.state = {
             anchorEl: null,
             anchorSaveMenu: null,
+            showExampleDataDialog: false
         }
     }
 
@@ -133,24 +140,65 @@ export class SettingBar extends Component {
         this.setState({anchorSaveMenu: null})
     }
 
+    handleExampleDataDialogOpen = () => {
+        this.handleClose()
+        this.setState({showExampleDataDialog: true})
+    }
+
+    handleExampleDataDialogClose = () => {        
+        this.setState({showExampleDataDialog: false})
+    }
+
+    openExampleData = (exampleData) => {
+        let script = "library(StatsNotebookServer)\nlibrary(carData)\ndata(" + exampleData + ")\ncurrentDataset <- " + exampleData
+        this.props.addExtraBlkCallback(script, true)
+        this.handleExampleDataDialogClose()
+    }
+
     render () {
         return (
-            <div className="app-bar">
-                <StyledButton disableRipple onClick={this.props.newNotebookCallback}>
-                    <FontAwesomeIcon icon={faFile}/><div className='ml-1'>New</div>
-                </StyledButton>
-                <StyledButton disableRipple onClick={this.handleMenu}>
-                    <FontAwesomeIcon icon={faFolderOpen} /><div className='ml-1'>Open</div>                    
-                </StyledButton>
-                <OpenFileMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
-                    openFileCallback = {this.props.openFileCallback}/>
-                <StyledButton disableRipple onClick={this.handleSaveMenu}>
-                    <FontAwesomeIcon icon={faSave}/><div className='ml-1'>Save</div>
-                </StyledButton>
-                <SaveFileMenu handleClose = {this.handleSaveClose} anchorEl = {this.state.anchorSaveMenu}
-                    savingFileCallback = {this.props.savingFileCallback}
-                    addExtraBlkCallback = {this.props.addExtraBlkCallback}
-                    savingDataFileCallback = {this.props.savingDataFileCallback}/>
+            <div>
+                <div className="app-bar">
+                    <StyledButton disableRipple onClick={this.props.newNotebookCallback}>
+                        <FontAwesomeIcon icon={faFile}/><div className='ml-1'>New</div>
+                    </StyledButton>
+                    <StyledButton disableRipple onClick={this.handleMenu}>
+                        <FontAwesomeIcon icon={faFolderOpen} /><div className='ml-1'>Open</div>                    
+                    </StyledButton>
+                    <OpenFileMenu handleClose = {this.handleClose} anchorEl = {this.state.anchorEl}
+                        openFileCallback = {this.props.openFileCallback}
+                        handleExampleDataDialogOpenCallback = {this.handleExampleDataDialogOpen}/>
+                    <StyledButton disableRipple onClick={this.handleSaveMenu}>
+                        <FontAwesomeIcon icon={faSave}/><div className='ml-1'>Save</div>
+                    </StyledButton>
+                    <SaveFileMenu handleClose = {this.handleSaveClose} anchorEl = {this.state.anchorSaveMenu}
+                        savingFileCallback = {this.props.savingFileCallback}
+                        addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                        savingDataFileCallback = {this.props.savingDataFileCallback}/>
+                </div>
+                <Dialog open={this.state.showExampleDataDialog} onClose={this.handleExampleDataDialogClose}>
+                    <DialogTitle>Example Data</DialogTitle>
+                    <DialogContent>
+                        <div onClick={()=> this.openExampleData("personality")} className="exampleDataSelection">
+                            <b>Personality</b><br/>
+                            <span>Simulated data on Big 5 personality traits, mental health and sex</span>
+                            <br/><br/>
+                        </div>
+                        <div onClick={()=> this.openExampleData("cancer")} className="exampleDataSelection">
+                            <b>Lung Cancer</b><br/>
+                            <span>Simulated data on lung cancer remission</span>
+                            <br/><br/>
+                        </div>
+                        <div onClick={()=> this.openExampleData("TitanicSurvival")} className="exampleDataSelection">
+                            <b>Titanic Survival</b><br/>
+                            <span>Information on the survival status in the Titanic disaster of 1912</span>
+                            <br/><br/>
+                        </div>
+                    </DialogContent>
+                    <DialogActions>
+                        <StyledButton onClick={() => this.handleExampleDataDialogClose()}>CANCEL</StyledButton>
+                    </DialogActions>
+                </Dialog>
             </div>
         )
     }

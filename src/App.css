@@ -64,3 +64,11 @@
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+.exampleDataSelection {
+  cursor: pointer;
+}
+
+.exampleDataSelection:hover {
+  color: #40a9ff;
+}

@@ -44,6 +44,8 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      currentVersion: "0.1.0",
+      RVersion: "4.0.2",
       tentativeScript: "",
       ActiveScript: "",
       ActiveBlkID: null,
@@ -100,12 +102,15 @@ export class App extends Component {
         this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
       }else if(ResultsJSON.OutputType[0] === "END") {
         let tmp = _.cloneDeep(this.state.NotebookBlkList)
+        let today = new Date()
+        let date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         let Reply2BlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === ResultsJSON.toBlk[0])
         if (Reply2BlkIndex >= 0)
         {
           tmp[Reply2BlkIndex].Busy = false
           tmp[Reply2BlkIndex].NotebookBlkROutput = [...tmp[Reply2BlkIndex].NotebookBlkROutput, {OutputType: ["Normal"],
-            Output: ["--- End Of Execution ---"]}];
+            Output: ["--- End Of Execution "+ date + " " + time +"---"]}];
           this.setState({NotebookBlkList:[...tmp]})
         }
       }else if(ResultsJSON.OutputType[0] === "Graphics") {
@@ -642,7 +647,9 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
-                    CPU = {this.state.CPU}/>
+                    CPU = {this.state.CPU}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "NMAPanel"}>
@@ -654,7 +661,9 @@ export class App extends Component {
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MAPanel"}>
@@ -666,7 +675,9 @@ export class App extends Component {
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "MIPanel"}>
@@ -679,7 +690,9 @@ export class App extends Component {
                     currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "LRPanel" &&
@@ -697,7 +710,9 @@ export class App extends Component {
                     CPU = {this.state.CPU}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "DescriptivePanel"}>
@@ -710,7 +725,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "CrosstabPanel"}>
@@ -723,7 +740,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
                   
                   <div hidden={this.state.currentActiveAnalysisPanel !== "ANOVAPanel"}>
@@ -737,7 +756,9 @@ export class App extends Component {
                     CPU = {this.state.CPU}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "IndependentTTestPanel"}>
@@ -751,7 +772,9 @@ export class App extends Component {
                     CPU = {this.state.CPU}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveAnalysisPanel !== "DependentTTestPanel"}>
@@ -765,7 +788,9 @@ export class App extends Component {
                     CPU = {this.state.CPU}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
                 </div>
                 
@@ -789,7 +814,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
                   
                   <div hidden={this.state.currentActiveDataVizPanel !== "DensityPanel"}>
@@ -802,7 +829,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "BoxplotPanel"}>
@@ -815,7 +844,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "BarChartPanel"}>
@@ -828,7 +859,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "ScatterplotPanel"}>
@@ -841,7 +874,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "CorrelogramPanel"}>
@@ -854,7 +889,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
                   
                   <div hidden={this.state.currentActiveDataVizPanel !== "LineGraphPanel"}>
@@ -867,7 +904,9 @@ export class App extends Component {
                     imputedDataset = {this.state.imputedDataset}
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
-                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}/>
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
                   </div>
 
                 </div>

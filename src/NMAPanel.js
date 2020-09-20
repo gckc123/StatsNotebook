@@ -381,6 +381,10 @@ export class NMAPanel extends Component {
       codeString = codeString + "\nfunnel(nma_res, order = c(\"" + this.state.TreatmentLvs.join("\", \"") +
       "\"), linreg = TRUE)\n"
     }
+    codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
+      "\"R Core Team (2020). The R Project for Statistical Computing. [Computer software]. Retrieved from https://r-project.org\"\n" + 
+      "\"Rücker, G., et al. (2016). Netmeta: network meta-analysis using frequentist methods. R package. Version 0.9–0.\"\n"
+      
     this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 

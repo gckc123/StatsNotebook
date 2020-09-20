@@ -542,6 +542,9 @@ export class DescriptivePanel extends Component {
         codeString = codeString + "svymean(~" + item + ", clus, na.rm = TRUE)\n\n"
       })
     }
+
+    codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
+      "\"R Core Team (2020). The R Project for Statistical Computing. [Computer software]. Retrieved from https://r-project.org\"\n"
     this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
 
