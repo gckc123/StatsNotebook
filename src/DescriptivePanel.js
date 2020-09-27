@@ -355,7 +355,7 @@ export class DescriptivePanel extends Component {
 
     let analysisVars = this.state.Variables["Targets"].concat(this.state.Variables["SplitBy"])
 
-    codeString = codeString + "print(\"Sample size and missing data\")\n\n"
+    codeString = codeString + "\"Sample size and missing data\"\n\n"
     codeString = codeString + dataset + " %>%\n  summarize(count = n()" 
     analysisVars.forEach((item) => {
       codeString = codeString + ", \n  mis_" + item + " = sum(is.na(" + item + "))"
@@ -365,7 +365,7 @@ export class DescriptivePanel extends Component {
 
 
     if (this.state.Variables.Weight.length === 0) {
-      codeString = codeString + "print(\"Descriptive Statistics\")\n\n"
+      codeString = codeString + "\"Descriptive Statistics for numeric variables\"\n\n"
       if (this.state.TargetsNum.length > 0) {
         codeString = codeString + dataset + " %>%\n  "
         if (this.state.Variables["SplitBy"].length > 0) {
@@ -435,7 +435,7 @@ export class DescriptivePanel extends Component {
           })
         }
 
-        codeString = codeString + "\n  ) %>% \n  print(width = 1000, n = 500)\n" 
+        codeString = codeString + "\n  ) %>% \n  print(width = 1000, n = 500, na.print = NULL)\n" 
         
         if (this.state.AnalysisSetting["QQPlot"]) {
           this.state.TargetsNum.forEach((item) => {
@@ -503,7 +503,7 @@ export class DescriptivePanel extends Component {
       if (this.state.TargetsCat.length > 0) {
         
         this.state.TargetsCat.forEach((item) => {
-          codeString = codeString + dataset + " %>%\n  drop_na(" + item + ") %>%\n  " + 
+          codeString = codeString + "\n\n\"Counts for categorical variables\"\n\n" + dataset + " %>%\n  drop_na(" + item + ") %>%\n  " + 
             (this.state.Variables["SplitBy"].length > 0 ? "group_by(" + this.state.Variables["SplitBy"].join(", ") + ", "+ item
             +") %>%\n  " : "group_by("+ item + ") %>%\n  ") +
             "summarize(count = n()) %>% \n  spread(key = " + 

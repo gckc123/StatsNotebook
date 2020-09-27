@@ -150,7 +150,7 @@ export class SettingBar extends Component {
     }
 
     openExampleData = (exampleData) => {
-        let script = "library(StatsNotebookServer)\nlibrary(carData)\ndata(" + exampleData + ")\ncurrentDataset <- " + exampleData
+        let script = "library(StatsNotebookServer)\ndata(" + exampleData + ")\ncurrentDataset <- " + exampleData
         this.props.addExtraBlkCallback(script, true)
         this.handleExampleDataDialogClose()
     }
@@ -184,16 +184,37 @@ export class SettingBar extends Component {
                             <span>Simulated data on Big 5 personality traits, mental health and sex</span>
                             <br/><br/>
                         </div>
+                        <div onClick={()=> this.openExampleData("wellbeing")} className="exampleDataSelection">
+                            <b>Wellbeing</b><br/>
+                            <span>Simulated data on psychological wellbeing, stress and social support.</span>
+                            <br/><br/>
+                        </div>
                         <div onClick={()=> this.openExampleData("cancer")} className="exampleDataSelection">
                             <b>Lung Cancer</b><br/>
                             <span>Simulated data on lung cancer remission</span>
                             <br/><br/>
                         </div>
-                        <div onClick={()=> this.openExampleData("TitanicSurvival")} className="exampleDataSelection">
-                            <b>Titanic Survival</b><br/>
-                            <span>Information on the survival status in the Titanic disaster of 1912</span>
+                        <div onClick={()=> this.openExampleData("alcohol_tax")} className="exampleDataSelection">
+                            <b>Alcohol</b><br/>
+                            <span>Simulated data on alcohol consumption before and after tax increase</span>
                             <br/><br/>
                         </div>
+                        <div onClick={()=> this.openExampleData("substance")} className="exampleDataSelection">
+                            <b>Substance</b><br/>
+                            <span>Simulated data on participation in family intervention program and substance use disorder</span>
+                            <br/><br/>
+                        </div>
+                        <div onClick={()=> this.openExampleData("stars")} className="exampleDataSelection">
+                            <b>Stars</b><br/>
+                            <span>A dataset of 47 stars</span>
+                            <br/><br/>
+                        </div>
+                        <div onClick={()=> this.openExampleData("sleep_reaction")} className="exampleDataSelection">
+                            <b>Sleep</b><br/>
+                            <span>A dataset on sleep deprivation and reaction time</span>
+                            <br/><br/>
+                        </div>
+                        
                     </DialogContent>
                     <DialogActions>
                         <StyledButton onClick={() => this.handleExampleDataDialogClose()}>CANCEL</StyledButton>

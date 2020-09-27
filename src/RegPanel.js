@@ -593,7 +593,7 @@ export class RegPanel extends Component {
               codeString = codeString + "res <- lmrob(" + this.state.Variables.Outcome[0] + " ~ " + this.state.Variables.Covariates.join(" + ") +
                 ( this.state.interaction.length > 0 ? " + " + this.state.interaction.join(" + "): "" ) + 
                 (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + ",\n  data=currentDataset)\nsummary(res)"+
-                "\nconfint(res, level = "+ this.state.AnalysisSetting[currentPanel].confLv/100 +")\n\n"
+                "\ncbind(coef(res), confint(res, level = "+ this.state.AnalysisSetting[currentPanel].confLv/100 +"))\n\n"
             }
           }
         }else {
@@ -795,7 +795,7 @@ export class RegPanel extends Component {
     }
     if (this.state.Checked["CovariatesEMMSelection"].length > 0) {
       if (currentPanel === "LogitPanel" || currentPanel === "PoiPanel" || currentPanel === "NbPanel" || (currentPanel === "LRPanel" && !this.state.AnalysisSetting["LRPanel"].robustReg)) {
-        codeString = codeString + "library(emmeans)\n\n"
+        codeString = codeString + "\"Estimated Marginal Means\"\nlibrary(emmeans)\n\n"
         this.state.Checked["CovariatesEMMSelection"].forEach((item) => {
           let terms = item.split("*")
           let numeric = 0

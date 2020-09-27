@@ -342,7 +342,7 @@ export class MediationPanel extends Component {
       }
     }
 
-    codeString = codeString + "library(mice)\n"
+    codeString = codeString + "\"Multiple imputation\"\n\nlibrary(mice)\n"
     let formula = []
     let method = []
     let formulaCode = "formulas <- make.formulas(currentDataset)\n"
@@ -385,20 +385,20 @@ export class MediationPanel extends Component {
       this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
       ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE)\n\n"
 
-    codeString = codeString + "med_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
-    "med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
-    "treat = \""+ Exposure[0] + "\",\n"+
-    (this.state.Variables.Covariate.length > 0 ? "c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n" : "")+
-    "ymodel = \""+ this.state.AnalysisSetting.Models[this.state.Variables.Outcome[0]] +"\",\n"+
-    "mmodel = c(\"" + mediatorModels.join("\" ,\"") +"\"),\n"+
-    "treat_lv = " + this.state.AnalysisSetting.TreatLv + 
+    codeString = codeString + "\"Causal Mediation Analysis\"\n\nmed_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
+    "  med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
+    "  treat = \""+ Exposure[0] + "\",\n"+
+    (this.state.Variables.Covariate.length > 0 ? "  c = c(\""+ this.state.Variables.Covariate.join("\" ,\"")+"\"),\n" : "")+
+    "  ymodel = \""+ this.state.AnalysisSetting.Models[this.state.Variables.Outcome[0]] +"\",\n"+
+    "  mmodel = c(\"" + mediatorModels.join("\" ,\"") +"\"),\n"+
+    "  treat_lv = " + this.state.AnalysisSetting.TreatLv + 
     ", control_lv = " + this.state.AnalysisSetting.ControlLv + 
     ", incint = " + (this.state.AnalysisSetting.incint? "TRUE": "FALSE") + 
     ", inc_mmint = " + (this.state.AnalysisSetting.incmmint ? "TRUE" : "FALSE") +
-    ",\n conf.level = " + this.state.AnalysisSetting.ConfLv/100 + ",\n" +
-    "data = currentDataset, sim = "+ this.state.AnalysisSetting.Simulation + 
+    ",\n  conf.level = " + this.state.AnalysisSetting.ConfLv/100 + ",\n" +
+    "  data = currentDataset, sim = "+ this.state.AnalysisSetting.Simulation + 
     ", digits = " + this.state.AnalysisSetting.Digits + ",\n" + 
-    "HTML_report = FALSE, complete_analysis = "+ (!this.state.AnalysisSetting.ImputeData).toString().toUpperCase() + ",\n  imputed_data = " +
+    "  HTML_report = FALSE, complete_analysis = "+ (!this.state.AnalysisSetting.ImputeData).toString().toUpperCase() + ",\n  imputed_data = " +
     (this.state.AnalysisSetting.ImputeData || this.state.AnalysisSetting.ImputedDataset? "TRUE":"FALSE") + ")"
     this.props.updateTentativeScriptCallback(codeString, this.state)
   }

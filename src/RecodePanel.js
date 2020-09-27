@@ -123,7 +123,7 @@ export class RecodePanel extends Component {
                 </div>
                 <div className="compute-pane-target-var-box pt-2">
                         <div className = "InvisibleBottomBorder pl-2">New Variable</div>
-                        <div><input className = "RecodeTargetVarInput" onChange={(event) => this.handleChange(event, "newVar")}
+                        <div><input className = "RecodeTargetVarInput" value={this.state.newVar} onChange={(event) => this.handleChange(event, "newVar")}
                             ></input>
                         </div>
                     </div>
