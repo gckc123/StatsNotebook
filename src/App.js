@@ -32,7 +32,10 @@ import _ from "lodash";
 import { HotKeys } from "react-hotkeys";
 
 const keyMap = {
-    ADD: "alt+a"
+    ADD: "alt+a",
+    EXPAND: "alt+x",
+    MOVE_UP: "alt+up",
+    MOVE_DOWN: "alt+down",
 }
 
 const electron = window.require('electron');
@@ -65,6 +68,8 @@ export class App extends Component {
       dataPanelHeight: 100,
       tentativePanelState: {},
       setPanelFromNotebook: false,
+      clearNotebookBlkRef: false,
+      NotebookPath: "",
     }
     this.DataPanelContainerRef = React.createRef();        
   }
@@ -73,7 +78,7 @@ export class App extends Component {
     this.updateDataPanelDimension();
     window.addEventListener("resize", this.updateDataPanelDimension);
 
-    let initialScript = "library(tidyverse)\nlibrary(ggplot2)\nlibrary(forcats)\n"
+    let initialScript = "library(tidyverse)\nlibrary(ggplot2)\nlibrary(forcats)\ninitialise_seed <- runif(1)\n"
     this.addExtraBlk(initialScript, true)
 
     ipcRenderer.on('RecvROutput', (event, content) => {
@@ -191,6 +196,9 @@ export class App extends Component {
         this.setState({CPU: cpuCount - 1})
     })
 
+    ipcRenderer.on('NotebookPath', (event, file) => {
+      this.setState({NotebookPath: file}, ()=> console.log(this.state.NotebookPath))
+    })
   }
 
   resetDataState = () => {
@@ -274,8 +282,12 @@ export class App extends Component {
     mainProcess.savingDataFile(fileType)
   }
 
-  savingFile = () => {
-    mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
+  savingFile = (saveAs = true) => {
+    if (saveAs) {
+      mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
+    }else{
+      mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList), this.state.NotebookPath)
+    }
   }
 
   addExtraBlk = (script,runScript, fromLeftPanel = "", fromPanel = "") => {
@@ -293,7 +305,7 @@ export class App extends Component {
       showEditor: false,
       editorHTML: "",
       Expanded: true,
-      Title: "--- Analysis Title Here ---",
+      Title: "--- Analysis Title ---",
       fromLeftPanel: fromLeftPanel,
       fromPanel: fromPanel,
       selected: false,
@@ -312,7 +324,6 @@ export class App extends Component {
           ActiveScript: script,
           NotebookBlkList: [...updatedNotebookBlkList]})
     }  
-    console.log(this.state.NotebookBlkList)
   }
 
   gainFocus = (index) => {
@@ -324,18 +335,16 @@ export class App extends Component {
     let tmp = _.cloneDeep(this.state.NotebookBlkList)
     let selectedBlk = this.state.NotebookBlkList.filter((item) => item.selected)
     let ActiveScript = ""
-    let ActiveBlkID = "'"
+    let ActiveBlkID = ""
 
     if (selectedBlk.length >= 2) {
       let combinedScript = ""
       let combinedEditorHTML = ""
       let combinedNotebookBlkROutput = []
       selectedBlk.forEach((blk, index) => {
-        combinedScript = combinedScript + "\n\n## Merged from block " + index+ " ##\n\n" + blk.NotebookBlkScript
-        combinedEditorHTML = combinedEditorHTML + "<p><br>MERGE FROM BLOCK "+ index +"<br><p>" + blk.editorHTML
+        combinedScript = combinedScript + "\n\n## Merged from block \"" + blk.Title + "\" ##\n\n" + blk.NotebookBlkScript
+        combinedEditorHTML = combinedEditorHTML + "<p><br>MERGE FROM BLOCK \""+ blk.Title +"\"<br><p>" + blk.editorHTML
         combinedNotebookBlkROutput = combinedNotebookBlkROutput.concat(blk.NotebookBlkROutput)
-        console.log("Merging")
-        console.log(combinedScript)
       })
 
       let add2BlkIndex = this.state.NotebookBlkList.findIndex((blk) => blk.selected)
@@ -364,6 +373,11 @@ export class App extends Component {
 
   delBlk = () => {
     let tmp = this.state.NotebookBlkList.filter( (item) => !item.selected)
+    
+    if (tmp.length === this.state.NotebookBlkList.length) {
+      tmp = this.state.NotebookBlkList.filter(item => item.NotebookBlkID !== this.state.ActiveBlkID)
+    }
+    
     this.setState({NotebookBlkList: [...tmp], ActiveScript: "", ActiveBlkID: null})
   }
 
@@ -381,10 +395,21 @@ export class App extends Component {
     this.setState({NotebookBlkList: [...tmp]})
   }
 
-  toggleNotebookBlk = (index) => {
+  toggleNotebookBlk = (index, by = 1) => {
     let tmp = _.cloneDeep(this.state.NotebookBlkList)
-    tmp[index].Expanded = !tmp[index].Expanded
-    this.setState({NotebookBlkList: [...tmp]})
+
+    if (by === 1) {
+      tmp[index].Expanded = !tmp[index].Expanded
+      this.setState({NotebookBlkList: [...tmp]})  
+    }else if (by === 2) {
+      let activeBlkIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
+      if (activeBlkIndex >= 0) {
+        tmp[activeBlkIndex].Expanded = !tmp[activeBlkIndex].Expanded 
+        this.setState({NotebookBlkList: [...tmp]})
+      }
+    }
+
+    
   }
 
   updateAEditorValue = (index, newValue, execute) => {
@@ -503,6 +528,13 @@ export class App extends Component {
   openFile = (fileType) => {
     mainProcess.getFileFromUser(fileType);
     this.setState({currentActiveLeftPanel: "DataPanel", currentActiveDataPanel: "DataPanel"})
+    if (fileType === "Notebook") {
+      this.setState({clearNotebookBlkRef: true})
+    }
+  }
+
+  resetClearNotebookBlkRef = (state = false) => {
+    this.setState({clearNotebookBlkRef: state})
   }
 
   updateTentativeScript = (codeString, panelState = {}) => {
@@ -548,8 +580,7 @@ export class App extends Component {
   }
 
   newNotebook = () => {
-    console.log("New Notebook")
-    this.setState({tentativeScript: "", ActiveScript: "", NotebookBlkList: []})
+    this.setState({tentativeScript: "", ActiveScript: "", NotebookBlkList: [], clearNotebookBlkRef: true})
   }
 
   render() {
@@ -912,7 +943,14 @@ export class App extends Component {
                 </div>
 
               </div>
-              <div className="right-pane pl-2 pr-2 mb-2"><HotKeys keyMap={keyMap} handlers={{ADD: event => this.addExtraBlk("",false)}}>
+              <div className="right-pane pl-2 pr-2 mb-2"><HotKeys keyMap={keyMap} 
+                handlers={{
+                  ADD: event => this.addExtraBlk("",false), 
+                  EXPAND: event => this.toggleNotebookBlk(0, 2),
+                  MOVE_UP: event => this.reorderNotebookBlk("Up"),
+                  MOVE_DOWN: event => this.reorderNotebookBlk("Down"),
+
+                }}>
                   <Notebook
                     NotebookBlkList = {this.state.NotebookBlkList}
                     addExtraBlkCallback={this.addExtraBlk}
@@ -930,6 +968,11 @@ export class App extends Component {
                     selectNotebookBlkCallback = {this.selectNotebookBlk}
                     setNotebookBlkUpdate2FalseCallback = {this.setNotebookBlkUpdate2False}
                     CurrentVariableList = {this.state.CurrentVariableList}
+                    resetClearNotebookBlkRefCallback = {this.resetClearNotebookBlkRef}
+                    clearNotebookBlkRef = {this.state.clearNotebookBlkRef}
+                    savingFileCallback = {this.savingFile}
+                    NotebookPath = {this.state.NotebookPath}
+
                   />  
               </HotKeys></div>
             </div>

@@ -49,6 +49,7 @@ export class NotebookBlk extends Component {
             message: "",
             showMessage: false,
         }
+
     }
 
     TEditorModules = {
@@ -191,10 +192,14 @@ export class NotebookBlk extends Component {
                     </div>
                     <div className="notebook-title-grid" style={{width: this.props.ElementWidth}}>
                         <div>
-                            <StyledIconButton size="small" hidden = {!this.props.notebookState.Expanded}
-                            onClick = {()=>{this.props.toggleNotebookBlkCallback(this.props.index)}}><ExpandLessIcon /></StyledIconButton>
-                            <StyledIconButton size="small" hidden = {this.props.notebookState.Expanded}
-                            onClick = {() => {this.props.toggleNotebookBlkCallback(this.props.index)}}><ExpandMoreIcon /></StyledIconButton>
+                            <StyledTooltip title="Alt-X">
+                                <StyledIconButton size="small" hidden = {!this.props.notebookState.Expanded}
+                                onClick = {()=>{this.props.toggleNotebookBlkCallback(this.props.index)}}><ExpandLessIcon /></StyledIconButton>
+                            </StyledTooltip>
+                            <StyledTooltip title="Alt-X">
+                                <StyledIconButton size="small" hidden = {this.props.notebookState.Expanded}
+                                onClick = {() => {this.props.toggleNotebookBlkCallback(this.props.index)}}><ExpandMoreIcon /></StyledIconButton>
+                            </StyledTooltip>
                             <input value={this.state.Title} className="titleEdit" onChange={(event) => this.onTitleChange(event)}
                         onBlur = {this.onBlkBlur}/>
                         </div>
@@ -234,6 +239,21 @@ export class NotebookBlk extends Component {
                           name: 'add',
                           bindKey: {win: 'Alt-a', mac: 'Alt-a'},
                           exec: () => this.props.addExtraBlkCallback("", false)
+                      },
+                      {
+                          name: 'expand',
+                          bindKey: {win: 'Alt-x', mac: 'Alt-x'},
+                          exec: ()=> this.props.toggleNotebookBlkCallback(this.props.index)
+                      },
+                      {
+                          name: 'move_up',
+                          bindKey: {win: 'Alt-up', mac: 'Alt-up'},
+                          exec: ()=> this.props.reorderNotebookBlkCallback("Up")
+                      },
+                      {
+                          name: 'move_down',
+                          bindKey: {win: 'Alt-down', mac: 'Alt-down'},
+                          exec: ()=> this.props.reorderNotebookBlkCallback("Down")
                       }
                     ]}                        
                     name={this.props.notebookState.NotebookBlkID} 
@@ -251,9 +271,9 @@ export class NotebookBlk extends Component {
                                             <div key={index}>
                                                 <div style={{color: "black", fontWeight: "bold"}}>######################################################</div>
                                                 <div><code className={output.OutputType} key={index}>{
-                                                    tmpOutput.map((line) => {
+                                                    tmpOutput.map((line, index) => {
                                                         return (
-                                                            <>{line}<br/></>
+                                                            <span key={index}>{line}<br/></span>
                                                         )
                                                     })
                                                 }</code></div>

@@ -610,9 +610,9 @@ export class RegPanel extends Component {
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "res1 <- res$analyses[[1]]\n" +
-                "library(car)\n\nres.std <- resid(res1)/sd(resid(res1))\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\noutlierTest(res1)\ninfIndexPlot(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res1)\n\n"
+                "\n\nres.std <- resid(res1)/sd(resid(res1))\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res1)\ncar::infIndexPlot(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res1)\n\n"
               }
 
             }else{
@@ -623,9 +623,9 @@ export class RegPanel extends Component {
                 ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
                 this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                codeString = codeString + "library(car)\n\nres.std <- resid(res)/sd(resid(res))\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\noutlierTest(res)\ninfIndexPlot(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res)\n\n"
+                codeString = codeString + "\n\nres.std <- resid(res)/sd(resid(res))\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res)\ncar::infIndexPlot(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res)\n\n"
               }
             }
 
@@ -639,9 +639,9 @@ export class RegPanel extends Component {
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
                 codeString = codeString + "res1 <- res$analyses[[1]]\n" +
-                "library(car)\n\nres.std <- rstandard(res1)\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\noutlierTest(res1)\ninfIndexPlot(res1)\n\n\"Residual plots, curvature tests and normality plot\"\nresidualPlots(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res1)\n\n"
+                "\n\nres.std <- rstandard(res1)\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res1)\ncar::infIndexPlot(res1)\n\n\"Residual plots, curvature tests and normality plot\"\ncar::residualPlots(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res1)\n\n"
               }
 
             }else {
@@ -652,9 +652,9 @@ export class RegPanel extends Component {
               this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
 
               if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                codeString = codeString + "library(car)\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .01 might be considered as outliers and might need further investigation.\"\noutlierTest(res)\ninfIndexPlot(res)\n\n\"Residual plots, curvature tests and normality plot\"\nresidualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\nvif(res)\n\n"
+                codeString = codeString + "\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                "\n\n\"Outlier Test. Observations with a Bonferroni p < .01 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res)\ncar::infIndexPlot(res)\n\n\"Residual plots, curvature tests and normality plot\"\ncar::residualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res)\n\n"
               }
             }
           }

@@ -78,7 +78,7 @@ class SaveFileMenu extends Component {
                 this.props.savingDataFileCallback(fileType);
                 break;
             case "RNB":
-                this.props.savingFileCallback();
+                this.props.savingFileCallback(true);
                 break;
             default:
                 break;
@@ -169,7 +169,7 @@ export class SettingBar extends Component {
                         openFileCallback = {this.props.openFileCallback}
                         handleExampleDataDialogOpenCallback = {this.handleExampleDataDialogOpen}/>
                     <StyledButton disableRipple onClick={this.handleSaveMenu}>
-                        <FontAwesomeIcon icon={faSave}/><div className='ml-1'>Save</div>
+                        <FontAwesomeIcon icon={faSave}/><div className='ml-1'>Save As</div>
                     </StyledButton>
                     <SaveFileMenu handleClose = {this.handleSaveClose} anchorEl = {this.state.anchorSaveMenu}
                         savingFileCallback = {this.props.savingFileCallback}

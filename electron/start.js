@@ -129,24 +129,31 @@ const getFileFromUser = exports.getFileFromUser = (fileType) => {
       if (fileType === "Notebook") {
         let notebookContent = fs.readFileSync(file[0]).toString();
         mainWindow.webContents.send('notebook-file-opened', notebookContent);
+        mainWindow.webContents.send('NotebookPath', file[0]);
       }
     }
   }
 }
 
-const savingFile = exports.savingFile = (content, workingDir) => {
-  const file = dialog.showSaveDialogSync(mainWindow, {
+const savingFile = exports.savingFile = (content, NotebookPath = "") => {
+  let file = ""
+  if (NotebookPath === "") {
+    file = dialog.showSaveDialogSync(mainWindow, {
     title: 'Save Notebook',
     filters: [
       {name: 'Notebook File', extensions: ['rnb']}
     ]
   });
+  }else {
+    file = NotebookPath
+  }
   if (!file) 
   {
     console.log("Cannot write to file.")
     return
   };
   fs.writeFileSync(file, content);
+  mainWindow.webContents.send('NotebookPath', file)
 }
 
 const savingDataFile = exports.savingDataFile = (fileType, workingDir) => {
