@@ -47,7 +47,15 @@ app.on('ready', () => {
     
     let RPath = (isDev? path.join(__dirname, '../extraResources/R/bin/R') : path.join(process.resourcesPath, 'extraResources/R/bin/R'))
 
-    exec("echo StatsNotebookServer::start_server() |\""+ RPath +"\" --no-save", (err, stdout, stderr) => {
+    let start_server = ""
+    if (process.platform === "win32")
+    {
+      start_server = "echo StatsNotebookServer::start_server()"
+    }else if (process.platform === "darwin") {
+      start_server = "echo \"StatsNotebookServer::start_server()\""
+    }
+
+    exec(start_server + "|\""+ RPath +"\" --no-save", (err, stdout, stderr) => {
       if (err) {
         console.log(err)
         console.log("Unable to start R.")

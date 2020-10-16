@@ -158,8 +158,8 @@ export class Notebook extends Component {
                     <StyledTooltip title={<div>Current file: {this.props.NotebookPath}</div>}><StyledButton style={{maxWidth: '36px', minWidth: '36px', maxHeight: '36px', minHeight: '36px'}} disableRipple onClick={()=>{this.props.savingFileCallback(false)}}>
                         <FontAwesomeIcon icon={faSave}/>
                     </StyledButton></StyledTooltip>
-                    <StyledNativeSelect style={{fontSize: "14px"}} inputProps={{style: {minWidth: "200px"}}} onChange={(event) => this.scrollToBlk(event)}>
-                        <option value = "">Navigate to</option>
+                    <StyledNativeSelect style={{fontSize: "14px"}} inputProps={{style: {minWidth: "250px", maxWidth: "250px"}}} onChange={(event) => this.scrollToBlk(event)}>
+                        <option value = "">-- Navigate to --</option>
                         {
                             this.props.NotebookBlkList.map((Blk, index) => 
                                 <option value = {Blk.NotebookBlkID}>{Blk.Title}</option>
