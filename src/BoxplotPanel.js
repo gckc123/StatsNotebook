@@ -470,7 +470,7 @@ export class BoxplotPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.variableSelection}
           onChange = {this.handlePanelExpansion("variableSelection")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Boxplot</Typography>
+              <Typography>Boxplot/ Violin Plot</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
               <BoxplotVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
@@ -493,7 +493,7 @@ export class BoxplotPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.analysisSetting}
           onChange = {this.handlePanelExpansion("analysisSetting")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Boxplot Setting</Typography>
+              <Typography>Boxplot/ Violin plot Setting</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
               <BoxplotDataVizSetting 

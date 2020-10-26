@@ -7,6 +7,7 @@ import {faExchangeAlt} from '@fortawesome/free-solid-svg-icons';
 import {faBook} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faTable} from '@fortawesome/free-solid-svg-icons';
+import {faRetweet} from '@fortawesome/free-solid-svg-icons';
 import "./App.css";
 
 const StyledButton = withStyles({
@@ -43,6 +44,9 @@ export class DataBar extends Component {
                 </StyledButton>
                 <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("RecodePanel")}>
                     <FontAwesomeIcon icon={faExchangeAlt} /><div className='ml-1'>Recode</div>
+                </StyledButton>
+                <StyledButton disableRipple onClick={() => this.props.selectDataPanelCallback("ReshapePanel")}>
+                    <FontAwesomeIcon icon={faRetweet} /><div className='ml-1'>Reshape</div>
                 </StyledButton>
 
             </div>

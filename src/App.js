@@ -18,6 +18,7 @@ import { CrosstabPanel } from './CrosstabPanel';
 import { ComputePanel } from './ComputePanel';
 import { FilterPanel } from './FilterPanel';
 import { RecodePanel } from './RecodePanel';
+import { ReshapePanel } from './ReshapePanel';
 import { ANOVAPanel } from './ANOVAPanel';
 import { IndependentTTestPanel } from './IndependentTTestPanel';
 import { DependentTTestPanel } from './DependentTTestPanel';
@@ -654,6 +655,21 @@ export class App extends Component {
                     dataPanelWidth = {this.state.dataPanelWidth}
                     addExtraBlkCallback = {this.addExtraBlk}
                     runScriptCallback = {this.runScript}/>
+                  </div>
+
+                  <div hidden={this.state.currentActiveDataPanel !== "ReshapePanel"}>
+                    <ReshapePanel CurrentVariableList = {this.state.CurrentVariableList}
+                      CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                      updateTentativeScriptCallback = {this.updateTentativeScript}
+                      tentativeScript = {this.state.tentativeScript}
+                      addExtraBlkCallback = {this.addExtraBlk}
+                      CPU = {this.state.CPU}
+                      currentActiveDataPanel = {this.state.currentActiveDataPanel}
+                      setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                      tentativePanelState = {this.state.tentativePanelState}
+                      setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                      currentVersion = {this.state.currentVersion}
+                      RVersion = {this.state.RVersion}/>
                   </div>
 
                 </div>

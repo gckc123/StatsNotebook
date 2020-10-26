@@ -345,7 +345,7 @@ export class ScatterplotPanel extends Component {
       ((this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", color = " + this.state.Variables.FillColor[0] : "") +
       ((this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0) ? ", shape = " + this.state.Variables.Shape[0] : "") + 
       (this.state.Variables.Size.length > 0 ? ", size = " + this.state.Variables.Size[0] : "") + ")) +\n" +
-      "    geom_jitter(alpha = " + (this.state.Variables.Size.length > 0 ? "0.4" : "0.6")
+      "    geom_jitter(alpha = " + (this.state.Variables.Size.length > 0 ? "0.5" : "0.6")
       + ((!this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", aes(color = " + 
       this.state.Variables.FillColor[0] + 
       ((!this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0)? ", shape = " + this.state.Variables.Shape[0] : "") + ")": "") + 
@@ -353,7 +353,7 @@ export class ScatterplotPanel extends Component {
       this.state.Variables.Shape[0] + ")" : "") + 
       ", na.rm = TRUE)" +
       (this.state.AnalysisSetting.fittedLine ? "+\n    geom_smooth(method = \"" + this.state.AnalysisSetting.fittedLineType + "\"" + 
-      (this.state.AnalysisSetting.confInt ? ", se = TRUE, level = " + this.state.AnalysisSetting.confIntLevel/100 : "") + ", na.rm = TRUE, show.legend = FALSE)": "") + 
+      (this.state.AnalysisSetting.confInt ? ", se = TRUE, level = " + this.state.AnalysisSetting.confIntLevel/100 : ", se = FALSE") + ", na.rm = TRUE, show.legend = FALSE)": "") + 
       (this.state.AnalysisSetting.rug ? "+\n    geom_rug(col = \"steelblue\", alpha = 0.1, size = 1)" : "") + 
       (this.state.Variables.Size.length > 0 ? "+\n    scale_size(range = c(0.1, 8))" :"") +
       (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 

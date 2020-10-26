@@ -498,3 +498,19 @@
     grid-row-start: 2;
     grid-row-end: 12;
 }
+
+.ReshapeSelection {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    width: 250px;
+}
+
+.ReshapeInput {
+    width: 250px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #a7a7a7;
+    font-size: 14px;
+}

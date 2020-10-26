@@ -214,6 +214,11 @@ export class SettingBar extends Component {
                             <span>A dataset on sleep deprivation and reaction time</span>
                             <br/><br/>
                         </div>
+                        <div onClick={()=> this.openExampleData("UNDP")} className="exampleDataSelection">
+                            <b>UNDP</b><br/>
+                            <span>A dataset of 199 countries from the United Nations Development Programme</span>
+                            <br/><br/>
+                        </div>
                         
                     </DialogContent>
                     <DialogActions>
