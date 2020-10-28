@@ -85,6 +85,10 @@ export class ReshapeVariableSelection extends Component {
                         <StyledIconButton size="small" onClick={() => this.props.resetVarListCallback()}>
                             <FontAwesomeIcon icon={faUndoAlt} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
+                    <StyledTooltip title="To reshape data from wide to long, the naming of the target variables should be in the format 'VariableName_index' (e.g. Measurement_1, Measurement_2, etc.)" placement="top"><span className="pl-2">
+                        
+                            <FontAwesomeIcon icon={faInfoCircle} size="1x"/>
+                        </span></StyledTooltip>
                     </div>
                     <div></div>
                     <div>Target Variables

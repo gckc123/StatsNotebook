@@ -179,44 +179,58 @@ export class SettingBar extends Component {
                 <Dialog open={this.state.showExampleDataDialog} onClose={this.handleExampleDataDialogClose}>
                     <DialogTitle>Example Data</DialogTitle>
                     <DialogContent>
-                        <div onClick={()=> this.openExampleData("personality")} className="exampleDataSelection">
-                            <b>Personality</b><br/>
-                            <span>Simulated data on Big 5 personality traits, mental health and sex</span>
-                            <br/><br/>
-                        </div>
-                        <div onClick={()=> this.openExampleData("wellbeing")} className="exampleDataSelection">
-                            <b>Wellbeing</b><br/>
-                            <span>Simulated data on psychological wellbeing, stress and social support.</span>
-                            <br/><br/>
-                        </div>
-                        <div onClick={()=> this.openExampleData("cancer")} className="exampleDataSelection">
-                            <b>Lung Cancer</b><br/>
-                            <span>Simulated data on lung cancer remission</span>
-                            <br/><br/>
-                        </div>
                         <div onClick={()=> this.openExampleData("alcohol_tax")} className="exampleDataSelection">
                             <b>Alcohol</b><br/>
                             <span>Simulated data on alcohol consumption before and after tax increase</span>
                             <br/><br/>
                         </div>
-                        <div onClick={()=> this.openExampleData("substance")} className="exampleDataSelection">
-                            <b>Substance</b><br/>
-                            <span>Simulated data on participation in family intervention program and substance use disorder</span>
+                        
+                        <div onClick={()=> this.openExampleData("HDI")} className="exampleDataSelection">
+                            <b>Human Development Index</b><br/>
+                            <span>Human Development Index (1990-2018) by regions</span>
                             <br/><br/>
                         </div>
-                        <div onClick={()=> this.openExampleData("stars")} className="exampleDataSelection">
-                            <b>Stars</b><br/>
-                            <span>A dataset of 47 stars</span>
+
+                        <div onClick={()=> this.openExampleData("cancer")} className="exampleDataSelection">
+                            <b>Lung Cancer</b><br/>
+                            <span>Simulated data on lung cancer remission</span>
                             <br/><br/>
                         </div>
+
+                        <div onClick={()=> this.openExampleData("personality")} className="exampleDataSelection">
+                            <b>Personality</b><br/>
+                            <span>Simulated data on Big 5 personality traits, mental health and sex</span>
+                            <br/><br/>
+                        </div>
+                        
                         <div onClick={()=> this.openExampleData("sleep_reaction")} className="exampleDataSelection">
                             <b>Sleep</b><br/>
                             <span>A dataset on sleep deprivation and reaction time</span>
                             <br/><br/>
                         </div>
+
+                        <div onClick={()=> this.openExampleData("stars")} className="exampleDataSelection">
+                            <b>Stars</b><br/>
+                            <span>A dataset of 47 stars</span>
+                            <br/><br/>
+                        </div>
+                        
+                        <div onClick={()=> this.openExampleData("substance")} className="exampleDataSelection">
+                            <b>Substance</b><br/>
+                            <span>Simulated data on participation in family intervention program and substance use disorder</span>
+                            <br/><br/>
+                        </div>
+                        
+                        
                         <div onClick={()=> this.openExampleData("UNDP")} className="exampleDataSelection">
                             <b>UNDP</b><br/>
                             <span>A dataset of 199 countries from the United Nations Development Programme</span>
+                            <br/><br/>
+                        </div>
+
+                        <div onClick={()=> this.openExampleData("wellbeing")} className="exampleDataSelection">
+                            <b>Wellbeing</b><br/>
+                            <span>Simulated data on psychological wellbeing, stress and social support.</span>
                             <br/><br/>
                         </div>
                         

@@ -79,7 +79,7 @@ export class App extends Component {
     this.updateDataPanelDimension();
     window.addEventListener("resize", this.updateDataPanelDimension);
 
-    let initialScript = "library(tidyverse)\nlibrary(ggplot2)\nlibrary(forcats)\ninitialise_seed <- runif(1)\n"
+    let initialScript = "library(tidyverse)\nlibrary(ggplot2)\nlibrary(forcats)\nlibrary(lubridate)\ninitialise_seed <- runif(1)\n"
     this.addExtraBlk(initialScript, true)
 
     ipcRenderer.on('RecvROutput', (event, content) => {

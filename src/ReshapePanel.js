@@ -3,12 +3,8 @@ import { withStyles } from '@material-ui/core/styles';
 import MuiExpansionPanel from '@material-ui/core/ExpansionPanel';
 import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { MIVariableSelection } from './MIVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { MIAnalysisSetting } from "./MIAnalysisSetting";
 import { Alert } from './Alert.js';
 import _ from "lodash";
 import { AnalysisPanelBar } from "./AnalysisPanelBar";
@@ -204,8 +200,8 @@ export class ReshapePanel extends Component {
       VariablesObj["Available"] = this.not(VariablesObj["Available"],toRightVars)
       VariablesObj[target] = VariablesObj[target].concat(toRightVars)
       CheckedObj["Available"] = []
-      this.setState({Variables: {...VariablesObj}},
-        () => this.setState({Checked: {...CheckedObj}}))  
+      this.setState({Variables: {...VariablesObj}, Checked: {...CheckedObj}},
+        () => this.buildCode())  
 
     }else{
         if (CheckedObj["Available"].length > 0) {
@@ -235,8 +231,8 @@ export class ReshapePanel extends Component {
 
 
       CheckedObj[from] = []
-      this.setState({Variables: {...VariablesObj}},
-          () => this.setState({Checked: {...CheckedObj}}))
+      this.setState({Variables: {...VariablesObj}, Checked: {...CheckedObj}},
+          () => this.buildCode())
   }
   
   handleToggle = (varname, from) => {
@@ -275,16 +271,18 @@ export class ReshapePanel extends Component {
     let codeString = ""
 
     if (this.state.AnalysisSetting["operation"] === "w2l") {
-
+      codeString = codeString + "currentDataset <- currentDataset %>% pivot_longer(c(\""+ this.state.Variables["Covariates"].join("\", \"") +"\"),"+
+      "\n  names_to = c(\".value\", \""+ this.state.AnalysisSetting.newVariable +"\"),\n  names_pattern = \"(.*)_(.*)\")"
     }else 
     {
-
+      codeString = codeString + "currentDataset <- currentDataset %>% pivot_wider(names_from = "+ this.state.AnalysisSetting.w2lBaseOn +",\n" + 
+      "  names_glue = \"{.value}_{year}\",\n  values_from = c(\""+ this.state.Variables["Covariates"].join("\", \"") +"\"))"
     }
 
     codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
       "\"R Core Team (2020). The R Project for Statistical Computing. [Computer software]. Retrieved from https://r-project.org\"\n"
 
-    this.props.updateTentativeScriptCallback(codeString, this.state) 
+    this.setState({tentativeScript: codeString})
   }
 
   handlePanelExpansion = (target) => (event, newExpanded) => {
@@ -305,7 +303,7 @@ export class ReshapePanel extends Component {
       default:
         break;
     }
-    this.setState({AnalysisSetting: {...AnalysisSettingObj}})
+    this.setState({AnalysisSetting: {...AnalysisSettingObj}}, ()=> this.buildCode())
   }
 
   openAlert = () => {
@@ -320,13 +318,18 @@ export class ReshapePanel extends Component {
     this.setState({alertTitle: title, alertText: text})
   }
 
+  
+
   render () {
     return (
       <div className="compute-pane">
+        <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
+          title = {this.state.alertTitle}
+          content = {this.state.alertText}></Alert>  
         <div className="notebook-bar">
-                  <AnalysisPanelBar addExtraBlkCallback = {this.addExtraBlkAndClear}
+                  <AnalysisPanelBar addExtraBlkCallback = {this.props.addExtraBlkCallback}
                   runScriptCallback = {this.props.runScriptCallback}
-                  tentativeScript = {this.state.rule}
+                  tentativeScript = {this.state.tentativeScript}
                   currentActiveLeftPanel = ""
                   currentActiveDataVizPanel = ""
                   currentActiveAnalysisPanel = ""/>
