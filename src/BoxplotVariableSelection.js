@@ -10,6 +10,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
 import IconButton from '@material-ui/core/IconButton';
 import {faUndoAlt} from '@fortawesome/free-solid-svg-icons';
+import {faBookReader} from '@fortawesome/free-solid-svg-icons';
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -81,6 +82,11 @@ export class BoxplotVariableSelection extends Component {
                     <StyledTooltip title="Reset variable lists." placement="top"><span className="pl-2">
                         <StyledIconButton size="small" onClick={() => this.props.resetVarListCallback()}>
                             <FontAwesomeIcon icon={faUndoAlt} size="1x"/></StyledIconButton>
+                        </span></StyledTooltip>
+
+                    <StyledTooltip title="see tutorial at StatsNotebook.io" placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/dataviz/")}>
+                            <FontAwesomeIcon icon={faBookReader} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
                     </div>
                     <div ></div>

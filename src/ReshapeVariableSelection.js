@@ -11,6 +11,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
 import IconButton from '@material-ui/core/IconButton';
 import {faUndoAlt} from '@fortawesome/free-solid-svg-icons';
+import {faBookReader} from '@fortawesome/free-solid-svg-icons';
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -81,14 +82,22 @@ export class ReshapeVariableSelection extends Component {
                         <StyledIconButton size="small" onClick={() => this.props.setSortAvailableCallback()}>
                             <FontAwesomeIcon icon={faSortAlphaDown} size="1x" color={this.props.sortAvailable? "hotpink" : "grey"}/></StyledIconButton>
                         </span></StyledTooltip>
+
                     <StyledTooltip title="Reset variable lists." placement="top"><span className="pl-2">
                         <StyledIconButton size="small" onClick={() => this.props.resetVarListCallback()}>
                             <FontAwesomeIcon icon={faUndoAlt} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
-                    <StyledTooltip title="To reshape data from wide to long, the naming of the target variables should be in the format 'VariableName_index' (e.g. Measurement_1, Measurement_2, etc.)" placement="top"><span className="pl-2">
-                        
+                    
+                    <StyledTooltip title="see tutorial at StatsNotebook.io" placement="top"><span className="pl-2">
+                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/data_management/reshape/")}>
+                            <FontAwesomeIcon icon={faBookReader} size="1x"/></StyledIconButton>
+                        </span></StyledTooltip>
+
+                    <StyledTooltip title="To reshape data from wide to long, the naming of the target variables should be in the format 'VariableName_index' (e.g. Measurement_1, Measurement_2, etc.)" placement="top"><span className="pl-2">                        
                             <FontAwesomeIcon icon={faInfoCircle} size="1x"/>
                         </span></StyledTooltip>
+
+                    
                     </div>
                     <div></div>
                     <div>Target Variables

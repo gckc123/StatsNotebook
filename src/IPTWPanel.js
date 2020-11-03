@@ -5,11 +5,10 @@ import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { MIVariableSelection } from './MIVariableSelection';
+import { IPTWVariableSelection } from './IPTWVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
 import { MIAnalysisSetting } from "./MIAnalysisSetting";
-import { AddInteraction } from './AddInteractions';
 import { Alert } from './Alert.js';
 import _ from "lodash";
 
@@ -56,7 +55,7 @@ const ExpansionPanelDetails = withStyles((theme) => ({
 }))(MuiExpansionPanelDetails);
 
 
-export class MIPanel extends Component {
+export class IPTWPanel extends Component {
 
   constructor(props) {
     super(props)
@@ -68,12 +67,27 @@ export class MIPanel extends Component {
         Checked: {
             Available: [],
             Covariates: [],
-            CovariatesIntSelection: [],
         },
-        interaction: [],
-        checkedInteraction: [],
+
+
+        TimeVarying: [
+          {
+            Exposure: [],
+            TVCovariates: [],
+          }
+        ],
+
+        TimeVaryingChecked: [
+          {
+            Exposure: [],
+            TVCovariates: [],
+          }
+        ],
+
         hideToRight: {
             Covariates: false,
+            Exposure: false,
+            TVCovariates: false,
         },
         tentativeScript: "",
         panels: {
@@ -92,7 +106,7 @@ export class MIPanel extends Component {
 
   componentDidUpdate() {
     //Update variable list
-    if (this.props.currentActiveAnalysisPanel === "MIPanel" && !this.props.setPanelFromNotebook) {
+    if (this.props.currentActiveAnalysisPanel === "IPTWPanel" && !this.props.setPanelFromNotebook) {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
@@ -108,18 +122,6 @@ export class MIPanel extends Component {
               CheckedObj[key] = this.intersection(CheckedObj[key],VariablesObj[key])
           }
 
-          let interactionObj = this.state.interaction.filter((item) => {
-            let terms = item.split("*")
-            let match = this.intersection(terms, VariablesObj["Covariates"])
-            if (match.length === terms.length)
-              return true
-            else
-              return false
-          })
-
-          CheckedObj["CovariatesIntSelection"] = this.intersection(CheckedObj["CovariatesIntSelection"], VariablesObj["Covariates"])
-
-          let checkedInteractionObj = this.intersection(this.state.checkedInteraction, interactionObj)
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
@@ -130,11 +132,10 @@ export class MIPanel extends Component {
           }
 
           this.setState({Variables:{...VariablesObj}, 
-            Checked: {...CheckedObj}, 
-            interaction: [...interactionObj],
-            checkedInteraction: [...checkedInteractionObj]})      
+            Checked: {...CheckedObj} 
+            })      
       }
-    }else if((this.props.currentActiveAnalysisPanel === "MIPanel" && this.props.setPanelFromNotebook)) {
+    }else if((this.props.currentActiveAnalysisPanel === "IPTWPanel" && this.props.setPanelFromNotebook)) {
       this.setState({...this.props.tentativePanelState})
       this.props.setPanelFromNotebookToFalseCallback()
     }
@@ -180,9 +181,7 @@ export class MIPanel extends Component {
     }
 
     this.setState({Variables: {...VariablesObj},
-      Checked: {...CheckedObj},
-      interaction: [],
-      checkedInteraction: [],
+      Checked: {...CheckedObj}
     })
 
   }
@@ -228,8 +227,7 @@ export class MIPanel extends Component {
   handleToLeft = (from) => {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
-      let interactionArr = [...this.state.interaction]
-      let checkedInteractionArr = [...this.state.checkedInteraction]
+
 
       VariablesObj[from] = this.not(VariablesObj[from], CheckedObj[from])
       VariablesObj["Available"] = VariablesObj["Available"].concat(CheckedObj[from])
@@ -240,23 +238,9 @@ export class MIPanel extends Component {
         VariablesObj["Available"] = this.intersection(Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id")), VariablesObj["Available"])
       }
 
-
-      if (from === "Covariates") {
-        interactionArr = this.state.interaction.filter((item) => {
-          let terms = item.split("*")
-          let match = this.intersection(terms, VariablesObj["Covariates"])
-          if (match.length === terms.length)
-            return true
-          else
-            return false
-        })
-        checkedInteractionArr = this.intersection(checkedInteractionArr, interactionArr)
-      }
-
       CheckedObj[from] = []
       this.setState({Variables: {...VariablesObj}},
-          () => this.setState({Checked: {...CheckedObj}, interaction: [...interactionArr],
-        checkedInteraction: [...checkedInteractionArr]}))
+          () => this.setState({Checked: {...CheckedObj}}))
   }
   
   handleToggle = (varname, from) => {
@@ -275,26 +259,10 @@ export class MIPanel extends Component {
             CheckedObj[key] = [];
         }
     }        
-    this.setState({Checked: {...CheckedObj}, checkedInteraction: []})
+    this.setState({Checked: {...CheckedObj}})
   }
 
-  handleToggleInteraction = (varname, from) => {
-    let CheckedObj = _.cloneDeep(this.state.Checked)
-    let CheckedIntObj = [...this.state.checkedInteraction]
-    let currentIndex = CheckedIntObj.indexOf(varname)
-    
-    if (currentIndex === -1) {
-      CheckedIntObj.push(varname)
-    }else {
-      CheckedIntObj.splice(currentIndex, 1)
-    }
 
-    for (let key in CheckedObj) {
-      CheckedObj[key] = []
-    }
-
-    this.setState({checkedInteraction: CheckedIntObj, Checked: {...CheckedObj}})
-  }
 
   changeArrow = (target) => {
       let hideToRightObj = {...this.state.hideToRight}
@@ -308,55 +276,16 @@ export class MIPanel extends Component {
       this.setState({hideToRight:{...hideToRightObj}})
   }
 
-  addInteractionTerm = () => {
-    let interactionObj = [...this.state.interaction]
-    let CheckedObj = _.cloneDeep(this.state.Checked)
-    if (CheckedObj["CovariatesIntSelection"].length <= 1) {
-      this.setState({showAlert: true, 
-        alertText: "Please select at least two variables.",
-        alertTitle: "Alert"
-      })
-    }else {
-      interactionObj.push(CheckedObj["CovariatesIntSelection"].join("*"))
-      CheckedObj["CovariatesIntSelection"] = []
-      this.setState({interaction: interactionObj, Checked: {...CheckedObj}})
-    }
-  }
-
-  delInteractionTerm = () => {
-    let interactionObj = this.not(this.state.interaction, this.state.checkedInteraction)
-    this.setState({interaction: interactionObj, checkedInteraction: []})
-  }
 
   buildCode = () => {
     let codeString = "library(mice)\n"
     let formula = []
     let method = []
     
-    let formulaCode = "formulas <- make.formulas(currentDataset)\n"
-
-    this.state.Variables.Covariates.forEach((variable) => {
-      let intTerm = this.notInInt(variable, this.state.interaction)
-      let predictor = this.state.Variables.Covariates.filter((item) => item !== variable)      
-      formula.push("formulas$"+variable+" =" + variable + " ~ " + 
-        predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
-        intTerm.join(" + "))
-    })
-
-    let notIncludedVars = this.not(this.state.Variables.Available, this.state.Variables.Covariates)
-    notIncludedVars.forEach((variable) => {
-      method.push("meth[\""+variable+"\"] <- \"\"")
-    })
-
-    formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
-    let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
-    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\nimputedDataset <- parlmice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
-    this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
-    ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE) "
-
+    
     codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
       "\"R Core Team (2020). The R Project for Statistical Computing. [Computer software]. Retrieved from https://r-project.org\"\n" +
-      "\"Buuren, S. v. and K. Groothuis-Oudshoorn (2010). mice: Multivariate imputation by chained equations in R. Journal of Statistical Software: 1-68.\"\n"
+      "\"van der Wal, W. M. and R. B. Geskus (2011). ipw: an R package for inverse probability weighting. J Stat Softw 43(13): 1-23.\"\n"
 
     this.props.updateTentativeScriptCallback(codeString, this.state) 
   }
@@ -392,10 +321,91 @@ export class MIPanel extends Component {
     this.setState({alertTitle: title, alertText: text})
   }
 
+  addTime = (currentTime) => {
+    let tmp = [..._.cloneDeep(this.state.TimeVarying), {
+      Exposure: [],
+      TVCovariates: [...this.state.TimeVarying[currentTime]["TVCovariates"]],
+    }]
+    let tmp2 = [..._.cloneDeep(this.state.TimeVaryingChecked), {
+      Exposure: [],
+      TVCovariates: [],
+    }]
+    this.setState({TimeVarying: [...tmp], TimeVaryingChecked: [...tmp2]}, () => console.log(this.state.TimeVarying))
+  }
+
+  handleToggleTV = (varname, from, currentTime) => {
+    let TimeVaryingCheckedObj = _.cloneDeep(this.state.TimeVaryingChecked)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
+    let currentIndex = TimeVaryingCheckedObj[currentTime][from].indexOf(varname)
+
+    if (currentIndex === -1) {
+      TimeVaryingCheckedObj[currentTime][from].push(varname)
+    }else {
+      TimeVaryingCheckedObj[currentTime][from].splice(currentIndex, 1)
+    }
+
+    for (let key in CheckedObj) {
+      CheckedObj[key] = []
+    }
+
+    for (let key in TimeVaryingCheckedObj[currentTime]) {
+      if (key !== from) {
+        TimeVaryingCheckedObj[currentTime][key] = [];
+      }
+    }
+
+    this.setState({Checked: {...CheckedObj}, TimeVaryingChecked: [...TimeVaryingCheckedObj]})
+  }
+
+  handleTVToRight = (target, maxElement, currentTime) => {
+    let TimeVaryingObj = _.cloneDeep(this.state.TimeVarying)
+    let CheckedObj = _.cloneDeep(this.state.Checked)
+
+    if (TimeVaryingObj[currentTime][target].length + CheckedObj["Available"].length <= maxElement) {
+      let newTerm = this.not(CheckedObj["Available"], TimeVaryingObj[currentTime][target])
+      TimeVaryingObj[currentTime][target] = TimeVaryingObj[currentTime][target].concat(newTerm)
+      CheckedObj["Available"] = []
+      this.setState({TimeVarying: [...TimeVaryingObj], Checked: {...CheckedObj}})
+    }else {
+      if (CheckedObj["Available"].length > 0) {
+        this.setState({showAlert: true,
+          alertText: "Only" + maxElement + " " + target + " variable(s) can be specified.",
+          alertTitle: "Alert"
+        })
+      }
+    }
+  }
+
+  handleTVToLeft = (target, currentTime) => {
+    let TimeVaryingObj = _.cloneDeep(this.state.TimeVarying)
+    let TimeVaryingCheckedObj = _.cloneDeep(this.state.TimeVaryingChecked)
+
+
+    TimeVaryingObj[currentTime][target] = this.not(TimeVaryingObj[currentTime][target], TimeVaryingCheckedObj[currentTime][target])
+    TimeVaryingCheckedObj[currentTime][target] = []
+
+    this.setState({TimeVarying: [...TimeVaryingObj], TimeVaryingChecked: [...TimeVaryingCheckedObj]}, () => {console.log(this.state.TimeVarying); console.log(this.state.TimeVaryingChecked)})
+  }
+
+  delTime = (currentTime, last) => {
+    let TimeVaryingObj = _.cloneDeep(this.state.TimeVarying)
+    let TimeVaryingCheckedObj = _.cloneDeep(this.state.TimeVaryingChecked)
+
+    if (last) {
+      TimeVaryingObj.pop()
+      TimeVaryingCheckedObj.pop()
+    } else {
+      TimeVaryingObj.splice(currentTime, 1)
+      TimeVaryingCheckedObj.splice(currentTime, 1)
+    }
+
+    this.setState({TimeVarying: [...TimeVaryingObj], TimeVaryingChecked: [...TimeVaryingCheckedObj]}, () => {console.log(this.state.TimeVarying); console.log(this.state.TimeVaryingChecked)})
+  }
+
   render () {
     return (
       <div className="mt-2">
-        {this.props.currentActiveAnalysisPanel === "MIPanel" &&
+        {this.props.currentActiveAnalysisPanel === "IPTWPanel" &&
         <div>
           <Alert showAlert = {this.state.showAlert} closeAlertCallback = {this.closeAlert}
           title = {this.state.alertTitle}
@@ -403,10 +413,10 @@ export class MIPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.variableSelection}
           onChange = {this.handlePanelExpansion("variableSelection")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Multiple Imputation - Variable Selection</Typography>
+              <Typography>IPTW - Variable Selection</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <MIVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
+              <IPTWVariableSelection CurrentVariableList = {this.props.CurrentVariableList}
               Variables = {this.state.Variables}
               Checked = {this.state.Checked}
               hideToRight = {this.state.hideToRight}
@@ -422,35 +432,17 @@ export class MIPanel extends Component {
               openWebpageCallback = {this.props.openWebpageCallback}
               StatsNotebookURL = {this.props.StatsNotebookURL}
               sortAvailable = {this.state.sortAvailable}
-              
+              addTimeCallback = {this.addTime}
+              TimeVarying = {this.state.TimeVarying}
+              TimeVaryingChecked = {this.state.TimeVaryingChecked}
+              handleToggleTVCallback = {this.handleToggleTV}
+              handleTVToLeftCallback = {this.handleTVToLeft}
+              handleTVToRightCallback = {this.handleTVToRight}
+              delTimeCallback = {this.delTime}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  
-          <ExpansionPanel square expanded={this.state.panels.modelSpec}
-          onChange = {this.handlePanelExpansion("modelSpec")}>
-            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Passive Imputation - Add interaction terms</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <AddInteraction CurrentVariableList = {this.props.CurrentVariableList}
-              Variables = {this.state.Variables}
-              Checked = {this.state.Checked}
-              hideToRight = {this.state.hideToRight}
-              intersectionCallback = {this.intersection}
-              notCallback = {this.not}
-              handleToggleCallback = {this.handleToggle}
-              changeArrowCallback = {this.changeArrow}
-              handleToRightCallback = {this.handleToRight}
-              handleToLeftCallback = {this.handleToLeft}
-              addExtraBlkCallback = {this.props.addExtraBlkCallback}
-              interaction = {this.state.interaction}
-              checkedInteraction = {this.state.checkedInteraction}
-              addInteractionTermCallback = {this.addInteractionTerm}
-              handleToggleInteractionCallback = {this.handleToggleInteraction}
-              delInteractionTermCallback = {this.delInteractionTerm}
-              />
-            </ExpansionPanelDetails>
-          </ExpansionPanel>    
+          
           <ExpansionPanel square expanded={this.state.panels.analysisSetting}
           onChange = {this.handlePanelExpansion("analysisSetting")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>

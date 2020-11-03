@@ -8,6 +8,7 @@ const BrowserWindow = electron.BrowserWindow
 
 const zmq = require('zeromq');
 const { exec } = require('child_process');
+const { shell } = require('electron');
 
 let mainWindow = null; // #A
 
@@ -162,6 +163,10 @@ const savingFile = exports.savingFile = (content, NotebookPath = "") => {
   };
   fs.writeFileSync(file, content);
   mainWindow.webContents.send('NotebookPath', file)
+}
+
+const openWebpage = exports.openWebpage = (address) => {
+  shell.openExternal(address)
 }
 
 const savingDataFile = exports.savingDataFile = (fileType, workingDir) => {

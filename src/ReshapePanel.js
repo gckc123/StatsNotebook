@@ -276,10 +276,10 @@ export class ReshapePanel extends Component {
     }else 
     {
       codeString = codeString + "currentDataset <- currentDataset %>% pivot_wider(names_from = "+ this.state.AnalysisSetting.w2lBaseOn +",\n" + 
-      "  names_glue = \"{.value}_{year}\",\n  values_from = c(\""+ this.state.Variables["Covariates"].join("\", \"") +"\"))"
+      "  names_glue = \"{.value}_{"+ this.state.AnalysisSetting.w2lBaseOn +"}\",\n  values_from = c(\""+ this.state.Variables["Covariates"].join("\", \"") +"\"))"
     }
 
-    codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
+    codeString = codeString + "\n\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
       "\"R Core Team (2020). The R Project for Statistical Computing. [Computer software]. Retrieved from https://r-project.org\"\n"
 
     this.setState({tentativeScript: codeString})
@@ -390,6 +390,8 @@ export class ReshapePanel extends Component {
               setSortAvailableCallback = {this.setSortAvailable}
               resetVarListCallback = {this.resetVarList}
               sortAvailable = {this.state.sortAvailable}
+              openWebpageCallback = {this.props.openWebpageCallback}
+              StatsNotebookURL = {this.props.StatsNotebookURL}
           />
         </div>
 

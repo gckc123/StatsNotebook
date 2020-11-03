@@ -463,6 +463,8 @@ export class HistogramPanel extends Component {
               setSortAvailableCallback = {this.setSortAvailable}
               resetVarListCallback = {this.resetVarList}
               sortAvailable = {this.state.sortAvailable}
+              openWebpageCallback = {this.props.openWebpageCallback}
+              StatsNotebookURL = {this.props.StatsNotebookURL}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

@@ -11,6 +11,7 @@ import { DataPanel} from './DataPanel';
 import { NMAPanel } from './NMAPanel';
 import { MAPanel } from './MAPanel';
 import { MIPanel } from './MIPanel';
+import { IPTWPanel } from './IPTWPanel';
 import { VarsReferencePanel } from './VarsReferencePanel';
 import { RegPanel } from './RegPanel';
 import { DescriptivePanel } from './DescriptivePanel';
@@ -50,6 +51,7 @@ export class App extends Component {
     this.state = {
       currentVersion: "0.1.0",
       RVersion: "4.0.2",
+      StatsNotebookURL: "https://statsnotebook.io",
       tentativeScript: "",
       ActiveScript: "",
       ActiveBlkID: null,
@@ -584,6 +586,10 @@ export class App extends Component {
     this.setState({tentativeScript: "", ActiveScript: "", NotebookBlkList: [], clearNotebookBlkRef: true})
   }
 
+  openWebpage = (address) => {
+    mainProcess.openWebpage(address)
+  }
+
   render() {
 
       return (
@@ -668,6 +674,8 @@ export class App extends Component {
                       setPanelFromNotebook = {this.state.setPanelFromNotebook}
                       tentativePanelState = {this.state.tentativePanelState}
                       setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                      openWebpageCallback = {this.openWebpage}
+                      StatsNotebookURL = {this.state.StatsNotebookURL}
                       currentVersion = {this.state.currentVersion}
                       RVersion = {this.state.RVersion}/>
                   </div>
@@ -694,6 +702,8 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
                     CPU = {this.state.CPU}
                     currentVersion = {this.state.currentVersion}
                     RVersion = {this.state.RVersion}/>
@@ -738,6 +748,25 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
+                  </div>
+                  
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "IPTWPanel"}>
+                    <IPTWPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    CPU = {this.state.CPU}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
                     currentVersion = {this.state.currentVersion}
                     RVersion = {this.state.RVersion}/>
                   </div>
@@ -758,6 +787,8 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
                     currentVersion = {this.state.currentVersion}
                     RVersion = {this.state.RVersion}/>
                   </div>
@@ -773,6 +804,8 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
                     currentVersion = {this.state.currentVersion}
                     RVersion = {this.state.RVersion}/>
                   </div>
@@ -863,7 +896,10 @@ export class App extends Component {
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
                     currentVersion = {this.state.currentVersion}
-                    RVersion = {this.state.RVersion}/>
+                    RVersion = {this.state.RVersion}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
+                    />
                   </div>
                   
                   <div hidden={this.state.currentActiveDataVizPanel !== "DensityPanel"}>
@@ -877,6 +913,8 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
                     currentVersion = {this.state.currentVersion}
                     RVersion = {this.state.RVersion}/>
                   </div>
@@ -892,6 +930,8 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
                     currentVersion = {this.state.currentVersion}
                     RVersion = {this.state.RVersion}/>
                   </div>
@@ -908,7 +948,10 @@ export class App extends Component {
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
                     currentVersion = {this.state.currentVersion}
-                    RVersion = {this.state.RVersion}/>
+                    RVersion = {this.state.RVersion}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
+                    />
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "ScatterplotPanel"}>
@@ -923,7 +966,9 @@ export class App extends Component {
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
                     currentVersion = {this.state.currentVersion}
-                    RVersion = {this.state.RVersion}/>
+                    RVersion = {this.state.RVersion}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}/>
                   </div>
 
                   <div hidden={this.state.currentActiveDataVizPanel !== "CorrelogramPanel"}>
@@ -938,7 +983,10 @@ export class App extends Component {
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
                     currentVersion = {this.state.currentVersion}
-                    RVersion = {this.state.RVersion}/>
+                    RVersion = {this.state.RVersion}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
+                    />
                   </div>
                   
                   <div hidden={this.state.currentActiveDataVizPanel !== "LineGraphPanel"}>
@@ -952,8 +1000,10 @@ export class App extends Component {
                     setPanelFromNotebook = {this.state.setPanelFromNotebook}
                     tentativePanelState = {this.state.tentativePanelState}
                     setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
                     currentVersion = {this.state.currentVersion}
-                    RVersion = {this.state.RVersion}/>
+                    RVersion = {this.state.RVersion}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}/>
                   </div>
 
                 </div>

@@ -184,7 +184,8 @@ class CausalMenu extends Component {
                 }}
                 open = {open}
                 onClose={this.props.handleClose}>
-                <MenuItem disableRipple style = {MenuItemStyle} disabled>Marginal Structural Models</MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle} 
+                onClick = {() => this.setAnalysisPanel("IPTWPanel")}>Inverse Probability Treatment Weighting (IPTW)</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick={() => this.setAnalysisPanel("MediationPanel")}>
                     Causal Mediation Analysis
