@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { IPTWVariableSelection } from './IPTWVariableSelection';
 import "./App.css";
 import "./AnalysisPanelElements.css";
-import { MIAnalysisSetting } from "./MIAnalysisSetting";
+import { IPTWAnalysisSetting } from "./IPTWAnalysisSetting";
 import { Alert } from './Alert.js';
 import _ from "lodash";
 
@@ -96,6 +96,8 @@ export class IPTWPanel extends Component {
           analysisSetting: false,
         },
         AnalysisSetting: {
+          imputedDataset: false,
+          imputeMissing: false,
           M: 20,
         },
         showAlert: false,
@@ -303,6 +305,10 @@ export class IPTWPanel extends Component {
       case "M":
         AnalysisSettingObj[target] = event.target.value
         break;
+      case "imputedDataset":
+      case "imputeMissing":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        break;
       default:
         break;
     }
@@ -449,7 +455,7 @@ export class IPTWPanel extends Component {
               <Typography>Analysis Setting</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
-              <MIAnalysisSetting 
+              <IPTWAnalysisSetting 
               Variables = {this.state.Variables}
               AnalysisSetting = {this.state.AnalysisSetting}
               updateAnalysisSettingCallback = {this.updateAnalysisSetting}/>

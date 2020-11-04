@@ -40,10 +40,11 @@ export class RegAnalysisSetting extends Component {
 
                     {(currentPanel === "LRPanel") &&
                         <div className="NMACheckbox"><Checkbox size="small"
-                        disabled = {(this.props.AnalysisSetting[currentPanel].imputedDataset || this.props.AnalysisSetting[currentPanel].imputeMissing) && this.props.Variables.RandomEffect.length > 0}
+                        disabled = {((this.props.AnalysisSetting[currentPanel].imputedDataset || this.props.AnalysisSetting[currentPanel].imputeMissing) && this.props.Variables.RandomEffect.length > 0)
+                        || this.props.Variables.Weight.length > 0}
                         checked= {this.props.AnalysisSetting[currentPanel].robustReg}
                         onClick={(event) => this.props.updateAnalysisSettingCallback(event, currentPanel,"robustReg")}/>Robust Regression
-                            <StyledTooltip title={<div>Robust regression is not available for for imputed Dataset when random effect is present. <br/><br/> Weight will be ignored when random effect is present. <br/><br/> It should be noted that robust regression might not always produce a convergent solution.</div>}>
+                            <StyledTooltip title={<div>Robust regression is not available for imputed Dataset when random effect is present. <br/><br/>Robust regression is not available for weighted analysis. <br/><br/>It should be noted that robust regression might not always produce a convergent solution.</div>}>
                             <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
                         </div>
                     }

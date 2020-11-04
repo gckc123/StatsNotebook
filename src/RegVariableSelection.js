@@ -11,6 +11,7 @@ import {faSortAlphaDown} from '@fortawesome/free-solid-svg-icons';
 import IconButton from '@material-ui/core/IconButton'
 import {faUndoAlt} from '@fortawesome/free-solid-svg-icons';
 import {faBookReader} from '@fortawesome/free-solid-svg-icons';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -119,7 +120,12 @@ export class RegVariableSelection extends Component {
                     </div>
 
                     <div></div>
-                    <div>Random Effect</div>
+                    <div>Random Effect
+                    <StyledTooltip title={<div>Random effect model is not available for weighted analysis. Random effect will be ignored if a weight is specified below.
+                        <br/><br/>Random effect model is not available for negative binomial regression and multinomial logistic regression.
+                    </div>}>
+                            <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div><center>
                         {this.genArrowButton("RandomEffect", 100000)}
                     </center></div>
@@ -128,7 +134,10 @@ export class RegVariableSelection extends Component {
                     </div>
 
                     <div></div>
-                    <div>Weight</div>
+                    <div>Weight 
+                    <StyledTooltip title={<div>Weighted analysis is not available for random effect model, negative binomial regression and multinomial logistic regression.</div>}>
+                            <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
                     <div><center>
                         {this.genArrowButton("Weight", 1)}
                     </center></div>

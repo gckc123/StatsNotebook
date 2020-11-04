@@ -73,7 +73,8 @@ export class EMMPanel extends Component {
         return (
             
             <div className="analysis-pane">
-                <div className="EMM-Variable-Selection-Box" hidden={(this.props.AnalysisSetting[this.props.currentActiveAnalysisPanel].robustReg)}>
+                <div className="EMM-Variable-Selection-Box" hidden={(this.props.AnalysisSetting[this.props.currentActiveAnalysisPanel].robustReg || 
+                    this.props.Variables.Weight.length > 0)}>
                     <div>Marginal Means
                     <StyledTooltip title={<div>Categorical variables: Marginal means of the outcome for each level of the target categorical variable will be computed. <br/><br/> 
                     Numeric variables: Marginal means of the outcome will be calculated at the mean and +/- 1 SD of the target numeric variable.<br/><br/>Estimated Marginal Means are not available for robust regression.</div>}>
@@ -118,8 +119,9 @@ export class EMMPanel extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="p-2" hidden={(!this.props.AnalysisSetting[this.props.currentActiveAnalysisPanel].robustReg)}>
-                    <FontAwesomeIcon icon={faExclamationTriangle} size="1x"/><span className="pl-2">Estimated Marginal Means are not available for Robust Regression.</span>
+                <div className="p-2" hidden={(!(this.props.AnalysisSetting[this.props.currentActiveAnalysisPanel].robustReg ||
+                    this.props.Variables.Weight.length > 0))}>
+                    <FontAwesomeIcon icon={faExclamationTriangle} size="1x"/><span className="pl-2">Estimated Marginal Means are not available for robust regression and weighted analysis.</span>
                 </div>
             </div>
         )

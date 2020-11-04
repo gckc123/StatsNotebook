@@ -531,7 +531,7 @@ export class RegPanel extends Component {
       }   
 
       codeString = codeString + "\"Impute missing data\"\n" + 
-      "library(mice)\n"
+      "library(mice)\nlibrary(mitools)\n\n"
       let formula = []
       let method = []
       let formulaCode = "formulas <- make.formulas(currentDataset)\n"
@@ -559,6 +559,8 @@ export class RegPanel extends Component {
         this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
         ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE)\n\n"
 
+    }else if (this.state.AnalysisSetting[currentPanel].imputedDataset) {
+      codeString = codeString + "library(mice)\nlibrary(mitools)\n\n"
     }
 
     
@@ -576,86 +578,122 @@ export class RegPanel extends Component {
 
     switch(currentPanel) {
       case "LRPanel":
-        if (this.state.AnalysisSetting[currentPanel].robustReg) {
-          if (this.state.Variables.RandomEffect.length > 0) {
-            codeString = codeString + "library(robustlmm) \n"
-            codeString = codeString + "res <- rlmer(" + formulaFixedPart + 
-            formulaRandompart +
-            ",\n  data = currentDataset)\nsummary(res)\n\n"
-          }else {
-            codeString = codeString + "library(robustbase) \n"
-            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-              codeString = codeString + 
-              "\nres <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmrob(" + formulaFixedPart + 
-              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + "\n))\nsummary(pool(res), conf.int = TRUE, conf.level = " +
-              this.state.AnalysisSetting[currentPanel].confLv/100 +")\n\n"
+        if (this.state.Variables.Weight.length === 0) {
+          if (this.state.AnalysisSetting[currentPanel].robustReg) {
+            if (this.state.Variables.RandomEffect.length > 0) {
+              codeString = codeString + "library(robustlmm) \n"
+              codeString = codeString + "res <- rlmer(" + formulaFixedPart + 
+              formulaRandompart +
+              ",\n  data = currentDataset)\nsummary(res)\n\n"
             }else {
-              codeString = codeString + "res <- lmrob(" + this.state.Variables.Outcome[0] + " ~ " + this.state.Variables.Covariates.join(" + ") +
-                ( this.state.interaction.length > 0 ? " + " + this.state.interaction.join(" + "): "" ) + 
-                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + ",\n  data=currentDataset)\nsummary(res)"+
-                "\ncbind(coef(res), confint(res, level = "+ this.state.AnalysisSetting[currentPanel].confLv/100 +"))\n\n"
+              codeString = codeString + "library(robustbase) \n"
+              if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+                codeString = codeString + 
+                "\nres <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmrob(" + formulaFixedPart + 
+                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + "\n))\nsummary(pool(res), conf.int = TRUE, conf.level = " +
+                this.state.AnalysisSetting[currentPanel].confLv/100 +")\n\n"
+              }else {
+                codeString = codeString + "res <- lmrob(" + this.state.Variables.Outcome[0] + " ~ " + this.state.Variables.Covariates.join(" + ") +
+                  ( this.state.interaction.length > 0 ? " + " + this.state.interaction.join(" + "): "" ) + 
+                  (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") + ",\n  data=currentDataset)\nsummary(res)"+
+                  "\ncbind(coef(res), confint(res, level = "+ this.state.AnalysisSetting[currentPanel].confLv/100 +"))\n\n"
+              }
+            }
+          }else {
+
+            if (this.state.Variables.RandomEffect.length > 0) {
+              
+              if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+                codeString = codeString + "\nlibrary(lme4)\nlibrary(broom.mixed)\n\n"
+                codeString = codeString +
+                "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmer(" + formulaFixedPart + 
+                formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+                if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                  codeString = codeString + "res1 <- res$analyses[[1]]\n" +
+                  "\n\nres.std <- resid(res1)/sd(resid(res1))\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                  "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res1)\ncar::infIndexPlot(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                  "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res1)\n\n"
+                }
+
+              }else{
+                /* lmerTest does not work with multiple imputation - possible problem the pool function in mice */
+                codeString = codeString + "\nlibrary(lme4)\nlibrary(lmerTest)\n\n"
+                codeString = codeString + "res <- lmer(" + formulaFixedPart + 
+                  formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                  ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
+                  this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
+                if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                  codeString = codeString + "\n\nres.std <- resid(res)/sd(resid(res))\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                  "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res)\ncar::infIndexPlot(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                  "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res)\n\n"
+                }
+              }
+
+            }else {
+              if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+                codeString = codeString + "\"Linear regression\"\n" + 
+                "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lm(" + formulaFixedPart + 
+                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+                if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                  codeString = codeString + "res1 <- res$analyses[[1]]\n" +
+                  "\n\nres.std <- rstandard(res1)\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                  "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res1)\ncar::infIndexPlot(res1)\n\n\"Residual plots, curvature tests and normality plot\"\ncar::residualPlots(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                  "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res1)\n\n"
+                }
+
+              }else {
+                codeString = codeString + "\"Linear regression\"\n"
+                +"res <- lm(" + formulaFixedPart + 
+                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                ",\n  data=currentDataset)\nsummary(res)\ncbind(coef(res), confint(res, level = " +
+                this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
+
+                if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                  codeString = codeString + "\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                  "\n\n\"Outlier Test. Observations with a Bonferroni p < .01 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res)\ncar::infIndexPlot(res)\n\n\"Residual plots, curvature tests and normality plot\"\ncar::residualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                  "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res)\n\n"
+                }
+              }
             }
           }
         }else {
-
-          if (this.state.Variables.RandomEffect.length > 0) {
+          /* Weighted analysis */
+          if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
             
-            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-              codeString = codeString + "\nlibrary(lme4)\nlibrary(broom.mixed)\n\n"
-              codeString = codeString +
-              "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lmer(" + formulaFixedPart + 
-              formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
-              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+            codeString = codeString + "library(survey)\n\n\"Weighted linear regression\"\n\n" + 
+            "mi_dataList <- currentDataset[currentDataset$.imp != 0,]\n" +
+            "mi_dataList <- split(mi_dataList, mi_dataList$.imp)\n" +
+            "mi_dataList <- imputationList(mi_dataList)\n" + 
+            "clus <- svydesign(id =~ 1, weights =~ " + this.state.Variables.Weight[0] + ", data = mi_dataList)\n" + 
+            "res <- with(clus, svyglm(" + formulaFixedPart + "))\n" +
+            "summary(MIcombine(res), alpha = " + ((100 - this.state.AnalysisSetting[currentPanel].confLv)/100).toString() + ")\n\n"
 
-              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                codeString = codeString + "res1 <- res$analyses[[1]]\n" +
-                "\n\nres.std <- resid(res1)/sd(resid(res1))\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res1)\ncar::infIndexPlot(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res1)\n\n"
-              }
-
-            }else{
-              /* lmerTest does not work with multiple imputation - possible problem the pool function in mice */
-              codeString = codeString + "\nlibrary(lme4)\nlibrary(lmerTest)\n\n"
-              codeString = codeString + "res <- lmer(" + formulaFixedPart + 
-                formulaRandompart + (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-                ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
-                this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
-              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                codeString = codeString + "\n\nres.std <- resid(res)/sd(resid(res))\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res)\ncar::infIndexPlot(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res)\n\n"
-              }
+            if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+              codeString = codeString + "res1 <- res[[1]]\n" +
+                  "\n\nres.std <- rstandard(res1)\nplot(res.std, ylab=\"Standardized Residuals\")" +
+                  "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res1)\ncar::infIndexPlot(res1)\n\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+                  "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res1)\n\n"
             }
+            
+          }else
+          {
+            codeString = codeString + "\"Weighted linear regression\"\n\nlibrary(survey)\n\n" + 
+            "clus <- svydesign(id =~ 1, weights =~ " + this.state.Variables.Weight[0] + ", data = currentDataset)\n" + 
+            "res <- svyglm(" + formulaFixedPart + ", design = clus)\n" + 
+            "summary(res)\n" + 
+            "cbind(coef(res), confint(res, level = " +
+            this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
 
-          }else {
-            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-              codeString = codeString + "\"Linear regression\"\n" + 
-              "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  lm(" + formulaFixedPart + 
-              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
-              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
-
-              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                codeString = codeString + "res1 <- res$analyses[[1]]\n" +
-                "\n\nres.std <- rstandard(res1)\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .05 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res1)\ncar::infIndexPlot(res1)\n\n\"Residual plots, curvature tests and normality plot\"\ncar::residualPlots(res1)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res1)\n\n"
-              }
-
-            }else {
-              codeString = codeString + "\"Linear regression\"\n"
-              +"res <- lm(" + formulaFixedPart + 
-              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              ",\n  data=currentDataset)\nsummary(res)\ncbind(coef(res), confint(res, level = " +
-              this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
-
-              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                codeString = codeString + "\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
-                "\n\n\"Outlier Test. Observations with a Bonferroni p < .01 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res)\ncar::infIndexPlot(res)\n\n\"Residual plots, curvature tests and normality plot\"\ncar::residualPlots(res)\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
-                "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res)\n\n"
-              }
+            if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+              codeString = codeString + "\n\nres.std <- rstandard(res)\nplot(res.std, ylab=\"Standardized Residuals\")" +
+              "\n\n\"Outlier Test. Observations with a Bonferroni p < .01 might be considered as outliers and might need further investigation.\"\ncar::outlierTest(res)\ncar::infIndexPlot(res)\n\nggplot(as.data.frame(res.std), aes(sample = res.std)) +\n" + 
+              "  geom_qq() +\n  geom_qq_line()\n\n\"Variance inflation factor (VIF >=5 indicates high level of multicollinearity)\"\ncar::vif(res)\n\n"
             }
           }
         }
@@ -669,70 +707,106 @@ export class RegPanel extends Component {
         else if (currentPanel === "PoiPanel")
           family = "family = poisson(link = \"log\")"
 
-        if (this.state.AnalysisSetting[currentPanel].robustReg) {
+        if (this.state.Variables.Weight.length === 0) {
+          if (this.state.AnalysisSetting[currentPanel].robustReg) {
 
-        }else{
-          if (this.state.Variables.RandomEffect.length > 0) {
-            
+          }else{
+            if (this.state.Variables.RandomEffect.length > 0) {
+              
 
-            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-              codeString = codeString + "\nlibrary(lme4)\nlibrary(broom.mixed)\n\n"
-              codeString = codeString +
-                "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glmer(" + formulaFixedPart + 
-                formulaRandompart + ",\n  " + family +
+              if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+                codeString = codeString + "\nlibrary(lme4)\nlibrary(broom.mixed)\n\n"
+                codeString = codeString +
+                  "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glmer(" + formulaFixedPart + 
+                  formulaRandompart + ",\n  " + family +
+                  (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                  "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                  this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
+                  this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
+              }else
+              {
+                /* lmerTest does not work with multiple imputation - possible problem the pool function in mice */
+                codeString = codeString + "\nlibrary(lme4)\n\n"
+                codeString = codeString + "res <- glmer(" + formulaFixedPart + 
+                  formulaRandompart + ",\n  " + family + 
+                  (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                  ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
+                  this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
+
+                  if (this.state.AnalysisSetting[currentPanel].expCoeff)
+                    codeString = codeString +
+                    "se <- sqrt(diag(vcov(res)))\n" +
+                    "z <- -qnorm((1-" + this.state.AnalysisSetting[currentPanel].confLv/100 + ")/2)\n" +
+                    "exp(cbind(Est=fixef(res),\n  \"" + ((100-(this.state.AnalysisSetting[currentPanel].confLv))/2).toString() + "%\"  = fixef(res) - z*se,\n  \"" + 
+                    (100-(100-(this.state.AnalysisSetting[currentPanel].confLv))/2).toString() + "%\" = fixef(res) + z*se))\n\n"
+              }
+            }else {
+
+              if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+                codeString = codeString +
+                  "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glm(" + formulaFixedPart + 
+                  ",\n  " + family +
+                  (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+                  "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+                  this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
+                  this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
+
+                  if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                    codeString = codeString + "res1 <- res$analyses[[1]]\n" +
+                    "car::infIndexPlot(res1)\n\n"
+                  }
+
+
+              }else {
+                codeString = codeString + "res <- glm(" + formulaFixedPart + ",\n  " + family + 
                 (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-                "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
-                this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
-                this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
-            }else
-            {
-              /* lmerTest does not work with multiple imputation - possible problem the pool function in mice */
-              codeString = codeString + "\nlibrary(lme4)\n\n"
-              codeString = codeString + "res <- glmer(" + formulaFixedPart + 
-                formulaRandompart + ",\n  " + family + 
-                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-                ",\n  data = currentDataset)\nsummary(res)\nconfint(res, level = "+
-                this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\")\n\n"
+                ",\n  data = currentDataset)\nsummary(res)\n\"Model coefficients and confidence intervals\"\ncbind(coef(res), confint(res, level = "+
+                this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\"))\n\n"
 
-                if (this.state.AnalysisSetting[currentPanel].expCoeff)
-                  codeString = codeString +
-                  "se <- sqrt(diag(vcov(res)))\n" +
-                  "z <- -qnorm((1-" + this.state.AnalysisSetting[currentPanel].confLv/100 + ")/2)\n" +
-                  "exp(cbind(Est=fixef(res),\n  \"" + ((100-(this.state.AnalysisSetting[currentPanel].confLv))/2).toString() + "%\"  = fixef(res) - z*se,\n  \"" + 
-                  (100-(100-(this.state.AnalysisSetting[currentPanel].confLv))/2).toString() + "%\" = fixef(res) + z*se))\n\n"
-            }
-          }else {
-
-            if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-              codeString = codeString +
-                "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  glm(" + formulaFixedPart + 
-                ",\n  " + family +
-                (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-                "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
-                this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
-                this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
-
-                if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                  codeString = codeString + "res1 <- res$analyses[[1]]\n" +
-                  "car::infIndexPlot(res1)\n\n"
+                if (this.state.AnalysisSetting[currentPanel].expCoeff) {
+                  codeString = codeString + 
+                  "\"Odds/Risk ratios and confidence intervals\"\nexp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
                 }
 
-
-            }else {
-              codeString = codeString + "res <- glm(" + formulaFixedPart + ",\n  " + family + 
-              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-              ",\n  data = currentDataset)\nsummary(res)\n\"Model coefficients and confidence intervals\"\ncbind(coef(res), confint(res, level = "+
-              this.state.AnalysisSetting[currentPanel].confLv/100 + ", method = \"Wald\"))\n\n"
-
-              if (this.state.AnalysisSetting[currentPanel].expCoeff) {
-                codeString = codeString + 
-                "\"Odds ratios and confidence intervals\"\nexp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
+                if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+                  codeString = codeString +
+                  "\ncar::infIndexPlot(res)\n\n"
+                }
               }
+            }
+          }
+        }else{
+          if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+            codeString = codeString + "library(survey)\n\n\"Weighted linear regression\"\n\n" + 
+            "mi_dataList <- currentDataset[currentDataset$.imp != 0,]\n" +
+            "mi_dataList <- split(mi_dataList, mi_dataList$.imp)\n" +
+            "mi_dataList <- imputationList(mi_dataList)\n" + 
+            "clus <- svydesign(id =~ 1, weights =~ " + this.state.Variables.Weight[0] + ", data = mi_dataList)\n" + 
+            "res <- with(clus, svyglm(" + formulaFixedPart + ", "+ family + "))\n" +
+            "summary(MIcombine(res), alpha = " + ((100- this.state.AnalysisSetting[currentPanel].confLv)/100).toString() + ",\n" +
+            "  logeffect = " + this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
 
-              if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
-                codeString = codeString +
-                "\ncar::infIndexPlot(res)\n\n"
-              }
+            if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+              codeString = codeString + "res1 <- res[[1]]\n" +
+              "car::infIndexPlot(res1)\n\n"
+            }
+
+          }else {
+            codeString = codeString + "\"Weighted linear regression\"\n\nlibrary(survey)\n\n" + 
+            "clus <- svydesign(id =~ 1, weights =~ " + this.state.Variables.Weight[0] + ", data = currentDataset)\n" + 
+            "res <- svyglm(" + formulaFixedPart + ", design = clus," + family + ")\n" + 
+            "summary(res)\n\"Model coefficients and confidence intervals\"\n" +
+            "cbind(coef(res), confint(res, level = " +
+            this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
+
+            if (this.state.AnalysisSetting[currentPanel].expCoeff) {
+              codeString = codeString + 
+              "\""+ (currentPanel === "LogitPanel"? "Odds" : "Risk") + " ratios and confidence intervals\"\nexp(cbind("+ (currentPanel === "LogitPanel"? "OR" : "RR") + " = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
+            }
+
+            if (this.state.AnalysisSetting[currentPanel].diagnosticPlot) {
+              codeString = codeString +
+              "\ncar::infIndexPlot(res)\n\n"
             }
           }
         }
@@ -749,42 +823,45 @@ export class RegPanel extends Component {
           library = "\nlibrary(nnet)\n\n"
         }
         codeString = codeString + library
-        if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-          codeString = codeString +
-          "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  " +
-          regType + "(" + formulaFixedPart + 
-          (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-          "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
-          this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
-          this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
-        }else{
-          codeString = codeString + "res <- " + regType + "(" + formulaFixedPart +  
+
+        if (this.state.Variables.Weight.length === 0 && this.state.Variables.RandomEffect.length === 0) {
+          if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
+            codeString = codeString +
+            "res <- with(" + (this.state.AnalysisSetting[currentPanel].imputeMissing ? "imputedDataset":"as.mids(currentDataset)") + ",\n  " +
+            regType + "(" + formulaFixedPart + 
             (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
-            ",\n  data = currentDataset)\nsummary(res)\n"
-          
-          if (currentPanel === "MultinomPanel") {
-            codeString = codeString + "  summary(res)$coefficients\n" +
-            "summary(res)$standard.errors\n" +
-            "z <- summary(res)$coefficients/summary(res)$standard.errors\n" +
-            "p <- (1 - pnorm(abs(z), 0, 1))*2\n" + 
-            "p\n"
-
-          }
+            "))\nsummary(pool(res), conf.int = TRUE, conf.level = " + 
+            this.state.AnalysisSetting[currentPanel].confLv/100 + ",\n  exponentiate = " +
+            this.state.AnalysisSetting[currentPanel].expCoeff.toString().toUpperCase() + ")\n\n"
+          }else{
+            codeString = codeString + "res <- " + regType + "(" + formulaFixedPart +  
+              (this.state.Variables.Weight.length >0 ? ",\n  weights = "+ this.state.Variables.Weight[0]: "") +
+              ",\n  data = currentDataset)\nsummary(res)\n"
             
-          codeString = codeString + "confint(res, level = "+
-            this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+            if (currentPanel === "MultinomPanel") {
+              codeString = codeString + "  summary(res)$coefficients\n" +
+              "summary(res)$standard.errors\n" +
+              "z <- summary(res)$coefficients/summary(res)$standard.errors\n" +
+              "p <- (1 - pnorm(abs(z), 0, 1))*2\n" + 
+              "p\n"
 
-            if (this.state.AnalysisSetting[currentPanel].expCoeff) {
-              if (currentPanel === "NbPanel") {
-                codeString = codeString + 
-                "exp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
-              }else {
-                codeString = codeString +
-                "exp(summary(res)$coefficients)\n" +
-                "exp(confint(res, level = " +
-                this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
-              }
             }
+              
+            codeString = codeString + "confint(res, level = "+
+              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\n\n"
+
+              if (this.state.AnalysisSetting[currentPanel].expCoeff) {
+                if (currentPanel === "NbPanel") {
+                  codeString = codeString + 
+                  "exp(cbind(OR = coef(res), confint(res, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ")))\n\n"
+                }else {
+                  codeString = codeString +
+                  "exp(summary(res)$coefficients)\n" +
+                  "exp(confint(res, level = " +
+                  this.state.AnalysisSetting[currentPanel].confLv/100 + "))\n\n"
+                }
+              }
+          }
         }
 
       break;
@@ -793,78 +870,81 @@ export class RegPanel extends Component {
 
 
     }
-    if (this.state.Checked["CovariatesEMMSelection"].length > 0) {
-      if (currentPanel === "LogitPanel" || currentPanel === "PoiPanel" || currentPanel === "NbPanel" || (currentPanel === "LRPanel" && !this.state.AnalysisSetting["LRPanel"].robustReg)) {
-        codeString = codeString + "\"Estimated Marginal Means\"\nlibrary(emmeans)\n\n"
-        this.state.Checked["CovariatesEMMSelection"].forEach((item) => {
-          let terms = item.split("*")
-          let numeric = 0
-          let numericCode = ",\n  cov.keep = 3, at = list("
-          let settingGridLevel = ""
-          terms.forEach((variable, index) => {
-            if (this.props.CurrentVariableList[variable][0] === "Numeric") {
-              numeric = numeric + 1
 
-              settingGridLevel = settingGridLevel + "m_" + variable + "<- mean(currentDataset$" + variable + ", na.rm = TRUE)\n" + 
-                "sd_" + variable + "<- sd(currentDataset$" + variable + ", na.rm = TRUE)\n\n"
+    if (this.state.Variables.Weight.length === 0) {
+      if (this.state.Checked["CovariatesEMMSelection"].length > 0) {
+        if (currentPanel === "LogitPanel" || currentPanel === "PoiPanel" || currentPanel === "NbPanel" || (currentPanel === "LRPanel" && !this.state.AnalysisSetting["LRPanel"].robustReg)) {
+          codeString = codeString + "\"Estimated Marginal Means\"\nlibrary(emmeans)\n\n"
+          this.state.Checked["CovariatesEMMSelection"].forEach((item) => {
+            let terms = item.split("*")
+            let numeric = 0
+            let numericCode = ",\n  cov.keep = 3, at = list("
+            let settingGridLevel = ""
+            terms.forEach((variable, index) => {
+              if (this.props.CurrentVariableList[variable][0] === "Numeric") {
+                numeric = numeric + 1
 
-              numericCode = numericCode + (index === 0 ? "\n  " : ",\n  ") + variable + " = c(m_" + variable + "-sd_" + variable +
-                ", m_" + variable + ", m_" + variable + "+sd_" + variable + ")"
+                settingGridLevel = settingGridLevel + "m_" + variable + "<- mean(currentDataset$" + variable + ", na.rm = TRUE)\n" + 
+                  "sd_" + variable + "<- sd(currentDataset$" + variable + ", na.rm = TRUE)\n\n"
+
+                numericCode = numericCode + (index === 0 ? "\n  " : ",\n  ") + variable + " = c(m_" + variable + "-sd_" + variable +
+                  ", m_" + variable + ", m_" + variable + "+sd_" + variable + ")"
+              }
+            })
+            numericCode = numericCode + ")"
+
+            if (numeric > 0) {
+              codeString = codeString + settingGridLevel + "\n"
+            }
+
+            codeString = codeString + "emm <- emmeans(res, " + (this.state.AnalysisSetting["Pairwise"] ? "pairwise" : "") + 
+              " ~ " + item + (numeric > 0 ? numericCode : "") + (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = \"response\"" : "") +", level = " +
+              this.state.AnalysisSetting[currentPanel].confLv/100 + ")\nsummary(emm)\n\n"
+            
+            if (this.state.AnalysisSetting["Pairwise"] && currentPanel === "LRPanel") {
+              if (this.state.AnalysisSetting[currentPanel].imputedDataset || this.state.AnalysisSetting[currentPanel].imputeMissing) {
+                if (this.state.Variables.RandomEffect.length > 0) {
+                  codeString = codeString + "eff_size(emm, sigma = sigma(res$analyses[[1]]), edf = Inf)\n\n"
+                }else {
+                  codeString = codeString + "eff_size(emm, sigma = sigma(res$analyses[[1]]), edf = res$analyses[[1]]$df.residual)\n\n"
+                }
+              }else {
+                
+                codeString = codeString + "eff_size(emm, sigma = sigma(res), edf = " + (this.state.Variables.RandomEffect.length > 0 ? "Inf" : "res$df.residual") + ")\n\n"
+                
+              }
+            }
+
+            if (this.state.AnalysisSetting["SimpleSlope"] && terms.length >= 2 && this.props.CurrentVariableList[terms[0]][0] === "Numeric") {
+              
+              let moderators = [...terms]
+              moderators.shift()
+
+              codeString = codeString + "simpleSlope <- emtrends(res, pairwise ~ " + moderators.join("*") + ", var = \"" +
+                terms[0] + "\""
+
+
+              if (numeric > 1) {
+                let searchTerm = terms[0] + ".*?\\),"
+                let regex = new RegExp(searchTerm)
+                let numericCodeForSimpleSlope = numericCode.replace(regex, "")
+                codeString = codeString + numericCodeForSimpleSlope
+                
+              }
+
+              codeString = codeString + ", level = " + 
+              this.state.AnalysisSetting[currentPanel].confLv/100 +")\nsummary(simpleSlope)\n\n"
+            }
+            
+            if (this.state.AnalysisSetting["InteractionPlot"] && terms.length >= 2) {
+              codeString = codeString + "emmip(res, " + terms[1] + " ~ " + terms[0] + (terms.length >= 3 ? " | " + terms[2] : "") +
+                numericCode + ",\n  CIs = TRUE, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ", position = \"jitter\"" + 
+                (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = \"response\"": "") +")\n\n"
+              
             }
           })
-          numericCode = numericCode + ")"
 
-          if (numeric > 0) {
-            codeString = codeString + settingGridLevel + "\n"
-          }
-
-          codeString = codeString + "emm <- emmeans(res, " + (this.state.AnalysisSetting["Pairwise"] ? "pairwise" : "") + 
-            " ~ " + item + (numeric > 0 ? numericCode : "") + (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = \"response\"" : "") +", level = " +
-            this.state.AnalysisSetting[currentPanel].confLv/100 + ")\nsummary(emm)\n\n"
-          
-          if (this.state.AnalysisSetting["Pairwise"] && currentPanel === "LRPanel") {
-            if (this.state.AnalysisSetting[currentPanel].imputedDataset || this.state.AnalysisSetting[currentPanel].imputeMissing) {
-              if (this.state.Variables.RandomEffect.length > 0) {
-                codeString = codeString + "eff_size(emm, sigma = sigma(res$analyses[[1]]), edf = Inf)\n\n"
-              }else {
-                codeString = codeString + "eff_size(emm, sigma = sigma(res$analyses[[1]]), edf = res$analyses[[1]]$df.residual)\n\n"
-              }
-            }else {
-              
-              codeString = codeString + "eff_size(emm, sigma = sigma(res), edf = " + (this.state.Variables.RandomEffect.length > 0 ? "Inf" : "res$df.residual") + ")\n\n"
-              
-            }
-          }
-
-          if (this.state.AnalysisSetting["SimpleSlope"] && terms.length >= 2 && this.props.CurrentVariableList[terms[0]][0] === "Numeric") {
-            
-            let moderators = [...terms]
-            moderators.shift()
-
-            codeString = codeString + "simpleSlope <- emtrends(res, pairwise ~ " + moderators.join("*") + ", var = \"" +
-              terms[0] + "\""
-
-
-            if (numeric > 1) {
-              let searchTerm = terms[0] + ".*?\\),"
-              let regex = new RegExp(searchTerm)
-              let numericCodeForSimpleSlope = numericCode.replace(regex, "")
-              codeString = codeString + numericCodeForSimpleSlope
-              
-            }
-
-            codeString = codeString + ", level = " + 
-            this.state.AnalysisSetting[currentPanel].confLv/100 +")\nsummary(simpleSlope)\n\n"
-          }
-          
-          if (this.state.AnalysisSetting["InteractionPlot"] && terms.length >= 2) {
-            codeString = codeString + "emmip(res, " + terms[1] + " ~ " + terms[0] + (terms.length >= 3 ? " | " + terms[2] : "") +
-              numericCode + ",\n  CIs = TRUE, level = " + this.state.AnalysisSetting[currentPanel].confLv/100 + ", position = \"jitter\"" + 
-              (this.state.AnalysisSetting["EMMResponseScale"] ? ", type = \"response\"": "") +")\n\n"
-            
-          }
-        })
-
+        }
       }
     }
    

@@ -8,6 +8,7 @@ import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import { withStyles } from '@material-ui/core/styles';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
+import {faExclamationTriangle} from '@fortawesome/free-solid-svg-icons';
 
 const StyledIconButton = withStyles({
     root: {
@@ -93,44 +94,51 @@ export class RandomEffectPanel extends Component {
 
     render () {
         return (
-            <div className="analysis-pane" hidden={!(this.state.currentREVar in this.props.RandomSlopes)}>
-                <div className="Random-Variable-Selection-Box">
-                    <div><StyledIconButton size="small" 
-                        onClick={()=>this.nextRandomEffect("previous")}><FontAwesomeIcon icon={faArrowLeft} size="xs"/></StyledIconButton></div>
-                    <div className="pl-1 pr-1 Random-Variable-Label"><b>{this.state.currentREVar}</b></div>
-                    <div><StyledIconButton size="small"
-                        onClick={()=>this.nextRandomEffect("next")}><FontAwesomeIcon icon={faArrowRight} size="xs"/></StyledIconButton></div>
-                    
+            <div>
+                <div className="analysis-pane" hidden={!(this.state.currentREVar in this.props.RandomSlopes) || this.props.Variables.Weight.length > 0}>
+                    <div className="Random-Variable-Selection-Box">
+                        <div><StyledIconButton size="small" 
+                            onClick={()=>this.nextRandomEffect("previous")}><FontAwesomeIcon icon={faArrowLeft} size="xs"/></StyledIconButton></div>
+                        <div className="pl-1 pr-1 Random-Variable-Label"><b>{this.state.currentREVar}</b></div>
+                        <div><StyledIconButton size="small"
+                            onClick={()=>this.nextRandomEffect("next")}><FontAwesomeIcon icon={faArrowRight} size="xs"/></StyledIconButton></div>
+                        
+                    </div>
+                    <div className="AddInteraction-Variable-Selection-Box">
+                        <div>Covariates</div>
+                        <div></div>
+                        <div>Random Slope</div>
+                        <div onClick={() => this.setState({arrowDelBtn: "arrow"})}>
+                            <VariableSelectionList VariableList = {this.state.currentREVar in this.props.RandomSlopes ? this.props.Variables["Covariates"] : []}
+                            checkedList = {this.state.currentREVar in this.props.RandomSlopes ? this.props.Checked["CovariatesRESelection"] : []}
+                            handleToggleCallback = {this.props.handleToggleCallback} 
+                            listType = {"CovariatesRESelection"}
+                            CurrentVariableList = {this.props.CurrentVariableList}
+                            addExtraBlkCallback = {this.props.addExtraBlkCallback}
+                            needTypeIcon = {true}/>                        
+                        </div>
+                        <div><center>
+                            {this.genREArrowButton()}
+                        </center></div>
+                        <div onClick={() => this.setState({arrowDelBtn: "del"})}>
+                            {
+                                <VariableSelectionList VariableList = {this.state.currentREVar !== "" && this.state.currentREVar in this.props.RandomSlopes ? this.props.RandomSlopes[this.state.currentREVar]: []}
+                                checkedList = {this.state.currentREVar !== "" && this.state.currentREVar in this.props.RandomSlopes ? this.props.CheckedRandomSlopes[this.state.currentREVar] : []}
+                                handleToggleCallback = {this.props.handleToggleRECallback} 
+                                listType = {this.state.currentREVar}
+                                CurrentVariableList = {null}
+                                addExtraBlkCallback = {null}
+                                needTypeIcon = {false}/>
+                            }
+                        </div>
+                    </div>
                 </div>
-                <div className="AddInteraction-Variable-Selection-Box">
-                    <div>Covariates</div>
-                    <div></div>
-                    <div>Random Slope</div>
-                    <div onClick={() => this.setState({arrowDelBtn: "arrow"})}>
-                        <VariableSelectionList VariableList = {this.state.currentREVar in this.props.RandomSlopes ? this.props.Variables["Covariates"] : []}
-                        checkedList = {this.state.currentREVar in this.props.RandomSlopes ? this.props.Checked["CovariatesRESelection"] : []}
-                        handleToggleCallback = {this.props.handleToggleCallback} 
-                        listType = {"CovariatesRESelection"}
-                        CurrentVariableList = {this.props.CurrentVariableList}
-                        addExtraBlkCallback = {this.props.addExtraBlkCallback}
-                        needTypeIcon = {true}/>                        
-                    </div>
-                    <div><center>
-                        {this.genREArrowButton()}
-                    </center></div>
-                    <div onClick={() => this.setState({arrowDelBtn: "del"})}>
-                        {
-                            <VariableSelectionList VariableList = {this.state.currentREVar !== "" && this.state.currentREVar in this.props.RandomSlopes ? this.props.RandomSlopes[this.state.currentREVar]: []}
-                            checkedList = {this.state.currentREVar !== "" && this.state.currentREVar in this.props.RandomSlopes ? this.props.CheckedRandomSlopes[this.state.currentREVar] : []}
-                            handleToggleCallback = {this.props.handleToggleRECallback} 
-                            listType = {this.state.currentREVar}
-                            CurrentVariableList = {null}
-                            addExtraBlkCallback = {null}
-                            needTypeIcon = {false}/>
-                        }
-                    </div>
+                <div className="p-2" hidden={this.props.Variables.Weight.length === 0}>
+                    <FontAwesomeIcon icon={faExclamationTriangle} size="1x"/><span className="pl-2">Random effect model is not available for weighted analysis.</span>
                 </div>
             </div>
+
+            
         )
     }
 }
