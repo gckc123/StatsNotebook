@@ -184,6 +184,12 @@ export class SettingBar extends Component {
                             <span>Simulated data on alcohol consumption before and after tax increase</span>
                             <br/><br/>
                         </div>
+
+                        <div onClick={()=> this.openExampleData("cannabis")} className="exampleDataSelection">
+                            <b>Cannabis</b><br/>
+                            <span>Simulated longitudinal data on cannabis and illicit drug use</span>
+                            <br/><br/>
+                        </div>
                         
                         <div onClick={()=> this.openExampleData("HDI")} className="exampleDataSelection">
                             <b>Human Development Index</b><br/>
