@@ -107,6 +107,7 @@ export class IPTWPanel extends Component {
         showAlert: false,
         alertText: "",
         alertTitle: "",
+        currentTime: 0,
     }
   }
 
@@ -181,11 +182,22 @@ export class IPTWPanel extends Component {
     this.setState({sortAvailable: !this.state.sortAvailable, Variables: {...VariablesObj}})
   }
 
+  nextTime = (direction) => {
+    if (direction === "next") {
+      if (this.state.currentTime +1 !== this.state.TimeVarying.length) {
+          this.setState({currentTime: this.state.currentTime + 1})
+      }
+    }else
+    {
+      if (this.state.currentTime !== 0) {
+          this.setState({currentTime: this.state.currentTime - 1})
+      }
+    }
+  }
+
   resetVarList = () => {
     let VariablesObj  = _.cloneDeep(this.state.Variables)
     let CheckedObj = _.cloneDeep(this.state.Checked)
-    let TimeVarying = _.cloneDeep(this.state.TimeVarying)
-    let TimeVaryingChecked = _.cloneDeep(this.state.TimeVaryingChecked)
 
     for (let key in this.state.Variables) {
       if (key === "Available") {
@@ -202,8 +214,23 @@ export class IPTWPanel extends Component {
       CheckedObj[key] = []
     }
 
+
+
     this.setState({Variables: {...VariablesObj},
-      Checked: {...CheckedObj}
+      Checked: {...CheckedObj},
+      TimeVarying: [
+        {
+          Exposure: [],
+          TVCovariates: [],
+        }
+      ],
+      TimeVaryingChecked: [
+        {
+          Exposure: [],
+          TVCovariates: [],
+        }
+      ],
+      currentTime: 0,
     })
 
   }
@@ -353,14 +380,14 @@ export class IPTWPanel extends Component {
 
     if (this.state.AnalysisSetting.imputeMissing || this.state.AnalysisSetting.imputedDataset) {
       codeString = codeString + "split_imp <- currentDataset$.imp\n" + "mi_dataList <- split(currentDataset, split_imp)\n\n" +
-        "for(i in 2:length(mi_dataList)) \{\n" 
+        "for(i in 2:length(mi_dataList)) {\n" 
       
       finalWeight = []
       exposureHistory = []
 
       this.state.TimeVarying.forEach((item, index) => {
         codeString = codeString + "  weight <- ipwpoint(exposure = " + item["Exposure"][0] + 
-        ", family = \"" + this.state.AnalysisSetting.family +"\""+ (this.state.AnalysisSetting.family == "binomial" ? ", link = \"logit\"": "") + 
+        ", family = \"" + this.state.AnalysisSetting.family +"\""+ (this.state.AnalysisSetting.family === "binomial" ? ", link = \"logit\"": "") + 
           ",\n    numerator =~ " + (this.state.Variables.Covariates.length === 0 && index === 0 ? "1" : exposureHistory.concat(this.state.Variables.Covariates).join("+")) + 
           ",\n    denominator =~ " + exposureHistory.concat(item["TVCovariates"]).concat(this.state.Variables.Covariates).join("+") + ",\n    trunc = 0.01, data = as.data.frame(mi_dataList[[i]]))\n\n"
 
@@ -374,7 +401,7 @@ export class IPTWPanel extends Component {
       
 
       codeString = codeString + "  mi_dataList[[i]]$.final_weight <- " + finalWeight.join("*") + "\n\n"
-      codeString = codeString + "\}\n\n"
+      codeString = codeString + "}\n\n"
 
       this.state.TimeVarying.forEach((item, index) => {
         codeString = codeString + "mi_dataList[[1]]$.ipw" + index + " <- NA\n"  
@@ -388,7 +415,7 @@ export class IPTWPanel extends Component {
     }else {
       this.state.TimeVarying.forEach((item, index) => {
         codeString = codeString + "weight <- ipwpoint(exposure = "+ item["Exposure"][0] + 
-          ", family = \"" + this.state.AnalysisSetting.family +"\""+ (this.state.AnalysisSetting.family == "binomial" ? ", link = \"logit\"": "") + 
+          ", family = \"" + this.state.AnalysisSetting.family +"\""+ (this.state.AnalysisSetting.family === "binomial" ? ", link = \"logit\"": "") + 
           ",\n  numerator =~ " + (this.state.Variables.Covariates.length === 0 && index === 0 ? "1" : exposureHistory.concat(this.state.Variables.Covariates).join("+")) + 
           ",\n  denominator =~ " + exposureHistory.concat(item["TVCovariates"]).concat(this.state.Variables.Covariates).join("+") + ",\n  trunc = 0.01, data = as.data.frame(currentDataset))\n"
 
@@ -451,49 +478,49 @@ export class IPTWPanel extends Component {
     this.setState({alertTitle: title, alertText: text})
   }
 
-  addTime = (currentTime) => {
+  addTime = () => {
     let tmp = [..._.cloneDeep(this.state.TimeVarying), {
       Exposure: [],
-      TVCovariates: [...this.state.TimeVarying[currentTime]["TVCovariates"]],
+      TVCovariates: [...this.state.TimeVarying[this.state.currentTime]["TVCovariates"]],
     }]
     let tmp2 = [..._.cloneDeep(this.state.TimeVaryingChecked), {
       Exposure: [],
       TVCovariates: [],
     }]
-    this.setState({TimeVarying: [...tmp], TimeVaryingChecked: [...tmp2]}, () => console.log(this.state.TimeVarying))
+    this.setState({TimeVarying: [...tmp], TimeVaryingChecked: [...tmp2], currentTime: this.state.currentTime + 1}, () => console.log(this.state.TimeVarying))
   }
 
-  handleToggleTV = (varname, from, currentTime) => {
+  handleToggleTV = (varname, from) => {
     let TimeVaryingCheckedObj = _.cloneDeep(this.state.TimeVaryingChecked)
     let CheckedObj = _.cloneDeep(this.state.Checked)
-    let currentIndex = TimeVaryingCheckedObj[currentTime][from].indexOf(varname)
+    let currentIndex = TimeVaryingCheckedObj[this.state.currentTime][from].indexOf(varname)
 
     if (currentIndex === -1) {
-      TimeVaryingCheckedObj[currentTime][from].push(varname)
+      TimeVaryingCheckedObj[this.state.currentTime][from].push(varname)
     }else {
-      TimeVaryingCheckedObj[currentTime][from].splice(currentIndex, 1)
+      TimeVaryingCheckedObj[this.state.currentTime][from].splice(currentIndex, 1)
     }
 
     for (let key in CheckedObj) {
       CheckedObj[key] = []
     }
 
-    for (let key in TimeVaryingCheckedObj[currentTime]) {
+    for (let key in TimeVaryingCheckedObj[this.state.currentTime]) {
       if (key !== from) {
-        TimeVaryingCheckedObj[currentTime][key] = [];
+        TimeVaryingCheckedObj[this.state.currentTime][key] = [];
       }
     }
 
     this.setState({Checked: {...CheckedObj}, TimeVaryingChecked: [...TimeVaryingCheckedObj]})
   }
 
-  handleTVToRight = (target, maxElement, currentTime) => {
+  handleTVToRight = (target, maxElement) => {
     let TimeVaryingObj = _.cloneDeep(this.state.TimeVarying)
     let CheckedObj = _.cloneDeep(this.state.Checked)
 
-    if (TimeVaryingObj[currentTime][target].length + CheckedObj["Available"].length <= maxElement) {
-      let newTerm = this.not(CheckedObj["Available"], TimeVaryingObj[currentTime][target])
-      TimeVaryingObj[currentTime][target] = TimeVaryingObj[currentTime][target].concat(newTerm)
+    if (TimeVaryingObj[this.state.currentTime][target].length + CheckedObj["Available"].length <= maxElement) {
+      let newTerm = this.not(CheckedObj["Available"], TimeVaryingObj[this.state.currentTime][target])
+      TimeVaryingObj[this.state.currentTime][target] = TimeVaryingObj[this.state.currentTime][target].concat(newTerm)
       CheckedObj["Available"] = []
       this.setState({TimeVarying: [...TimeVaryingObj], Checked: {...CheckedObj}})
     }else {
@@ -506,30 +533,32 @@ export class IPTWPanel extends Component {
     }
   }
 
-  handleTVToLeft = (target, currentTime) => {
+  handleTVToLeft = (target) => {
     let TimeVaryingObj = _.cloneDeep(this.state.TimeVarying)
     let TimeVaryingCheckedObj = _.cloneDeep(this.state.TimeVaryingChecked)
 
 
-    TimeVaryingObj[currentTime][target] = this.not(TimeVaryingObj[currentTime][target], TimeVaryingCheckedObj[currentTime][target])
-    TimeVaryingCheckedObj[currentTime][target] = []
+    TimeVaryingObj[this.state.currentTime][target] = this.not(TimeVaryingObj[this.state.currentTime][target], TimeVaryingCheckedObj[this.state.currentTime][target])
+    TimeVaryingCheckedObj[this.state.currentTime][target] = []
 
     this.setState({TimeVarying: [...TimeVaryingObj], TimeVaryingChecked: [...TimeVaryingCheckedObj]}, () => {console.log(this.state.TimeVarying); console.log(this.state.TimeVaryingChecked)})
   }
 
-  delTime = (currentTime, last) => {
+  delTime = (last) => {
     let TimeVaryingObj = _.cloneDeep(this.state.TimeVarying)
     let TimeVaryingCheckedObj = _.cloneDeep(this.state.TimeVaryingChecked)
+    let newTime = this.state.currentTime
 
     if (last) {
       TimeVaryingObj.pop()
       TimeVaryingCheckedObj.pop()
+      newTime = newTime - 1
     } else {
-      TimeVaryingObj.splice(currentTime, 1)
-      TimeVaryingCheckedObj.splice(currentTime, 1)
+      TimeVaryingObj.splice(this.state.currentTime, 1)
+      TimeVaryingCheckedObj.splice(this.state.currentTime, 1)
     }
 
-    this.setState({TimeVarying: [...TimeVaryingObj], TimeVaryingChecked: [...TimeVaryingCheckedObj]}, () => {console.log(this.state.TimeVarying); console.log(this.state.TimeVaryingChecked)})
+    this.setState({TimeVarying: [...TimeVaryingObj], TimeVaryingChecked: [...TimeVaryingCheckedObj], currentTime: newTime}, () => {console.log(this.state.TimeVarying); console.log(this.state.TimeVaryingChecked)})
   }
 
   render () {
@@ -569,6 +598,8 @@ export class IPTWPanel extends Component {
               handleTVToLeftCallback = {this.handleTVToLeft}
               handleTVToRightCallback = {this.handleTVToRight}
               delTimeCallback = {this.delTime}
+              nextTimeCallback = {this.nextTime}
+              currentTime = {this.state.currentTime}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

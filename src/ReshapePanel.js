@@ -1,8 +1,4 @@
 import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import MuiExpansionPanel from '@material-ui/core/ExpansionPanel';
-import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import MuiExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import "./App.css";
 import "./AnalysisPanelElements.css";
 import { Alert } from './Alert.js';
@@ -12,65 +8,6 @@ import { ReshapeVariableSelection } from './ReshapeVariableSelection';
 import "./DataPanelElements.css"; 
 import "./AnalysisPanelElements.css";
 import "./Notebook.css";
-import NativeSelect from '@material-ui/core/NativeSelect';
-
-const StyledNativeSelect = withStyles({
-  root: {
-      '&:focus': {
-          outline: 'none',
-          background: 'white',
-      },
-  },
-  select: {
-      paddingLeft: '5px',
-      "&:focus": {
-          border: "0px",
-          outline: "0px",
-      }
-  }
-})(NativeSelect);
-
-const ExpansionPanel = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
-    boxShadow: 'none',
-    '&:not(:last-child)': {
-      borderBottom: 0,
-    },
-    '&:before': {
-      display: 'none',
-    },
-    '&$expanded': {
-      margin: 'auto',
-    },
-  },
-  expanded: {},
-})(MuiExpansionPanel);
-
-const ExpansionPanelSummary = withStyles({
-  root: {
-    backgroundColor: 'rgba(0, 0, 0, .03)',
-    borderBottom: '1px solid rgba(0, 0, 0, .125)',
-    marginBottom: -1,
-    minHeight: 30,
-    maxHeight: 30,
-    '&$expanded': {
-      minHeight: 30,
-      maxHeight: 30,
-    },
-  },
-  content: {
-    '&$expanded': {
-    },
-  },
-  expanded: {},
-})(MuiExpansionPanelSummary);
-
-const ExpansionPanelDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(2),
-  },
-}))(MuiExpansionPanelDetails);
 
 
 export class ReshapePanel extends Component {

@@ -12,7 +12,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import "./Notebook.css"
 import {NotebookBlk} from "./NotebookBlk";
 import "./App.css";
-import _ from "lodash";
 import NativeSelect from '@material-ui/core/NativeSelect';
 import {faSave} from '@fortawesome/free-regular-svg-icons';
 

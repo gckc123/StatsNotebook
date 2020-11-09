@@ -73,8 +73,8 @@ export class IPTWVariableSelection extends Component {
 
     genTVVariableSelectionList = (targetList) => {
         return (
-            <VariableSelectionList key={targetList} VariableList = {this.props.TimeVarying[this.state.currentTime][targetList]}
-                        checkedList = {this.props.TimeVaryingChecked[this.state.currentTime][targetList]}
+            <VariableSelectionList key={targetList} VariableList = {this.props.TimeVarying[this.props.currentTime][targetList]}
+                        checkedList = {this.props.TimeVaryingChecked[this.props.currentTime][targetList]}
                         handleToggleCallback = {this.handleToggleTV} 
                         listType = {targetList}
                         CurrentVariableList = {this.props.CurrentVariableList}
@@ -102,11 +102,11 @@ export class IPTWVariableSelection extends Component {
         return (
             <>
             <StyledButton disableRipple hidden={this.props.hideToRight[targetList]}
-            onClick = {() => this.props.handleTVToRightCallback(targetList, maxElement, this.state.currentTime)}> 
+            onClick = {() => this.props.handleTVToRightCallback(targetList, maxElement)}> 
                 <FontAwesomeIcon icon={faArrowRight}/>
             </StyledButton>
             <StyledButton disableRipple hidden={!this.props.hideToRight[targetList]}
-            onClick = {() => this.props.handleTVToLeftCallback(targetList, this.state.currentTime)}> 
+            onClick = {() => this.props.handleTVToLeftCallback(targetList)}> 
                 <FontAwesomeIcon icon={faTrashAlt}/>
             </StyledButton>
             </>
@@ -114,39 +114,24 @@ export class IPTWVariableSelection extends Component {
     }
 
     addTimeCheck = () => {
-        if (this.state.currentTime +1 === this.props.TimeVarying.length) {
-            this.props.addTimeCallback(this.state.currentTime)
-            this.setState({currentTime: this.state.currentTime +1})
-        }
-    }
-
-    nextTime = (direction) => {
-        if (direction === "next") {
-            if (this.state.currentTime +1 !== this.props.TimeVarying.length) {
-                this.setState({currentTime: this.state.currentTime + 1})
-            }
-        }else
-        {
-            if (this.state.currentTime !== 0) {
-                this.setState({currentTime: this.state.currentTime - 1})
-            }
+        if (this.props.currentTime +1 === this.props.TimeVarying.length) {
+            this.props.addTimeCallback()
         }
     }
 
     delTimeCheck = () => {
         if (this.props.TimeVarying.length > 1) {
-            if (this.state.currentTime + 1 === this.props.TimeVarying.length) {
+            if (this.props.currentTime + 1 === this.props.TimeVarying.length) {
                 /* Last element */
-                this.props.delTimeCallback(this.state.currentTime, true)
-                this.setState({currentTime: this.state.currentTime - 1})
+                this.props.delTimeCallback(true)
             }else {
-                this.props.delTimeCallback(this.state.currentTime, false)
+                this.props.delTimeCallback(false)
             }
         }
     }
 
     handleToggleTV = (varname, from) => {
-        this.props.handleToggleTVCallback(varname, from, this.state.currentTime)
+        this.props.handleToggleTVCallback(varname, from)
     }
 
     render () {
@@ -173,9 +158,9 @@ export class IPTWVariableSelection extends Component {
                     <div></div>
                     <div className="IPTW-Time-Navigation-Box">
                         <div><StyledIconButton size="small" 
-                        onClick = {() => this.nextTime("previous")}
+                        onClick = {() => this.props.nextTimeCallback("previous")}
                         ><FontAwesomeIcon icon={faArrowLeft} size="xs"/></StyledIconButton></div>
-                        <div><center><b>Time {this.state.currentTime+1}</b></center></div>
+                        <div><center><b>Time {this.props.currentTime+1}</b></center></div>
                         <div><StyledIconButton size="small" 
                         onClick = {() => this.addTimeCheck()}
                         ><FontAwesomeIcon icon={faPlus} size="xs"/></StyledIconButton></div>
@@ -183,7 +168,7 @@ export class IPTWVariableSelection extends Component {
                         onClick = {() => this.delTimeCheck()}
                         ><FontAwesomeIcon icon={faTrashAlt} size="xs"/></StyledIconButton></div>
                         <div><StyledIconButton size="small" 
-                        onClick = {() => this.nextTime("next")}
+                        onClick = {() => this.props.nextTimeCallback("next")}
                         ><FontAwesomeIcon icon={faArrowRight} size="xs"/></StyledIconButton></div>
 
                     </div>
@@ -194,7 +179,11 @@ export class IPTWVariableSelection extends Component {
                         {this.genVariableSelectionList("Available")}
                     </div>                    
                     <div></div>
-                    <div>Exposure</div>
+                    <div>Exposure
+                    <StyledTooltip title={<div>For binary exposure variable, it needs to be coded as 0 and 1, and coded as <b>numeric</b> variable.
+                    </div>}>
+                            <span className="pl-2"><FontAwesomeIcon icon={faInfoCircle} size="1x"/></span></StyledTooltip>
+                    </div>
 
                     <div><center>
                         {this.genTVArrowButton("Exposure", 1)}
