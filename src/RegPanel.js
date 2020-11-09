@@ -521,6 +521,7 @@ export class RegPanel extends Component {
 
     let codeString =""
     let currentPanel = this.props.currentActiveAnalysisPanel
+    let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
 
     if (this.state.AnalysisSetting[currentPanel].imputeMissing) {
 
@@ -545,12 +546,10 @@ export class RegPanel extends Component {
           predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
           intTerm.join(" + "))
       })
-  
-      let notIncludedVars = this.not(this.state.Variables.Available, analysisVars)
+      
+      let notIncludedVars = this.not(CurrentVariableList, analysisVars)
       notIncludedVars.forEach((variable) => {
-        if (variable !== ".id" && variable !== ".imp") {
-          method.push("meth[\""+variable+"\"] <- \"\"")
-        }
+        method.push("meth[\""+variable+"\"] <- \"\"")
       })
 
       formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"

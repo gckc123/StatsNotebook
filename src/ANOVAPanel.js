@@ -383,6 +383,7 @@ export class ANOVAPanel extends Component {
 
     let codeString =""
     let currentPanel = this.props.currentActiveAnalysisPanel
+    let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
 
     if (this.state.AnalysisSetting[currentPanel].imputeMissing) {
 
@@ -406,7 +407,7 @@ export class ANOVAPanel extends Component {
           intTerm.join(" + "))
       })
   
-      let notIncludedVars = this.not(this.state.Variables.Available, analysisVars)
+      let notIncludedVars = this.not(CurrentVariableList, analysisVars)
       notIncludedVars.forEach((variable) => {
         if (variable !== ".id" && variable !== ".imp") {
           method.push("meth[\""+variable+"\"] <- \"\"")

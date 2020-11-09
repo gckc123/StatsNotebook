@@ -63,10 +63,12 @@ export class IPTWPanel extends Component {
         Variables: {
             Available: [],
             Covariates: [],
+            Outcome: [],
         }, 
         Checked: {
             Available: [],
             Covariates: [],
+            Outcome: [],
         },
 
 
@@ -85,6 +87,7 @@ export class IPTWPanel extends Component {
         ],
 
         hideToRight: {
+            Outcome: false,
             Covariates: false,
             Exposure: false,
             TVCovariates: false,
@@ -98,6 +101,7 @@ export class IPTWPanel extends Component {
         AnalysisSetting: {
           imputedDataset: false,
           imputeMissing: false,
+          family: "",
           M: 20,
         },
         showAlert: false,
@@ -111,9 +115,14 @@ export class IPTWPanel extends Component {
     if (this.props.currentActiveAnalysisPanel === "IPTWPanel" && !this.props.setPanelFromNotebook) {
       let VariablesObj = _.cloneDeep(this.state.Variables)
       let CheckedObj = _.cloneDeep(this.state.Checked)
+      
+      let TimeVaryingObj = _.cloneDeep(this.state.TimeVarying)
+      let TimeVaryingCheckedObj = _.cloneDeep(this.state.TimeVaryingChecked)
+
       let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
       let CurrentVariableListByFileOrder = [...CurrentVariableList]
       let allVarsInCurrentList = []
+
       for (let key in this.state.Variables) {   
           allVarsInCurrentList = allVarsInCurrentList.concat(this.state.Variables[key])
       }
@@ -127,6 +136,13 @@ export class IPTWPanel extends Component {
           let addToAvailable = this.not(CurrentVariableList, allVarsInCurrentList)
           VariablesObj["Available"] = VariablesObj["Available"].concat(addToAvailable)
 
+          TimeVaryingObj.forEach((item, index) => {
+            TimeVaryingObj[index]["Exposure"] = this.intersection(item["Exposure"], CurrentVariableList)
+            TimeVaryingObj[index]["TVCovariates"] = this.intersection(item["TVCovariates"], CurrentVariableList)
+            TimeVaryingCheckedObj[index]["Exposure"] = this.intersection(TimeVaryingCheckedObj[index]["Exposure"], TimeVaryingObj[index]["Exposure"])
+            TimeVaryingCheckedObj[index]["TVCovariates"] = this.intersection(TimeVaryingCheckedObj[index]["TVCovariates"], TimeVaryingObj[index]["TVCovariates"])
+          })
+
           if (this.state.sortAvailable) {
             VariablesObj["Available"].sort()
           }else{
@@ -134,7 +150,9 @@ export class IPTWPanel extends Component {
           }
 
           this.setState({Variables:{...VariablesObj}, 
-            Checked: {...CheckedObj} 
+            Checked: {...CheckedObj},
+            TimeVarying: TimeVaryingObj,
+            TimeVaryingChecked: TimeVaryingCheckedObj,
             })      
       }
     }else if((this.props.currentActiveAnalysisPanel === "IPTWPanel" && this.props.setPanelFromNotebook)) {
@@ -166,6 +184,8 @@ export class IPTWPanel extends Component {
   resetVarList = () => {
     let VariablesObj  = _.cloneDeep(this.state.Variables)
     let CheckedObj = _.cloneDeep(this.state.Checked)
+    let TimeVarying = _.cloneDeep(this.state.TimeVarying)
+    let TimeVaryingChecked = _.cloneDeep(this.state.TimeVaryingChecked)
 
     for (let key in this.state.Variables) {
       if (key === "Available") {
@@ -280,9 +300,108 @@ export class IPTWPanel extends Component {
 
 
   buildCode = () => {
-    let codeString = "library(mice)\n"
-    let formula = []
-    let method = []
+    let codeString = "library(ipw)\n\n"
+    let finalWeight = []
+    let exposureHistory = []
+    let CurrentVariableList = Object.keys(this.props.CurrentVariableList).filter((item) => (item !== ".imp" && item !== ".id"))
+    
+
+    if (this.state.AnalysisSetting.imputeMissing) {
+
+      if (Object.keys(this.props.CurrentVariableList).indexOf(".imp") !== -1) {
+        codeString = codeString + 
+        "currentDataset <- currentDataset[which(currentDataset$.imp == 0),]\n" +
+        "currentDataset <- currentDataset[!(names(currentDataset) %in% c(\".id\", \".imp\"))]\n\n"
+      }   
+
+      codeString = codeString + "\"Impute missing data\"\n" + 
+      "library(mice)\nlibrary(mitools)\n\n"
+      let formula = []
+      let method = []
+      let formulaCode = "formulas <- make.formulas(currentDataset)\n"
+
+      let analysisVars = this.state.Variables.Covariates.concat(this.state.Variables.Outcome)
+
+      this.state.TimeVarying.forEach((item) => {
+        analysisVars = [...analysisVars.concat(item["Exposure"]).concat(item["TVCovariates"])]
+      })
+
+      analysisVars = [...new Set(analysisVars)]
+
+      analysisVars.forEach((variable) => {
+        let predictor = analysisVars.filter((item) => item !== variable)      
+        formula.push("formulas$"+variable+" =" + variable + " ~ " + 
+          predictor.join(" + "))
+      })
+  
+      let notIncludedVars = this.not(CurrentVariableList, analysisVars)
+      notIncludedVars.forEach((variable) => {
+        method.push("meth[\""+variable+"\"] <- \"\"")
+      })
+
+      formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
+      let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
+      codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\nimputedDataset <- parlmice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
+        this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
+        ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE)\n\n"
+
+    }else if (this.state.AnalysisSetting.imputedDataset) {
+      codeString = codeString + "library(mice)\nlibrary(mitools)\n\n"
+    }
+
+    codeString = codeString + "\"Calculate IPTW\"\n\n"
+
+    if (this.state.AnalysisSetting.imputeMissing || this.state.AnalysisSetting.imputedDataset) {
+      codeString = codeString + "split_imp <- currentDataset$.imp\n" + "mi_dataList <- split(currentDataset, split_imp)\n\n" +
+        "for(i in 2:length(mi_dataList)) \{\n" 
+      
+      finalWeight = []
+      exposureHistory = []
+
+      this.state.TimeVarying.forEach((item, index) => {
+        codeString = codeString + "  weight <- ipwpoint(exposure = " + item["Exposure"][0] + 
+        ", family = \"" + this.state.AnalysisSetting.family +"\""+ (this.state.AnalysisSetting.family == "binomial" ? ", link = \"logit\"": "") + 
+          ",\n    numerator =~ " + (this.state.Variables.Covariates.length === 0 && index === 0 ? "1" : exposureHistory.concat(this.state.Variables.Covariates).join("+")) + 
+          ",\n    denominator =~ " + exposureHistory.concat(item["TVCovariates"]).concat(this.state.Variables.Covariates).join("+") + ",\n    trunc = 0.01, data = as.data.frame(mi_dataList[[i]]))\n\n"
+
+        codeString = codeString + "  mi_dataList[[i]]$.ipw" + index + " = weight$weights.trunc\n\n"
+        finalWeight.push("mi_dataList[[i]]$.ipw" + index)
+
+        exposureHistory.push(item["Exposure"][0])
+
+      })
+
+      
+
+      codeString = codeString + "  mi_dataList[[i]]$.final_weight <- " + finalWeight.join("*") + "\n\n"
+      codeString = codeString + "\}\n\n"
+
+      this.state.TimeVarying.forEach((item, index) => {
+        codeString = codeString + "mi_dataList[[1]]$.ipw" + index + " <- NA\n"  
+      })
+      codeString = codeString + "mi_dataList[[1]]$.final_weight <- NA\n\n"
+
+      
+
+      codeString = codeString + "currentDataset <- unsplit(mi_dataList, split_imp)\n\n"
+
+    }else {
+      this.state.TimeVarying.forEach((item, index) => {
+        codeString = codeString + "weight <- ipwpoint(exposure = "+ item["Exposure"][0] + 
+          ", family = \"" + this.state.AnalysisSetting.family +"\""+ (this.state.AnalysisSetting.family == "binomial" ? ", link = \"logit\"": "") + 
+          ",\n  numerator =~ " + (this.state.Variables.Covariates.length === 0 && index === 0 ? "1" : exposureHistory.concat(this.state.Variables.Covariates).join("+")) + 
+          ",\n  denominator =~ " + exposureHistory.concat(item["TVCovariates"]).concat(this.state.Variables.Covariates).join("+") + ",\n  trunc = 0.01, data = as.data.frame(currentDataset))\n"
+
+        codeString = codeString + "currentDataset$.ipw" + index + " = weight$weights.trunc\n\n"
+        finalWeight.push("currentDataset$.ipw" + index)
+
+        exposureHistory.push(item["Exposure"][0])
+      })
+
+      codeString = codeString + "currentDataset$.final_weight <- " + finalWeight.join("*") + "\n\n"
+      
+      
+    }
     
     
     codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
@@ -303,11 +422,16 @@ export class IPTWPanel extends Component {
     
     switch (target) {
       case "M":
+      case "family":
         AnalysisSettingObj[target] = event.target.value
         break;
       case "imputedDataset":
+        AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        AnalysisSettingObj["imputeMissing"] = false
+        break;
       case "imputeMissing":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
+        AnalysisSettingObj["imputedDataset"] = false
         break;
       default:
         break;

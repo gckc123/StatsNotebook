@@ -166,7 +166,7 @@ export class IPTWVariableSelection extends Component {
                         </span></StyledTooltip>
 
                     <StyledTooltip title="see tutorial at StatsNotebook.io" placement="top"><span className="pl-2">
-                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/analysis/multiple_imputation/")}>
+                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/analysis/marginal_structural_model_IPTW/")}>
                             <FontAwesomeIcon icon={faBookReader} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
                     </div>
@@ -221,6 +221,16 @@ export class IPTWVariableSelection extends Component {
                     </center></div>
                     <div onClick={() => this.props.changeArrowCallback("Covariates")}>
                         {this.genVariableSelectionList("Covariates")}
+                    </div>
+
+                    <div></div>
+                    <div>Outcome</div>
+
+                    <div><center>
+                        {this.genArrowButton("Outcome", 100000)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("Outcome")}>
+                        {this.genVariableSelectionList("Outcome")}
                     </div>
 
 

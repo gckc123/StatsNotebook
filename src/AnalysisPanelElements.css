@@ -518,14 +518,14 @@
 .IPTW-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 25px 40px 25px 150px 25px 150px;
+    grid-template-rows: 25px 25px 40px 25px 120px 25px 120px 25px 40px;
     margin: 0px;
     padding: 0px;
 }
 
 .IPTW-Available-Variable-List-Container {
     grid-row-start: 2;
-    grid-row-end: 8;
+    grid-row-end: 10;
 }
 
 .IPTW-Time-Navigation-Box {

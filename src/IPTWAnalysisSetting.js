@@ -6,6 +6,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControl from '@material-ui/core/FormControl';
+import NativeSelect from '@material-ui/core/NativeSelect';
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -13,16 +15,42 @@ const StyledTooltip = withStyles({
     }
   })(Tooltip);
   
-
+  const StyledNativeSelect = withStyles({
+    root: {
+        '&:focus': {
+            outline: 'none',
+            background: 'white',
+        },
+    },
+    select: {
+        paddingLeft: '5px',
+        "&:focus": {
+            border: "0px",
+            outline: "0px",
+        }
+    }
+  })(NativeSelect);
 
 export class IPTWAnalysisSetting extends Component {
     
     render () {
         return (
             <div>
-                    <div className="NMACheckbox">
+                    <div className="NMA-Analysis-Box">
                         <div className="pl-2">Distribution family</div>
-                        <div></div>
+                        <div>
+                        <FormControl>
+                            <StyledNativeSelect
+                            value={this.props.AnalysisSetting.family}
+                            onChange={(event) => this.props.updateAnalysisSettingCallback(event, "family")}
+                            inputProps={{style: {fontSize: 14, minWidth: "100px"}}}>
+                                <option value="">----- Select distribution family -----</option>
+                                <option value="binomial">Binomial</option>
+                                <option value="gaussian">Gausssian (Normal)</option>
+                                <option value="multinomial">Multinomial</option>                                
+                            </StyledNativeSelect>
+                        </FormControl>
+                        </div>
                     </div>
                     <div className="NMACheckbox"><Checkbox size="small"
                         checked= {this.props.AnalysisSetting.imputedDataset}
