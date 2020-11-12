@@ -270,15 +270,15 @@ export class App extends Component {
   }
 
   selectDataPanel = (panel) => {
-    this.setState({currentActiveDataPanel: panel})
+    this.setState({currentActiveDataPanel: panel, currentActiveLeftPanel: "DataPanel"})
   }
 
   selectAnalysisPanel = (panel) => {
-    this.setState({currentActiveAnalysisPanel: panel})
+    this.setState({currentActiveAnalysisPanel: panel, currentActiveLeftPanel: "AnalysisPanel"})
   }
 
   selectDataVizPanel = (panel) => {
-    this.setState({currentActiveDataVizPanel: panel})
+    this.setState({currentActiveDataVizPanel: panel, currentActiveLeftPanel: "DataVizPanel"})
   }
 
   savingDataFile = (fileType, workingDir) => {
