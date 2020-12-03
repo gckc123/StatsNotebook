@@ -2,7 +2,8 @@
 
 ## StatsNotebook
 
-**Follow our [Facebook](https://www.facebook.com/StatsNotebook) page or [our developer's twitter](https://twitter.com/gckc123) for tutorials and updates.**
+**Follow our [Facebook](https://www.facebook.com/StatsNotebook) page or [our developer's twitter](https://twitter.com/gckc123) for updates.**
+**Tutorials are available on [StatsNotebook.io](https://statsnotebook.io)**
 
 [StatsNotebook](https://statsnotebook.io) is an graphical and notebook interface for R. It is designed for reproducible analysis and interactive computing. It is simple, powerful and reproducible.
 
