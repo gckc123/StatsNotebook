@@ -1,3 +1,5 @@
+![Rexi](https://github.com/gckc123/StatsNotebook/rexi.png)
+
 ## StatsNotebook
 
 **Follow our [Facebook](https://www.facebook.com/StatsNotebook) page or [our developer's twitter](https://twitter.com/gckc123) for tutorials and updates.**
