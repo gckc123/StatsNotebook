@@ -1,4 +1,4 @@
-![Rexi](https://github.com/gckc123/StatsNotebook/blob/master/rexi.png)
+![Rexi](https://github.com/gckc123/StatsNotebook/blob/master/rexi250.png)
 
 ## StatsNotebook
 
