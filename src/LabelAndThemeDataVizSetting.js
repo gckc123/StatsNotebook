@@ -87,14 +87,14 @@ export class LabelAndThemeDataVizSetting extends Component {
                     <div><b>Title</b></div>
                     <div className="Label-And-Theme-Box">
                         <div className = "InvisibleBottomBorder">Label</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.title}
                         ></input></div>
                     </div>
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode}>
                         <div className = "InvisibleBottomBorder">Font Size</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.titleFontSize}></input></div>
                     </div>
@@ -104,35 +104,35 @@ export class LabelAndThemeDataVizSetting extends Component {
                     <div><b>Horizontal Axis</b></div>
                     <div className="Label-And-Theme-Box">
                         <div className = "InvisibleBottomBorder">Label</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.xlab}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode}>
                         <div className = "InvisibleBottomBorder">Label Font Size</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.xlabFontSize}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode || !this.props.needXLim}>
                         <div className = "InvisibleBottomBorder">Lower Limit</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.xLowerLim}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode || !this.props.needXLim}>
                         <div className = "InvisibleBottomBorder">Upper Limit</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
-                        value = {this.props.AnalysisSetting.xUppperLim}></input></div>
+                        value = {this.props.AnalysisSetting.xUpperLim}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode}>
                         <div className = "InvisibleBottomBorder">Axis Font Size</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.xAxisFontSize}></input></div>
                     </div>
@@ -142,35 +142,35 @@ export class LabelAndThemeDataVizSetting extends Component {
                     <div><b>Vertical Axis</b></div>
                     <div className="Label-And-Theme-Box">
                         <div className = "InvisibleBottomBorder">Label</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.ylab}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode}>
                         <div className = "InvisibleBottomBorder">Label Font Size</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.ylabFontSize}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode || !this.props.needYLim}>
                         <div className = "InvisibleBottomBorder">Lower Limit</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.yLowerLim}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode || !this.props.needYLim} >
                         <div className = "InvisibleBottomBorder">Upper Limit</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.yUpperLim}></input></div>
                     </div>
 
                     <div className="Label-And-Theme-Box" hidden = {this.state.basicMode}>
                         <div className = "InvisibleBottomBorder">Axis Font Size</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.yAxisFontSize}></input></div>
                     </div>
@@ -180,39 +180,39 @@ export class LabelAndThemeDataVizSetting extends Component {
                     <div><b>Legends</b></div>
                     <div className="Label-And-Theme-Box" hidden = {!this.props.needFillLabel}>
                         <div className = "InvisibleBottomBorder">Color Fill Label</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.legendFillLab}></input></div>
                     </div>
                     <div className="Label-And-Theme-Box" hidden = {!this.props.needColorLabel}>
                         <div className = "InvisibleBottomBorder">Color Label</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.legendColorLab}></input></div>
                     </div>
                     <div className="Label-And-Theme-Box" hidden = {!this.props.needShapeLabel}>
                         <div className = "InvisibleBottomBorder">Shape Label</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.legendShapeLab}></input></div>
                     </div>
                     <div className="Label-And-Theme-Box" hidden = {!this.props.needSizeLabel}>
                         <div className = "InvisibleBottomBorder">Size Label</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "350px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.legendSizeLab}></input></div>
                     </div>
                     <div hidden = {this.state.basicMode || !(this.props.needFillLabel || this.props.needColorLabel || this.props.needShapeLabel || this.props.needSizeLabel)}>
                         <div className="Label-And-Theme-Box">
                             <div className = "InvisibleBottomBorder">Title Font Size</div>
-                            <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                            <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                             onClick = {() => this.handleOpen()}
                             value = {this.props.AnalysisSetting.legendFontSize}></input></div>
                         </div>
                         
                         <div className="Label-And-Theme-Box">
                             <div className = "InvisibleBottomBorder">Key Font Size</div>
-                            <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                            <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                             onClick = {() => this.handleOpen()}
                             value = {this.props.AnalysisSetting.legendKeyFontSize}></input></div>
                         </div>
@@ -235,7 +235,7 @@ export class LabelAndThemeDataVizSetting extends Component {
                     <div><b>Facet</b></div>
                     <div className="Label-And-Theme-Box" hidden = {!this.props.needFacetFontSize || this.state.basicMode}>
                         <div className = "InvisibleBottomBorder">Font Size</div>
-                        <div><input readonly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
+                        <div><input readOnly className = "LabelAndThemeSettingInput" style={{width: "120px"}}
                         onClick = {() => this.handleOpen()}
                         value = {this.props.AnalysisSetting.facetFontSize}></input></div>
                     </div>

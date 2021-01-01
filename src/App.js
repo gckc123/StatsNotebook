@@ -49,7 +49,7 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentVersion: "0.1.0",
+      currentVersion: "0.1.1",
       RVersion: "4.0.2",
       StatsNotebookURL: "https://statsnotebook.io",
       tentativeScript: "",
@@ -415,11 +415,16 @@ export class App extends Component {
     
   }
 
-  updateAEditorValue = (index, newValue, execute) => {
+  updateAEditorValue = (index, newValue, execute, selectedCode = "") => {
     let tmp = _.cloneDeep(this.state.NotebookBlkList)
     tmp[index].NotebookBlkScript = newValue
     if (execute) {
-      this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID}, () => this.runScript())  
+      if (selectedCode === "") {
+        this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID}, () => this.runScript(false))  
+      }else
+      {
+        this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID}, () => this.runScript(false, selectedCode))  
+      }
     }else
     {
       this.setState({NotebookBlkList: [...tmp], ActiveScript: newValue, ActiveBlkID: tmp[index].NotebookBlkID})
@@ -458,68 +463,72 @@ export class App extends Component {
     mainProcess.getCPUCount();
   }
 
-  runScript = (fromNotebookBlk = false) => {  
+  runScript = (fromNotebookBlk = false, selectedCode = "") => {  
     let tmp = _.cloneDeep(this.state.NotebookBlkList)
     let need2ResetDataState = false
     let selectedBlk = []
     let multipleBlk = false
     let incActiveBlk = false
     
+  
     if (fromNotebookBlk) {
-      selectedBlk = this.state.NotebookBlkList.filter((item) => item.selected)
-      if (selectedBlk.length > 0) {
-        multipleBlk = true
-      }
+        selectedBlk = this.state.NotebookBlkList.filter((item) => item.selected)
+        if (selectedBlk.length > 0) {
+          multipleBlk = true
+        }
 
-      if (selectedBlk.findIndex((item) => item.NotebookBlkID === this.state.ActiveBlkID) === -1) {
-        incActiveBlk = true
-      }
+        if (selectedBlk.findIndex((item) => item.NotebookBlkID === this.state.ActiveBlkID) === -1) {
+          incActiveBlk = true
+        }
     }
 
     if (multipleBlk) {
-      selectedBlk.forEach((blk) => {
-        let currentIndex = this.state.NotebookBlkList.findIndex((item) => item.NotebookBlkID === blk.NotebookBlkID)
-        tmp[currentIndex].NotebookBlkROutput = [];
-        tmp[currentIndex].Busy = true;
-        tmp[currentIndex].selected = false;
+        selectedBlk.forEach((blk) => {
+          let currentIndex = this.state.NotebookBlkList.findIndex((item) => item.NotebookBlkID === blk.NotebookBlkID)
+          tmp[currentIndex].NotebookBlkROutput = [];
+          tmp[currentIndex].Busy = true;
+          tmp[currentIndex].selected = false;        
 
-        let ScriptJSON = {
-          RequestType: "RCode",
-          Script: blk.NotebookBlkScript,
-          fromBlk: blk.NotebookBlkID,
-        }
+          let ScriptJSON = {
+            RequestType: "RCode",
+            Script: blk.NotebookBlkScript,
+            fromBlk: blk.NotebookBlkID,
+          }
 
-        let regex = /currentDataset <- read_csv\(|currentDataset <- read_sav\(|currentDataset <- read_dta\(/;
-        if (ScriptJSON.Script.match(regex)) {
-          need2ResetDataState = true          
-        }
+          let regex = /currentDataset <- read_csv\(|currentDataset <- read_sav\(|currentDataset <- read_dta\(/;
+          if (ScriptJSON.Script.match(regex)) {
+            need2ResetDataState = true          
+          }
 
-        let StriptString = JSON.stringify(ScriptJSON)
-        mainProcess.send2R(StriptString);
-      })
+          let StriptString = JSON.stringify(ScriptJSON)
+          mainProcess.send2R(StriptString);
+        })
     }
     
     if(!multipleBlk || incActiveBlk){
-      let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
-      if (CurrentActiveIndex >= 0) {
-        tmp[CurrentActiveIndex].NotebookBlkROutput = [];
-        tmp[CurrentActiveIndex].Busy = true;
-        
-        let ScriptJSON = {
-          RequestType: "RCode",
-          Script: this.state.ActiveScript,
-          fromBlk: this.state.ActiveBlkID,
-        }
+        let CurrentActiveIndex = this.state.NotebookBlkList.findIndex( (item) => item.NotebookBlkID === this.state.ActiveBlkID)
+        if (CurrentActiveIndex >= 0) {
+          tmp[CurrentActiveIndex].NotebookBlkROutput = [];
+          tmp[CurrentActiveIndex].Busy = true;
+          
+          let readyScript = (selectedCode === "" ? tmp[CurrentActiveIndex].NotebookBlkScript : selectedCode)
 
-        let regex = /currentDataset <- read_csv\(|currentDataset <- read_sav\(|currentDataset <- read_dta\(/;
-        if (ScriptJSON.Script.match(regex)) {
-          need2ResetDataState = true          
-        }
+          let ScriptJSON = {
+            RequestType: "RCode",
+            Script: readyScript,
+            fromBlk: this.state.ActiveBlkID,
+          }
 
-        let StriptString = JSON.stringify(ScriptJSON)
-        mainProcess.send2R(StriptString);
-      }
+          let regex = /currentDataset <- read_csv\(|currentDataset <- read_sav\(|currentDataset <- read_dta\(/;
+          if (ScriptJSON.Script.match(regex)) {
+            need2ResetDataState = true          
+          }
+
+          let StriptString = JSON.stringify(ScriptJSON)
+          mainProcess.send2R(StriptString);
+        }
     }
+    
     this.setState({NotebookBlkList: [...tmp]})
     if (need2ResetDataState) {
       this.resetDataState()
@@ -1038,7 +1047,8 @@ export class App extends Component {
                     clearNotebookBlkRef = {this.state.clearNotebookBlkRef}
                     savingFileCallback = {this.savingFile}
                     NotebookPath = {this.state.NotebookPath}
-
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
                   />  
               </HotKeys></div>
             </div>

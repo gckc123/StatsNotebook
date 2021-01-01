@@ -64,6 +64,7 @@ export class BarChartPanel extends Component {
         Variables: {
             Available: [],
             Horizontal: [],
+            Vertical: [],
             FillColor: [],
             Facet: [],
             
@@ -72,11 +73,13 @@ export class BarChartPanel extends Component {
         Checked: {
             Available: [],
             Horizontal: [],
+            Vertical: [],
             FillColor: [],
             Facet: [],          
         },
         hideToRight: {
             Horizontal: false,
+            Vertical: false,
             FillColor: false,
             Facet: false,
         },
@@ -91,6 +94,7 @@ export class BarChartPanel extends Component {
           originalData: true,
           fill: false,
           dodge: false,
+          coord_flip: false,
 
           title: "",
           titleFontSize: "",
@@ -113,7 +117,7 @@ export class BarChartPanel extends Component {
           legendPosition: "bottom",
           facetFontSize: "",
           theme: "theme_bw",
-          colorPalette: "Set2"
+          colorPalette: "ggplot_default",
           
         },
         showAlert: false,
@@ -212,7 +216,7 @@ export class BarChartPanel extends Component {
 
     if (VariablesObj[target].length + CheckedObj["Available"].length <= maxElement) {
       
-      if (target === "Horizontal") {
+      if (target === "Horizontal" || target === "Vertical") {
         toRightVars = CheckedObj["Available"].filter((item) =>
           this.props.CurrentVariableList[item][0] !== "Character"
         )
@@ -322,10 +326,14 @@ export class BarChartPanel extends Component {
       }
      
       codeString = codeString + 
-      "  ggplot(aes(x = " + item + (this.state.Variables.FillColor.length > 0 ? ", fill = " + this.state.Variables.FillColor[0] : "") + "))" + 
+      "  ggplot(aes(x = " + item + 
+      (this.state.Variables.Vertical.length > 0 ? ", y = " + this.state.Variables.Vertical[0] : "") +
+      (this.state.Variables.FillColor.length > 0 ? ", fill = " + this.state.Variables.FillColor[0] : "") + "))" + 
       " +\n  geom_bar(alpha = 0.6, na.rm = TRUE"+ 
-      (this.state.AnalysisSetting.fill ? ", position = \"fill\"" : "")+ 
-      (this.state.AnalysisSetting.dodge ? ", position = \"dodge\"": "")+")" + 
+      (this.state.Variables.Vertical.length > 0 ? ", position = \"identify\"" : "")+
+      (this.state.AnalysisSetting.fill && this.state.Variables.Vertical.length === 0 ? ", position = \"fill\"" : "")+ 
+      (this.state.AnalysisSetting.dodge && this.state.Variables.Vertical.length === 0 ? ", position = \"dodge\"": "")+")" + 
+      (this.state.AnalysisSetting.coord_flip ? "+\n    coord_flip()" : "") +
       (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
       this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
       (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
@@ -401,6 +409,7 @@ export class BarChartPanel extends Component {
         AnalysisSettingObj[target] = event.target.value
         break;
       case "originalData":
+      case "coord_flip":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       case "fill":

@@ -40,10 +40,43 @@ export class ScatterplotDataVizSetting extends Component {
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"byFillColor")}/>By fill color
                 </div>        
                 
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.jitter} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"jitter")}/>Add Jitter (random noise to points to avoid points overlapping)
+                </div>   
+
                 <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.rug} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"rug")}/>Add rug on sides
-                </div>        
+                </div>      
+
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.scale_x_log10} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"scale_x_log10")}/>Log scale for the horizontal axis
+                </div>   
+
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.scale_y_log10} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"scale_y_log10")}/>Log scale for the vertical axis
+                </div>   
                 
+
+                <br/>
+                <div hidden={this.props.Variables.Frame.length === 0}>
+                    <div className="pb-2">Animated plot setting</div>
+                    <div className="Label-And-Theme-Box">
+                        <div className = "InvisibleBottomBorder">Width</div>
+                        <div><input value={this.props.AnalysisSetting.ani_width} className="LabelAndThemeSettingInput" style={{width: "350px"}} onChange={(event) => this.props.updateAnalysisSettingCallback(event,"ani_width")}></input></div>
+                    </div>
+
+                    <div className="Label-And-Theme-Box">
+                        <div className = "InvisibleBottomBorder">Height</div>
+                        <div><input value={this.props.AnalysisSetting.ani_height} className="LabelAndThemeSettingInput" style={{width: "350px"}} onChange={(event) => this.props.updateAnalysisSettingCallback(event,"ani_height")}></input></div>
+                    </div>
+
+                    <div className="Label-And-Theme-Box">
+                        <div className = "InvisibleBottomBorder">File name</div>
+                        <div><input className="LabelAndThemeSettingInput" style={{width: "350px"}} 
+                            value={this.props.AnalysisSetting.ani_file} onChange={(event) => this.props.updateAnalysisSettingCallback(event, "ani_file")}></input></div>
+                    </div>
+                </div>
+
                 <div className="NMACheckbox" hidden={true}><Checkbox checked = {this.props.AnalysisSetting.marginalPlot} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"marginalPlot")}/>Add Marginal Plots <span hidden={!this.props.AnalysisSetting.marginalPlot}>using &nbsp;
                 <select className="select-box" onChange={(event) => this.props.updateAnalysisSettingCallback(event, "marginalPlotType")}>

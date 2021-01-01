@@ -102,6 +102,12 @@ export class LineGraphPanel extends Component {
           marginalPlot: false,
           marginalPlotType: "histogram",
           rug: false,
+          scale_x_log10: false,
+          scale_y_log10: false,
+          animate: false,
+          ani_width: 500,
+          ani_height: 500,
+          ani_file: "animated_linegraph",
 
           originalData: true,
           title: "",
@@ -125,7 +131,7 @@ export class LineGraphPanel extends Component {
           legendPosition: "bottom",
           facetFontSize: "",
           theme: "theme_bw",
-          colorPalette: "Set2"
+          colorPalette: "ggplot_default"
           
         },
         showAlert: false,
@@ -319,7 +325,7 @@ export class LineGraphPanel extends Component {
     
     let dropNA = this.state.Variables.FillColor.concat(this.state.Variables.Shape)
     
-    codeString = codeString + "currentDataset %>%\n" 
+    codeString = codeString + "plot <- currentDataset %>%\n" 
     
     if (this.props.imputedDataset) {
       if (this.state.AnalysisSetting.originalData) {
@@ -341,6 +347,8 @@ export class LineGraphPanel extends Component {
     this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
     (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
     (this.state.AnalysisSetting.theme === "ggplot_default" ? "" : "+\n    " + this.state.AnalysisSetting.theme + "(base_family = \"sans\")") + 
+    (this.state.AnalysisSetting.scale_x_log10 ? "+\n    scale_x_log10()" : "") +
+    (this.state.AnalysisSetting.scale_y_log10 ? "+\n    scale_y_log10()" : "") +
     (this.state.AnalysisSetting.title === "" ? "" : "+\n    ggtitle(\"" + this.state.AnalysisSetting.title + "\")") +
     (this.state.AnalysisSetting.xlab === "" ? "" : "+\n    xlab(\"" + this.state.AnalysisSetting.xlab + "\")") +
     (this.state.AnalysisSetting.ylab === "" ? "" : "+\n    ylab(\"" + this.state.AnalysisSetting.ylab + "\")") +
@@ -365,6 +373,12 @@ export class LineGraphPanel extends Component {
     (this.state.AnalysisSetting.facetFontSize === "" ? "" : "+\n    theme(strip.text.x = element_text(size = " + 
     this.state.AnalysisSetting.facetFontSize + "))") +
     (this.state.AnalysisSetting.legendPosition === "right" ? "" : "+\n    theme(legend.position = \"" + this.state.AnalysisSetting.legendPosition +"\")") +
+    "\nplot"+ 
+    (this.state.AnalysisSetting.animate ? "\n\nlibrary(gganimate)\nlibrary(gifski)\n\nanimated_plot <- plot + " + 
+        "transition_reveal("+ this.state.Variables.Horizontal[0]+ ")"+ 
+          "\nanimate(animated_plot, width = " + this.state.AnalysisSetting.ani_width + ", height = " + this.state.AnalysisSetting.ani_height + ", renderer = gifski_renderer())" + 
+          "\nanim_save(\"" + this.state.AnalysisSetting.ani_file + ".gif\", animation = last_animation())" +
+          "\npaste(\"Animated plot saved at \", getwd()) " : "") +
     "\n\n"
 
     codeString = codeString + "\n\"Chan, G. and StatsNotebook Team (2020). StatsNotebook. (Version "+ this.props.currentVersion +") [Computer Software]. Retrieved from https://www.statsnotebook.io\"\n"+
@@ -413,9 +427,15 @@ export class LineGraphPanel extends Component {
       case "fittedLineType":
       case "confIntLevel":
       case "marginalPlotType":
+      case "ani_width":
+      case "ani_height":
+      case "ani_file":
         AnalysisSettingObj[target] = event.target.value
         break;
       case "originalData":
+      case "scale_x_log10":
+      case "scale_y_log10":
+      case "animate":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:

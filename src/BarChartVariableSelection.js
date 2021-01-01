@@ -73,7 +73,7 @@ export class BarChartVariableSelection extends Component {
     render () {
         return (
             <div className="analysis-pane">
-                <div className="Histogram-Variable-Selection-Box">
+                <div className="Bargraph-Variable-Selection-Box">
                     <div >Variables
                     <StyledTooltip title="Sort alphabetically, from capital to lower case." placement="top"><span className="pl-2">
                         <StyledIconButton size="small" onClick={() => this.props.setSortAvailableCallback()}>
@@ -92,7 +92,7 @@ export class BarChartVariableSelection extends Component {
                     </div>
                     <div ></div>
                     <div>Horizontal Axis</div>
-                    <div className="Histogram-Available-Variable-List-Container" 
+                    <div className="Bargraph-Available-Variable-List-Container" 
                     onClick={() => this.props.changeArrowCallback("Available")}>
                         {this.genVariableSelectionList("Available")}
                     </div>
@@ -102,6 +102,15 @@ export class BarChartVariableSelection extends Component {
                     </center></div>
                     <div onClick={() => this.props.changeArrowCallback("Horizontal")}>
                         {this.genVariableSelectionList("Horizontal")}
+                    </div>
+
+                    <div></div>
+                    <div>Vertical Axis</div>
+                    <div><center>
+                        {this.genArrowButton("Vertical", 1)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("Vertical")}> 
+                        {this.genVariableSelectionList("Vertical")}
                     </div>
 
                     <div></div>

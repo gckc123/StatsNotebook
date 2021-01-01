@@ -48,6 +48,8 @@ export class NotebookBlk extends Component {
             editorHTML: "",
             message: "",
             showMessage: false,
+            selection: "",
+            AEditor: null,
         }
 
     }
@@ -105,6 +107,7 @@ export class NotebookBlk extends Component {
         (AEditor.renderer.lineHeight) + AEditor.renderer.scrollBar.getWidth() + 20;
         AEditor.container.style.height = `${newHeight}px`;
         AEditor.resize();
+        this.setState({AEditor: AEditor})
     }
     
     onAEBlur = (e, editor) => {
@@ -116,7 +119,14 @@ export class NotebookBlk extends Component {
     }
 
     updateAndRun = () => {
-        this.props.updateAEditorValueCallback(this.props.index, this.state.Script, true);
+        /*Check if any code is selected*/
+        let selectedCode =  this.state.AEditor.getSelectedText()
+        if (selectedCode === "") {
+            this.props.updateAEditorValueCallback(this.props.index, this.state.Script, true);
+        }else{
+            /*Only run selected code */
+            this.props.updateAEditorValueCallback(this.props.index, this.state.Script, true, selectedCode)
+        }
     }
 
     onAEChange = (newValue) => {
@@ -230,6 +240,7 @@ export class NotebookBlk extends Component {
                     theme="tomorrow"
                     onChange={this.onAEChange}
                     onBlur={this.onAEBlur}
+                    onSelectionChange={this.onAESelectionChange}
                     commands={[{   
                         name: 'runScript', 
                         bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'}, 
@@ -285,7 +296,7 @@ export class NotebookBlk extends Component {
                                         return (
                                             <div key={index}>
                                                 <div style={{color: "black", fontWeight: "bold"}}>######################################################</div>
-                                                <div><img width={this.props.ElementWidth*0.8} src={graphicsData} alt=""/></div>
+                                                <div><img width={this.props.ElementWidth*0.8 > 750 ? 750 : this.props.ElementWidth*0.8} src={graphicsData} alt=""/></div>
                                             </div>
                                             
                                         )

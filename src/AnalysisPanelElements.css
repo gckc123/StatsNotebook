@@ -402,6 +402,19 @@
     grid-row-end: 8;
 }
 
+.Bargraph-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows: 25px 100px 25px 40px 25px 25px 40px 25px 41px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.Bargraph-Available-Variable-List-Container {
+    grid-row-start: 2;
+    grid-row-end: 10;
+}
+
 .Histogram-Two-Column-Box {
     display: grid;
     grid-template-columns: 150px 250px;
@@ -450,14 +463,14 @@
 .Scatterplot-Variable-Selection-Box {
     display: grid;
     grid-template-columns: 260px 80px 260px;
-    grid-template-rows: 25px 40px 25px 40px 25px 25px 40px 25px 40px 25px 40px 25px 40px;
+    grid-template-rows: 25px 40px 25px 40px 25px 25px 40px 25px 40px 25px 40px 25px 40px 25px 40px;
     margin: 0px;
     padding: 0px;
 }
 
 .Scatterplot-Available-Variable-List-Container {
     grid-row-start: 2;
-    grid-row-end: 14;
+    grid-row-end: 16;
 }
 
 .select-box {

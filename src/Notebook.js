@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import {faPlay} from '@fortawesome/free-solid-svg-icons';
+import {faInfo, faPlay} from '@fortawesome/free-solid-svg-icons';
 import {faPlus} from '@fortawesome/free-solid-svg-icons';
 import {faTrashAlt} from '@fortawesome/free-regular-svg-icons';
 import {faObjectUngroup} from '@fortawesome/free-regular-svg-icons';
@@ -14,6 +14,8 @@ import {NotebookBlk} from "./NotebookBlk";
 import "./App.css";
 import NativeSelect from '@material-ui/core/NativeSelect';
 import {faSave} from '@fortawesome/free-regular-svg-icons';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+
 
 const StyledTooltip = withStyles({
     tooltip: {
@@ -165,6 +167,10 @@ export class Notebook extends Component {
                             )
                         }
                     </StyledNativeSelect>
+                    <StyledTooltip title={<div>Use Ctrl-C/ Ctrl-V to copy and paste the results.<br/>For tutorials, visit {this.props.StatsNotebookURL}</div>}><StyledButton style={{maxWidth: '36px', minWidth: '36px', maxHeight: '36px', minHeight: '36px'}} disableRipple
+                        onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL)}>
+                        <FontAwesomeIcon icon={faInfoCircle}/>
+                    </StyledButton></StyledTooltip>
                 </div>
 
                 <div className="notebook-blk">

@@ -151,6 +151,15 @@ export class ScatterplotVariableSelection extends Component {
                         {this.genVariableSelectionList("Facet")}
                     </div>
 
+                    <div></div>
+                    <div><i>Frame</i></div>
+                    <div><center>
+                        {this.genArrowButton("Frame", 1)}
+                    </center></div>
+                    <div onClick={() => this.props.changeArrowCallback("Frame")}> 
+                        {this.genVariableSelectionList("Frame")}
+                    </div>
+
                 </div>
             </div>
         )

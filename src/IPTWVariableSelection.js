@@ -151,7 +151,7 @@ export class IPTWVariableSelection extends Component {
                         </span></StyledTooltip>
 
                     <StyledTooltip title="see tutorial at StatsNotebook.io" placement="top"><span className="pl-2">
-                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/analysis/marginal_structural_model_IPTW/")}>
+                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/analysis/marginal_structural_model_iptw/")}>
                             <FontAwesomeIcon icon={faBookReader} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
                     </div>

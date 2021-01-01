@@ -18,9 +18,11 @@ export class BarChartDataVizSetting extends Component {
     render () {
         return (
             <div>
-                <div className="NMACheckbox" hidden = {this.props.Variables.FillColor.length === 0}><Checkbox checked = {this.props.AnalysisSetting.fill} size="small"
+                <div className="NMACheckbox"><Checkbox checked = {this.props.AnalysisSetting.coord_flip} size="small"
+                onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"coord_flip")}/>Flip horizontal and vertical axis</div>
+                <div className="NMACheckbox" hidden = {this.props.Variables.FillColor.length === 0 || this.props.Variables.Vertical.length > 0}><Checkbox checked = {this.props.AnalysisSetting.fill} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"fill")}/>Fill Chart</div>
-                <div className="NMACheckbox" hidden = {this.props.Variables.FillColor.length === 0}><Checkbox checked = {this.props.AnalysisSetting.dodge} size="small"
+                <div className="NMACheckbox" hidden = {this.props.Variables.FillColor.length === 0 || this.props.Variables.Vertical.length > 0}><Checkbox checked = {this.props.AnalysisSetting.dodge} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"dodge")}/>Separate bars by {this.props.Variables.FillColor[0]}</div>              
                 <div className="NMACheckbox" hidden = {!this.props.imputedDataset}><Checkbox checked = {this.props.AnalysisSetting.originalData} size="small"
                 onClick= {(event) => this.props.updateAnalysisSettingCallback(event,"originalData")}/>Plot using original data

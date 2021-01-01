@@ -69,6 +69,7 @@ export class ScatterplotPanel extends Component {
             Shape: [],
             Size: [],
             Facet: [],
+            Frame: [],
             
         }, 
 
@@ -79,7 +80,8 @@ export class ScatterplotPanel extends Component {
             FillColor: [],
             Shape: [],
             Size: [],
-            Facet: [],          
+            Facet: [],
+            Frame: [],          
         },
         hideToRight: {
             Horizontal: false,
@@ -88,6 +90,7 @@ export class ScatterplotPanel extends Component {
             Shape: false,
             Size: false,
             Facet: false,
+            Frame: false,
         },
         tentativeScript: "",
         panels: {
@@ -96,15 +99,21 @@ export class ScatterplotPanel extends Component {
           labelAndThemeSetting: false,
         },
         AnalysisSetting: {          
-          fittedLine: true,
+          fittedLine: false,
           fittedLineType: "lm",
-          confInt: true,
+          confInt: false,
           confIntLevel: "95",
           byShape: false,
           byFillColor: false,
           marginalPlot: false,
           marginalPlotType: "histogram",
           rug: false,
+          jitter: true,
+          scale_x_log10: false,
+          scale_y_log10: false,
+          ani_width: 500,
+          ani_height: 500,
+          ani_file: "animated_scatterplot",
 
           originalData: true,
           title: "",
@@ -112,7 +121,7 @@ export class ScatterplotPanel extends Component {
           xlab: "",
           xlabFontSize: "",
           xLowerLim: "",
-          xUppperLim: "",
+          xUpperLim: "",
           xAxisFontSize: "",
           ylab: "",
           yLowerLim: "",
@@ -128,7 +137,7 @@ export class ScatterplotPanel extends Component {
           legendPosition: "bottom",
           facetFontSize: "",
           theme: "theme_bw",
-          colorPalette: "Set2"
+          colorPalette: "ggplot_default"
           
         },
         showAlert: false,
@@ -229,17 +238,17 @@ export class ScatterplotPanel extends Component {
       
       if (target === "Vertical" || (target === "Horizontal")) {
         toRightVars = CheckedObj["Available"].filter((item) =>
-          this.props.CurrentVariableList[item][0] === "Numeric"
+          this.props.CurrentVariableList[item][0] !== "Character"
         )
 
         if (toRightVars.length !== CheckedObj["Available"].length) {
           this.setState({showAlert: true, 
-            alertText: "Character and categorical variables will not be added. Only numeric variables can be added.",
+            alertText: "Character variables will not be added. Only numeric variables can be added.",
             alertTitle: "Alert"
           })
         }
 
-      }else if ((target === "FillColor") || (target === "Facet" || (target === "Shape") || (target === "Size"))) {
+      }else if ((target === "FillColor") || (target === "Facet" || (target === "Shape") || (target === "Size") || (target === "Frame"))) {
         toRightVars = CheckedObj["Available"].filter((item) =>
           this.props.CurrentVariableList[item][0] !== "Character"
         )
@@ -327,7 +336,7 @@ export class ScatterplotPanel extends Component {
     let horizontal = this.state.Variables.Horizontal[0]
 
 
-      codeString = codeString + "currentDataset %>%\n" 
+      codeString = codeString + "plot <- currentDataset %>%\n" 
 
       if (this.props.imputedDataset) {
         if (this.state.AnalysisSetting.originalData) {
@@ -345,7 +354,8 @@ export class ScatterplotPanel extends Component {
       ((this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", color = " + this.state.Variables.FillColor[0] : "") +
       ((this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0) ? ", shape = " + this.state.Variables.Shape[0] : "") + 
       (this.state.Variables.Size.length > 0 ? ", size = " + this.state.Variables.Size[0] : "") + ")) +\n" +
-      "    geom_jitter(alpha = " + (this.state.Variables.Size.length > 0 ? "0.5" : "0.6")
+      (this.state.AnalysisSetting.jitter ? "    geom_jitter" : "    geom_point") + 
+      "(alpha = " + (this.state.Variables.Size.length > 0 ? "0.5" : "0.8")
       + ((!this.state.AnalysisSetting.byFillColor && this.state.Variables.FillColor.length > 0) ? ", aes(color = " + 
       this.state.Variables.FillColor[0] + 
       ((!this.state.AnalysisSetting.byShape && this.state.Variables.Shape.length > 0)? ", shape = " + this.state.Variables.Shape[0] : "") + ")": "") + 
@@ -356,6 +366,8 @@ export class ScatterplotPanel extends Component {
       (this.state.AnalysisSetting.confInt ? ", se = TRUE, level = " + this.state.AnalysisSetting.confIntLevel/100 : ", se = FALSE") + ", na.rm = TRUE, show.legend = FALSE)": "") + 
       (this.state.AnalysisSetting.rug ? "+\n    geom_rug(col = \"steelblue\", alpha = 0.1, size = 1)" : "") + 
       (this.state.Variables.Size.length > 0 ? "+\n    scale_size(range = c(0.1, 8))" :"") +
+      (this.state.AnalysisSetting.scale_x_log10 ? "+\n    scale_x_log10()": "")+
+      (this.state.AnalysisSetting.scale_y_log10 ? "+\n    scale_y_log10()": "")+
       (this.state.AnalysisSetting.colorPalette === "ggplot_default" ? "" : "+\n    scale_fill_brewer(palette = \"" + 
       this.state.AnalysisSetting.colorPalette + "\")+\n    scale_color_brewer(palette = \""+ this.state.AnalysisSetting.colorPalette +"\")") + 
       (this.state.Variables.Facet.length > 0? "+\n    facet_wrap( ~ " + this.state.Variables.Facet[0] + ")": "") +
@@ -363,6 +375,8 @@ export class ScatterplotPanel extends Component {
       (this.state.AnalysisSetting.title === "" ? "" : "+\n    ggtitle(\"" + this.state.AnalysisSetting.title + "\")") +
       (this.state.AnalysisSetting.xlab === "" ? "" : "+\n    xlab(\"" + this.state.AnalysisSetting.xlab + "\")") +
       (this.state.AnalysisSetting.ylab === "" ? "" : "+\n    ylab(\"" + this.state.AnalysisSetting.ylab + "\")") +
+      ((this.state.AnalysisSetting.xLowerLim === "" | this.state.AnalysisSetting.xUpperLim === "") ? "" : "+\n    xlim("+this.state.AnalysisSetting.xLowerLim +", " + this.state.AnalysisSetting.xUpperLim +")") +
+      ((this.state.AnalysisSetting.yLowerLim === "" | this.state.AnalysisSetting.yUpperLim === "") ? "" : "+\n    ylim("+this.state.AnalysisSetting.yLowerLim +", " + this.state.AnalysisSetting.yUpperLim +")") +
       (this.state.AnalysisSetting.legendFillLab === "" ? "" : "+\n    labs(color = \"" + this.state.AnalysisSetting.legendFillLab + "\", fill = \""+ 
       this.state.AnalysisSetting.legendFillLab +"\")") +
       (this.state.AnalysisSetting.legendShapeLab === "" ? "" : "+\n    labs(shape = \"" + this.state.AnalysisSetting.legendShapeLab + "\")") +
@@ -385,7 +399,16 @@ export class ScatterplotPanel extends Component {
       this.state.AnalysisSetting.facetFontSize + "))") +
       (this.state.AnalysisSetting.legendPosition === "right" ? "" : "+\n    theme(legend.position = \"" + this.state.AnalysisSetting.legendPosition +"\")") +
       (this.state.AnalysisSetting.marginalPlot? "%>%\n    ggMarginal(type=\""+ this.state.AnalysisSetting.marginalPlotType +"\")": "") +
-      "\n\n"
+      "\nplot" +
+      (this.state.Variables.Frame.length > 0 ? "\n\nlibrary(gganimate)\nlibrary(gifski)\n\nanimated_plot <- plot + " + 
+        (this.props.CurrentVariableList[this.state.Variables.Frame[0]][0] === "Numeric" ? "transition_time(" + this.state.Variables.Frame[0] + ")": "transition_states("+
+        this.state.Variables.Frame[0] +", transition_length = 1, state_length = 2)") + 
+          "+\n    labs(subtitle = \""+ this.state.Variables.Frame[0] + ":"+ 
+          (this.props.CurrentVariableList[this.state.Variables.Frame[0]][0] === "Numeric" ? " {frame_time}": " {closest_state}") + "\")" + 
+          "\nanimate(animated_plot, width = " + this.state.AnalysisSetting.ani_width + ", height = " + this.state.AnalysisSetting.ani_height + ", renderer = gifski_renderer())" + 
+          "\nanim_save(\"" + this.state.AnalysisSetting.ani_file + ".gif\", animation = last_animation())" +
+          "\npaste(\"Animated plot saved at \", getwd()) " : "") +
+      "\n"
 
     
     
@@ -431,6 +454,9 @@ export class ScatterplotPanel extends Component {
       case "fittedLineType":
       case "confIntLevel":
       case "marginalPlotType":
+      case "ani_width":
+      case "ani_height":
+      case "ani_file":
         AnalysisSettingObj[target] = event.target.value
         break;
       case "fittedLine":
@@ -440,6 +466,9 @@ export class ScatterplotPanel extends Component {
       case "marginalPlot":
       case "rug":
       case "originalData":
+      case "jitter":
+      case "scale_x_log10":
+      case "scale_y_log10":
         AnalysisSettingObj[target] = !AnalysisSettingObj[target]
         break;
       default:
@@ -516,7 +545,7 @@ export class ScatterplotPanel extends Component {
           <ExpansionPanel square expanded={this.state.panels.labelAndThemeSetting}
           onChange = {this.handlePanelExpansion("labelAndThemeSetting")}>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-              <Typography>Label and Theme</Typography>
+              <Typography>Label, Theme and Settings</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails onMouseLeave={this.buildCode} onBlur={this.buildCode}>
               <LabelAndThemeDataVizSetting 
@@ -529,8 +558,8 @@ export class ScatterplotPanel extends Component {
               needColorLabel = {false}
               needShapeLabel = {this.state.Variables.Shape.length > 0}
               needSizeLabel = {this.state.Variables.Size.length > 0}
-              needYLim = {false}
-              needXLim = {false}
+              needYLim = {true}
+              needXLim = {true}
               needFacetFontSize = {this.state.Variables.Facet.length > 0}
 
               />

@@ -191,6 +191,12 @@ export class SettingBar extends Component {
                             <br/><br/>
                         </div>
                         
+                        <div onClick={()=> this.openExampleData("gapminder")} className="exampleDataSelection">
+                            <b>Gapminder</b><br/>
+                            <span>GDP, Life expectancy and population data</span>
+                            <br/><br/>
+                        </div>
+
                         <div onClick={()=> this.openExampleData("HDI")} className="exampleDataSelection">
                             <b>Human Development Index</b><br/>
                             <span>Human Development Index (1990-2018) by regions</span>

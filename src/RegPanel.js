@@ -665,7 +665,7 @@ export class RegPanel extends Component {
           /* Weighted analysis */
           if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
             
-            codeString = codeString + "library(survey)\n\n\"Weighted linear regression\"\n\n" + 
+            codeString = codeString + "library(survey)\n\n\"Weighted analysis\"\n\n" + 
             "mi_dataList <- currentDataset[currentDataset$.imp != 0,]\n" +
             "mi_dataList <- split(mi_dataList, mi_dataList$.imp)\n" +
             "mi_dataList <- imputationList(mi_dataList)\n" + 
@@ -682,7 +682,7 @@ export class RegPanel extends Component {
             
           }else
           {
-            codeString = codeString + "\"Weighted linear regression\"\n\nlibrary(survey)\n\n" + 
+            codeString = codeString + "\"Weighted analysis\"\n\nlibrary(survey)\n\n" + 
             "clus <- svydesign(id =~ 1, weights =~ " + this.state.Variables.Weight[0] + ", data = currentDataset)\n" + 
             "res <- svyglm(" + formulaFixedPart + ", design = clus)\n" + 
             "summary(res)\n" + 
@@ -776,7 +776,7 @@ export class RegPanel extends Component {
           }
         }else{
           if (this.state.AnalysisSetting[currentPanel].imputeMissing || this.state.AnalysisSetting[currentPanel].imputedDataset) {
-            codeString = codeString + "library(survey)\n\n\"Weighted linear regression\"\n\n" + 
+            codeString = codeString + "library(survey)\n\n\"Weighted analysis\"\n\n" + 
             "mi_dataList <- currentDataset[currentDataset$.imp != 0,]\n" +
             "mi_dataList <- split(mi_dataList, mi_dataList$.imp)\n" +
             "mi_dataList <- imputationList(mi_dataList)\n" + 
@@ -791,7 +791,7 @@ export class RegPanel extends Component {
             }
 
           }else {
-            codeString = codeString + "\"Weighted linear regression\"\n\nlibrary(survey)\n\n" + 
+            codeString = codeString + "\"Weighted analysis\"\n\nlibrary(survey)\n\n" + 
             "clus <- svydesign(id =~ 1, weights =~ " + this.state.Variables.Weight[0] + ", data = currentDataset)\n" + 
             "res <- svyglm(" + formulaFixedPart + ", design = clus," + family + ")\n" + 
             "summary(res)\n\"Model coefficients and confidence intervals\"\n" +
