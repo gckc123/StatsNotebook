@@ -340,50 +340,52 @@ export class MediationPanel extends Component {
         codeString = codeString + "currentDataset <- currentDataset[which(currentDataset$.imp == 0),]\n" +
         "currentDataset <- currentDataset[!(names(currentDataset) %in% c(\".id\", \".imp\"))]\n\n"
       }
-    }
 
-    codeString = codeString + "\"Multiple imputation\"\n\nlibrary(mice)\n"
-    let formula = []
-    let method = []
-    let formulaCode = "formulas <- make.formulas(currentDataset)\n"
+      codeString = codeString + "\"Multiple imputation\"\n\nlibrary(mice)\n"
+      let formula = []
+      let method = []
+      let formulaCode = "formulas <- make.formulas(currentDataset)\n"
 
-    let analysisVars = this.state.Variables.Covariate.concat(this.state.Variables.Outcome).concat(Exposure).concat(this.state.Variables.Mediator)
+      let analysisVars = this.state.Variables.Covariate.concat(this.state.Variables.Outcome).concat(Exposure).concat(this.state.Variables.Mediator)
 
-    let intTerm = []
+      let intTerm = []
 
-    if (this.state.AnalysisSetting.incint) {
-      this.state.Variables.Mediator.forEach((med) => {
-        intTerm.push(med + "*" + Exposure)
+      if (this.state.AnalysisSetting.incint) {
+        this.state.Variables.Mediator.forEach((med) => {
+          intTerm.push(med + "*" + Exposure)
+        })
+      }
+
+      if (this.state.AnalysisSetting.incmmint && this.state.Variables.Mediator.length >= 2) {
+        this.state.Variables.Mediator.forEach((med, index) => {
+          for(let i = index+1; i < this.state.Variables.Mediator.length; i++) {
+            intTerm.push(med + "*" + this.state.Variables.Mediator[i])
+          }
+        })
+      }
+
+      analysisVars.forEach((variable) => {
+        let predictor = analysisVars.filter((item) => item !== variable)
+        formula.push("formulas$"+variable+" =" + variable + " ~ " + 
+        predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
+        intTerm.join(" + "))
       })
-    }
 
-    if (this.state.AnalysisSetting.incmmint && this.state.Variables.Mediator.length >= 2) {
-      this.state.Variables.Mediator.forEach((med, index) => {
-        for(let i = index+1; i < this.state.Variables.Mediator.length; i++) {
-          intTerm.push(med + "*" + this.state.Variables.Mediator[i])
-        }
+      let notIncludedVars = this.not(this.state.Variables.Available, analysisVars)
+        notIncludedVars.forEach((variable) => {
+          if (variable !== ".id" && variable !== ".imp") {
+            method.push("meth[\""+variable+"\"] <- \"\"")
+          }
       })
+
+      formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
+      let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
+      codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\nimputedDataset <- parlmice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
+        this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
+        ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE)\n\n"
     }
 
-    analysisVars.forEach((variable) => {
-      let predictor = analysisVars.filter((item) => item !== variable)
-      formula.push("formulas$"+variable+" =" + variable + " ~ " + 
-      predictor.join(" + ") + (intTerm.length > 0 ? " + " : "") + 
-      intTerm.join(" + "))
-    })
-
-    let notIncludedVars = this.not(this.state.Variables.Available, analysisVars)
-      notIncludedVars.forEach((variable) => {
-        if (variable !== ".id" && variable !== ".imp") {
-          method.push("meth[\""+variable+"\"] <- \"\"")
-        }
-    })
-
-    formulaCode = formulaCode + "\n" + formula.join("\n") + "\n"
-    let methodCode = "meth <- make.method(currentDataset)\n" + method.join("\n") + "\n"
-    codeString = codeString + "\n" + formulaCode + "\n" + methodCode + "\nimputedDataset <- parlmice(currentDataset,\n  method = meth,\n  formulas = formulas,\n  m = "+ 
-      this.state.AnalysisSetting.M + ",\n  n.core = " + this.props.CPU + ", \n  n.imp.core = "+ Math.ceil(this.state.AnalysisSetting.M/this.props.CPU) +
-      ")\n\nplot(imputedDataset)\ncurrentDataset <- complete(imputedDataset, action = \"long\", include = TRUE)\n\n"
+    
 
     codeString = codeString + "\"Causal Mediation Analysis\"\n\nmed_res <- intmed::mediate(y = \"" + this.state.Variables.Outcome[0] + "\",\n"+ 
     "  med = c(\""+ this.state.Variables.Mediator.join("\" ,\"") +"\"),\n"+
