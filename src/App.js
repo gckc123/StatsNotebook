@@ -30,6 +30,7 @@ import { BarChartPanel } from './BarChartPanel';
 import { ScatterplotPanel } from './ScatterplotPanel';
 import { CorrelogramPanel } from './CorrelogramPanel';
 import { LineGraphPanel } from './LineGraphPanel';
+import { ITSAPanel } from './ITSAPanel';
 import _ from "lodash";
 import { HotKeys } from "react-hotkeys";
 
@@ -49,7 +50,7 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentVersion: "0.1.1",
+      currentVersion: "0.1.2",
       RVersion: "4.0.2",
       StatsNotebookURL: "https://statsnotebook.io",
       tentativeScript: "",
@@ -107,7 +108,13 @@ export class App extends Component {
           CategoricalVarLevels: ResultsJSON.CategoricalVarLevels,
           imputedDataset: imputedDataset})
       }else if (ResultsJSON.OutputType[0] === "getData") {
-        this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
+        try {
+          this.setState({CurrentData: ResultsJSON.Output, nrow: ResultsJSON.nrow[0], ncol: ResultsJSON.ncol[0]})
+        }catch(err) {
+          console.log(err.message)
+          this.resetDataState()
+          
+        }
       }else if(ResultsJSON.OutputType[0] === "END") {
         let tmp = _.cloneDeep(this.state.NotebookBlkList)
         let today = new Date()
@@ -765,6 +772,23 @@ export class App extends Component {
                   
                   <div hidden={this.state.currentActiveAnalysisPanel !== "IPTWPanel"}>
                     <IPTWPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    CPU = {this.state.CPU}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
+                  </div>
+                  
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "ITSAPanel"}>
+                    <ITSAPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}

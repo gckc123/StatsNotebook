@@ -155,7 +155,8 @@ class RegressionMenu extends Component {
                 onClick = {() => this.setAnalysisPanel("NbPanel")}>Negative Binomial Regression (Over-dispersed count outcome)</MenuItem>
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick = {() => this.setAnalysisPanel("MultinomPanel")}>Multinomial Logistic Regression (Categorical outcome with more than two levels)</MenuItem>
-               
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick = {() => this.setAnalysisPanel("ITSAPanel")}>Interrupted Time Series Analysis</MenuItem>               
             </Menu>
         )
     }
