@@ -31,6 +31,7 @@ import { ScatterplotPanel } from './ScatterplotPanel';
 import { CorrelogramPanel } from './CorrelogramPanel';
 import { LineGraphPanel } from './LineGraphPanel';
 import { ITSAPanel } from './ITSAPanel';
+import { MatchingPanel } from './MatchingPanel';
 import _ from "lodash";
 import { HotKeys } from "react-hotkeys";
 
@@ -50,7 +51,7 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentVersion: "0.1.2",
+      currentVersion: "0.1.3",
       RVersion: "4.0.2",
       StatsNotebookURL: "https://statsnotebook.io",
       tentativeScript: "",
@@ -772,6 +773,23 @@ export class App extends Component {
                   
                   <div hidden={this.state.currentActiveAnalysisPanel !== "IPTWPanel"}>
                     <IPTWPanel CurrentVariableList = {this.state.CurrentVariableList}
+                    CategoricalVarLevels = {this.state.CategoricalVarLevels}
+                    updateTentativeScriptCallback = {this.updateTentativeScript}
+                    tentativeScript = {this.state.tentativeScript}
+                    addExtraBlkCallback = {this.addExtraBlk}
+                    CPU = {this.state.CPU}
+                    currentActiveAnalysisPanel = {this.state.currentActiveAnalysisPanel}
+                    setPanelFromNotebook = {this.state.setPanelFromNotebook}
+                    tentativePanelState = {this.state.tentativePanelState}
+                    setPanelFromNotebookToFalseCallback = {this.setPanelFromNotebookToFalse}
+                    openWebpageCallback = {this.openWebpage}
+                    StatsNotebookURL = {this.state.StatsNotebookURL}
+                    currentVersion = {this.state.currentVersion}
+                    RVersion = {this.state.RVersion}/>
+                  </div>
+
+                  <div hidden={this.state.currentActiveAnalysisPanel !== "MatchingPanel"}>
+                    <MatchingPanel CurrentVariableList = {this.state.CurrentVariableList}
                     CategoricalVarLevels = {this.state.CategoricalVarLevels}
                     updateTentativeScriptCallback = {this.updateTentativeScript}
                     tentativeScript = {this.state.tentativeScript}

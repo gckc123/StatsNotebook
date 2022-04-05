@@ -560,3 +560,16 @@
     margin: 0px;
     padding: 0px;
 }
+
+.Matching-Variable-Selection-Box {
+    display: grid;
+    grid-template-columns: 260px 80px 260px;
+    grid-template-rows: 25px 40px 25px 40px 25px 160px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.Matching-Available-Variable-List-Container {
+    grid-row-start: 2;
+    grid-row-end: 7;
+}

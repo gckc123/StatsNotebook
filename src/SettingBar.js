@@ -155,6 +155,12 @@ export class SettingBar extends Component {
         this.handleExampleDataDialogClose()
     }
 
+    openOnlineExampleData = (exampleData) => {
+        let script = "currentDataset <- read_csv(\"https://raw.githubusercontent.com/gckc123/ExampleData/main/" + exampleData + ".csv\")"
+        this.props.addExtraBlkCallback(script, true)
+        this.handleExampleDataDialogClose()
+    }
+
     render () {
         return (
             <div>
@@ -243,6 +249,12 @@ export class SettingBar extends Component {
                         <div onClick={()=> this.openExampleData("wellbeing")} className="exampleDataSelection">
                             <b>Wellbeing</b><br/>
                             <span>Simulated data on psychological wellbeing, stress and social support.</span>
+                            <br/><br/>
+                        </div>
+
+                        <div onClick={()=> this.openOnlineExampleData("smoking_psyc_distress_with_missing")} className="exampleDataSelection">
+                            <b>Psychological distress and smoking</b><br/>
+                            <span>Simulated data on psychological disstress and smoking</span>
                             <br/><br/>
                         </div>
                         

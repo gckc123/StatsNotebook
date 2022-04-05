@@ -190,7 +190,11 @@ class CausalMenu extends Component {
                 <MenuItem disableRipple style = {MenuItemStyle}
                 onClick={() => this.setAnalysisPanel("MediationPanel")}>
                     Causal Mediation Analysis
-                </MenuItem>                                       
+                </MenuItem>
+                <MenuItem disableRipple style = {MenuItemStyle}
+                onClick={() => this.setAnalysisPanel("MatchingPanel")}>
+                    Matching
+                </MenuItem>                                            
             </Menu>
         )
     }
