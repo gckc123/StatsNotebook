@@ -285,7 +285,7 @@ export class MatchingPanel extends Component {
         codeString = codeString + "\n  }\n\n" 
         
         if (this.state.AnalysisSetting.EstOutcome) {
-          codeString = codeString + "matched_data[[i]] <- " + (this.state.AnalysisSetting.Replacement && this.state.AnalysisSetting.Method != "full" && this.state.AnalysisSetting.Method != "optimal" ? "get_matches" : "match.data") + "(match_obj[[i]])\n"
+          codeString = codeString + "  matched_data[[i]] <- " + (this.state.AnalysisSetting.Replacement && this.state.AnalysisSetting.Method != "full" && this.state.AnalysisSetting.Method != "optimal" ? "get_matches" : "match.data") + "(match_obj[[i]])\n"
           if (this.state.AnalysisSetting.OutcomeModel == "lm") {
             codeString = codeString + "  res[[i]] <- lm("+ this.state.Variables.Outcome[0] + " ~ " + 
             this.state.Variables.Exposure[0]+
@@ -514,6 +514,8 @@ export class MatchingPanel extends Component {
               setSortAvailableCallback = {this.setSortAvailable}
               resetVarListCallback = {this.resetVarList}
               sortAvailable = {this.state.sortAvailable}
+              openWebpageCallback = {this.props.openWebpageCallback}
+              StatsNotebookURL = {this.props.StatsNotebookURL}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>  

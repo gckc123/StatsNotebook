@@ -86,7 +86,7 @@ export class MatchingVariableSelection extends Component {
                             <FontAwesomeIcon icon={faUndoAlt} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
                     <StyledTooltip title="see tutorial at StatsNotebook.io" placement="top"><span className="pl-2">
-                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/analysis/itsa/")}>
+                        <StyledIconButton size="small" onClick={() => this.props.openWebpageCallback( this.props.StatsNotebookURL + "/blog/analysis/matching/")}>
                             <FontAwesomeIcon icon={faBookReader} size="1x"/></StyledIconButton>
                         </span></StyledTooltip>
                     </div>
