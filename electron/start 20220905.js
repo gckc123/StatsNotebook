@@ -20,17 +20,13 @@ RequestToR.identity = "NodejsClient"
 RequestToR.connect("tcp://localhost:5556");
 ReplyFromR.bind("tcp://*:5555")
 
-const {ipcMain} = require('electron');
 
 app.on('ready', () => {
   
   mainWindow = new BrowserWindow({
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      preload: path.join(app.getAppPath(), 'electron\\preload.js')
-  },
+      contextIsolation: false
+    },
     show:false,
     width: 1366,
     height: 768,
@@ -99,13 +95,13 @@ ReplyFromR.on("message",function() {
   showRReply(args[1].toString('utf8'));
 })
 
-ipcMain.on('getCPUCount',(event, arg = '') => {
+const getCPUCount = exports.getCPUCount = () => {
   let os = require('os')
   let cpuCount = os.cpus().length
   mainWindow.webContents.send('cpuCount', cpuCount);
-})
+}
 
-ipcMain.on('getFileFromUser', (event, fileType) => {
+const getFileFromUser = exports.getFileFromUser = (fileType) => {
   let fileTypeName = ""
   let fileExtension = ""
   switch (fileType) {
@@ -146,10 +142,9 @@ ipcMain.on('getFileFromUser', (event, fileType) => {
       }
     }
   }
-})
+}
 
-
-ipcMain.on('savingFile', (event, content, NotebookPath = "") => {
+const savingFile = exports.savingFile = (content, NotebookPath = "") => {
   let file = ""
   if (NotebookPath === "") {
     file = dialog.showSaveDialogSync(mainWindow, {
@@ -168,13 +163,13 @@ ipcMain.on('savingFile', (event, content, NotebookPath = "") => {
   };
   fs.writeFileSync(file, content);
   mainWindow.webContents.send('NotebookPath', file)
-})
+}
 
-ipcMain.on('openWebpage', (event, address) => {
+const openWebpage = exports.openWebpage = (address) => {
   shell.openExternal(address)
-})
+}
 
-ipcMain.on('savingDataFile', (event, fileType) => {
+const savingDataFile = exports.savingDataFile = (fileType, workingDir) => {
   let fileTypeName = ""
   let fileExtension = ""
   switch (fileType) {
@@ -197,7 +192,6 @@ ipcMain.on('savingDataFile', (event, fileType) => {
     default:
       break;
   }
-
   const file = dialog.showSaveDialogSync(mainWindow, {
     title: 'Save Data File as ' + fileType,
     filters: [
@@ -211,17 +205,15 @@ ipcMain.on('savingDataFile', (event, fileType) => {
   }else {
     sendFileName(file, "save") 
   };
-})
-
-send2R = (codes) => {
-  codes = codes.replace(/\\r\\n/g,"\\n").replace(/\\r/g,"\\n")
-  RequestToR.send(codes);
+  
 }
 
-ipcMain.on('send2R', (event, codes) => {
-  console.log(codes)
-  send2R(codes)
-})
+const send2R = exports.send2R = (codes) => {
+  //console.log("Before replacement", codes)
+  codes = codes.replace(/\\r\\n/g,"\\n").replace(/\\r/g,"\\n")
+  //console.log("Sending codes to R: ", codes);
+  RequestToR.send(codes);
+}
 
 const sendFileName = (file, action = "open") => {
   let directory = ""
@@ -247,7 +239,5 @@ const sendFileName = (file, action = "open") => {
 
 const showRReply = (reply) => {
   mainWindow.webContents.send('RecvROutput', reply)
-  console.log(reply)
 }
-
 

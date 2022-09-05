@@ -42,17 +42,16 @@ const keyMap = {
     MOVE_DOWN: "alt+down",
 }
 
-//const electron = window.require('electron');
-//const mainProcess = electron.remote.require('../electron/start.js');
-
-const ipcRenderer = window.ipcRenderer;
+const electron = window.require('electron');
+const mainProcess = electron.remote.require('../electron/start.js');
+const ipcRenderer = electron.ipcRenderer;
 
 export class App extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      currentVersion: "0.1.4",
+      currentVersion: "0.1.3",
       RVersion: "4.0.2",
       StatsNotebookURL: "https://statsnotebook.io",
       tentativeScript: "",
@@ -291,16 +290,14 @@ export class App extends Component {
   }
 
   savingDataFile = (fileType, workingDir) => {
-    ipcRenderer.send('savingDataFile', fileType)
+    mainProcess.savingDataFile(fileType)
   }
 
   savingFile = (saveAs = true) => {
     if (saveAs) {
-      //mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
-      ipcRenderer.send('savingFile',JSON.stringify(this.state.NotebookBlkList))
+      mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
     }else{
-      //mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList), this.state.NotebookPath)
-      ipcRenderer.send('savingFile',JSON.stringify(this.state.NotebookBlkList), this.state.NotebookPath)
+      mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList), this.state.NotebookPath)
     }
   }
 
@@ -457,8 +454,7 @@ export class App extends Component {
       endIndex: 500,
     }
     let ScriptString = JSON.stringify(ScriptJSON)
-    //mainProcess.send2R(ScriptString);
-    ipcRenderer.send('send2R',ScriptString)
+    mainProcess.send2R(ScriptString);
   }
 
   getVariableList = () => {
@@ -468,13 +464,11 @@ export class App extends Component {
       fromBlk: "",
     }
     let StriptString = JSON.stringify(ScriptJSON)
-    ipcRenderer.send('send2R',StriptString)
-    //mainProcess.send2R(StriptString);
+    mainProcess.send2R(StriptString);
   }
 
   getCPUCount = () => {
-    //mainProcess.getCPUCount();
-    ipcRenderer.send('getCPUCount',"")
+    mainProcess.getCPUCount();
   }
 
   runScript = (fromNotebookBlk = false, selectedCode = "") => {  
@@ -515,8 +509,7 @@ export class App extends Component {
           }
 
           let StriptString = JSON.stringify(ScriptJSON)
-          //mainProcess.send2R(StriptString);
-          ipcRenderer.send('send2R', StriptString)
+          mainProcess.send2R(StriptString);
         })
     }
     
@@ -540,8 +533,7 @@ export class App extends Component {
           }
 
           let StriptString = JSON.stringify(ScriptJSON)
-          //mainProcess.send2R(StriptString);
-          ipcRenderer.send('send2R', StriptString)
+          mainProcess.send2R(StriptString);
         }
     }
     
@@ -554,8 +546,7 @@ export class App extends Component {
   }
 
   openFile = (fileType) => {
-    //mainProcess.getFileFromUser(fileType);
-    ipcRenderer.send('getFileFromUser', fileType)
+    mainProcess.getFileFromUser(fileType);
     this.setState({currentActiveLeftPanel: "DataPanel", currentActiveDataPanel: "DataPanel"})
     if (fileType === "Notebook") {
       this.setState({clearNotebookBlkRef: true})
@@ -613,8 +604,7 @@ export class App extends Component {
   }
 
   openWebpage = (address) => {
-    //mainProcess.openWebpage(address)
-    ipcRenderer.send('openWebpage', address)
+    mainProcess.openWebpage(address)
   }
 
   render() {
