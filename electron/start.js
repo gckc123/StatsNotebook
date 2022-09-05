@@ -24,12 +24,21 @@ const {ipcMain} = require('electron');
 
 app.on('ready', () => {
   
+  preload_path = ''
+
+  if (process.platform === "win32")
+  {
+    preload_path = 'electron\\preload.js'
+  }else if (process.platform === "darwin") {
+    preload_path = 'electron/preload.js'
+  }
+
   mainWindow = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
-      preload: path.join(app.getAppPath(), 'electron\\preload.js')
+      preload: path.join(app.getAppPath(), preload_path)
   },
     show:false,
     width: 1366,
