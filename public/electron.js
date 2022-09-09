@@ -45,8 +45,6 @@ app.on('ready', () => {
       ? 'http://localhost:3000'
       : `file://${path.join(__dirname, 'index.html')}`,
   )
-
-  mainWindow.webContents.openDevTools()
   
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
