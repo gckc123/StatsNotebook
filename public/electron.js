@@ -136,7 +136,7 @@ ipcMain.on('getFileFromUser', (event, fileType) => {
     ]
   });
   console.log("Opening file")
-  console.log(file[0])
+
   if (file) { 
     if (fileType === "CSV" || fileType === "SPSS" || fileType === "STATA") {
       sendFileName(file, "open") 
