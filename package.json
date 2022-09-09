@@ -22,16 +22,7 @@
         ]
       },
       "public/electron.js"
-    ],
-    "win": {
-      "target": "msi"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "linux": {
-      "target": "deb"
-    }
+    ]
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
