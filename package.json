@@ -2,7 +2,7 @@
   "name": "StatsNotebook",
   "version": "0.1.4",
   "private": true,
-  "main": "electron/start.js",
+  "main": "./public/electron.js",
   "homepage": "./",
   "build": {
     "files": [
@@ -19,7 +19,8 @@
         "filter": [
           "**/*"
         ]
-      }
+      },
+      "public/electron.js"
     ]
   },
   "dependencies": {
@@ -61,21 +62,17 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build-electron": "mkdir build/extraResources && robocopy electron build/electron /S & robocopy extraResources build/extraResources /S",
-    "package": "electron-builder build --win -c.extraMetadata.main=build/electron/start.js --publish never"
+    "package:win": "electron-builder build --win -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": "react-app"
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "last 1 electron version"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "last 1 electron version"
     ]
   },
   "devDependencies": {

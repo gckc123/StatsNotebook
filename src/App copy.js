@@ -34,7 +34,6 @@ import { ITSAPanel } from './ITSAPanel';
 import { MatchingPanel } from './MatchingPanel';
 import _ from "lodash";
 import { HotKeys } from "react-hotkeys";
-import { WindowScroller } from 'react-virtualized';
 
 const keyMap = {
     ADD: "alt+a",
@@ -45,6 +44,8 @@ const keyMap = {
 
 //const electron = window.require('electron');
 //const mainProcess = electron.remote.require('../electron/start.js');
+
+const ipcRenderer = window.ipcRenderer;
 
 export class App extends Component {
 
@@ -86,7 +87,7 @@ export class App extends Component {
     let initialScript = "library(tidyverse)\nlibrary(ggplot2)\nlibrary(forcats)\nlibrary(lubridate)\ninitialise_seed <- runif(1)\n"
     this.addExtraBlk(initialScript, true)
 
-    window.electronAPI.RecvROutput((event, content) => {
+    ipcRenderer.on('RecvROutput', (event, content) => {
       let ResultsJSON = JSON.parse(content.toString())
       
       if (ResultsJSON.OutputType[0] === "Normal" || ResultsJSON.OutputType[0] === "Warning" || ResultsJSON.OutputType[0] === "Message" || ResultsJSON.OutputType[0] === "Error") {
@@ -141,7 +142,7 @@ export class App extends Component {
       }
     })
     
-    window.electronAPI.data_file_opened((event, directory, filename, ext, os) => {
+    ipcRenderer.on('data-file-opened', (event, directory, filename, ext, os) => {
       
       if (os === "win32") {
         directory = directory.replace(/\\/g,"\\\\")
@@ -169,7 +170,7 @@ export class App extends Component {
       this.addExtraBlk(script, true) 
     })
 
-    window.electronAPI.data_file_saved((event, directory, filename, ext, os) => {
+    ipcRenderer.on('data-file-saved', (event, directory, filename, ext, os) => {
       
       if (os === "win32") {
         directory = directory.replace(/\\/g,"\\\\")
@@ -197,17 +198,17 @@ export class App extends Component {
       this.addExtraBlk(script, true) 
     })
 
-    window.electronAPI.notebook_file_opened((event, notebookContent) => {
+    ipcRenderer.on('notebook-file-opened', (event, notebookContent) => {
       let contentJSON = JSON.parse(notebookContent)
       this.setState({NotebookBlkList: contentJSON, ActiveBlkID: null, ActiveScript: ""})
     })
 
-    window.electronAPI.cpuCount((event, cpuCount) => {
+    ipcRenderer.on('cpuCount', (event, cpuCount) => {
       if (cpuCount >= 2)
         this.setState({CPU: cpuCount - 1})
     })
 
-    window.electronAPI.NotebookPath((event, file) => {
+    ipcRenderer.on('NotebookPath', (event, file) => {
       this.setState({NotebookPath: file}, ()=> console.log(this.state.NotebookPath))
     })
   }
@@ -253,6 +254,10 @@ export class App extends Component {
   }
 
   componentWillUnmount() {
+    ipcRenderer.removeAllListeners('RecvROutput')
+    ipcRenderer.removeAllListeners('data-file-opened')
+    ipcRenderer.removeAllListeners('notebook-file-opened')
+    ipcRenderer.removeAllListeners('cpuCount')
     window.removeEventListener('resize', this.updateDataPanelDimension)
   }
 
@@ -286,16 +291,16 @@ export class App extends Component {
   }
 
   savingDataFile = (fileType, workingDir) => {
-    window.electronAPI.savingDataFile(fileType)
+    ipcRenderer.send('savingDataFile', fileType)
   }
 
   savingFile = (saveAs = true) => {
     if (saveAs) {
       //mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList));
-      window.electronAPI.savingFile(JSON.stringify(this.state.NotebookBlkList))
+      ipcRenderer.send('savingFile',JSON.stringify(this.state.NotebookBlkList))
     }else{
       //mainProcess.savingFile(JSON.stringify(this.state.NotebookBlkList), this.state.NotebookPath)
-      window.electronAPI.savingFile(JSON.stringify(this.state.NotebookBlkList), this.state.NotebookPath)
+      ipcRenderer.send('savingFile',JSON.stringify(this.state.NotebookBlkList), this.state.NotebookPath)
     }
   }
 
@@ -453,7 +458,7 @@ export class App extends Component {
     }
     let ScriptString = JSON.stringify(ScriptJSON)
     //mainProcess.send2R(ScriptString);
-    window.electronAPI.send2R(ScriptString)
+    ipcRenderer.send('send2R',ScriptString)
   }
 
   getVariableList = () => {
@@ -463,13 +468,13 @@ export class App extends Component {
       fromBlk: "",
     }
     let StriptString = JSON.stringify(ScriptJSON)
-    window.electronAPI.send2R(StriptString)
+    ipcRenderer.send('send2R',StriptString)
     //mainProcess.send2R(StriptString);
   }
 
   getCPUCount = () => {
     //mainProcess.getCPUCount();
-    window.electronAPI.getCPUCount()
+    ipcRenderer.send('getCPUCount',"")
   }
 
   runScript = (fromNotebookBlk = false, selectedCode = "") => {  
@@ -511,7 +516,7 @@ export class App extends Component {
 
           let StriptString = JSON.stringify(ScriptJSON)
           //mainProcess.send2R(StriptString);
-          window.electronAPI.send2R(StriptString)
+          ipcRenderer.send('send2R', StriptString)
         })
     }
     
@@ -536,7 +541,7 @@ export class App extends Component {
 
           let StriptString = JSON.stringify(ScriptJSON)
           //mainProcess.send2R(StriptString);
-          window.electronAPI.send2R(StriptString)
+          ipcRenderer.send('send2R', StriptString)
         }
     }
     
@@ -550,7 +555,7 @@ export class App extends Component {
 
   openFile = (fileType) => {
     //mainProcess.getFileFromUser(fileType);
-    window.electronAPI.getFileFromUser(fileType)
+    ipcRenderer.send('getFileFromUser', fileType)
     this.setState({currentActiveLeftPanel: "DataPanel", currentActiveDataPanel: "DataPanel"})
     if (fileType === "Notebook") {
       this.setState({clearNotebookBlkRef: true})
@@ -609,7 +614,7 @@ export class App extends Component {
 
   openWebpage = (address) => {
     //mainProcess.openWebpage(address)
-    window.electronAPI.openWebpage(address)
+    ipcRenderer.send('openWebpage', address)
   }
 
   render() {

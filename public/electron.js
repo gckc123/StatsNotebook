@@ -23,22 +23,12 @@ ReplyFromR.bind("tcp://*:5555")
 const {ipcMain} = require('electron');
 
 app.on('ready', () => {
-  
-  preload_path = ''
-
-  if (process.platform === "win32")
-  {
-    preload_path = 'electron\\preload.js'
-  }else if (process.platform === "darwin") {
-    preload_path = 'electron/preload.js'
-  }
 
   mainWindow = new BrowserWindow({
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
       enableRemoteModule: true,
-      preload: path.join(app.getAppPath(), preload_path)
+      preload: path.join(__dirname, "preload.js")
   },
     show:false,
     width: 1366,
@@ -53,9 +43,11 @@ app.on('ready', () => {
   mainWindow.loadURL(
     isDev
       ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../index.html')}`,
+      : `file://${path.join(__dirname, 'index.html')}`,
   )
 
+  mainWindow.webContents.openDevTools()
+  
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     
@@ -137,13 +129,14 @@ ipcMain.on('getFileFromUser', (event, fileType) => {
     default:
       break;
   }
-  const file = dialog.showOpenDialogSync(mainWindow, {
+  let file = dialog.showOpenDialogSync(mainWindow, {
     properties: ['openFile'],
     filters: [
         {name: fileType, extensions: fileExtension},
     ]
   });
   console.log("Opening file")
+  console.log(file[0])
   if (file) { 
     if (fileType === "CSV" || fileType === "SPSS" || fileType === "STATA") {
       sendFileName(file, "open") 
@@ -207,7 +200,7 @@ ipcMain.on('savingDataFile', (event, fileType) => {
       break;
   }
 
-  const file = dialog.showSaveDialogSync(mainWindow, {
+  let file = dialog.showSaveDialogSync(mainWindow, {
     title: 'Save Data File as ' + fileType,
     filters: [
       {name: fileType, extensions: fileExtension}
@@ -232,7 +225,7 @@ ipcMain.on('send2R', (event, codes) => {
   send2R(codes)
 })
 
-const sendFileName = (file, action = "open") => {
+sendFileName = (file, action = "open") => {
   let directory = ""
   let filename = ""
   let ext = ""
@@ -240,14 +233,21 @@ const sendFileName = (file, action = "open") => {
     directory = path.dirname(file[0])
     filename = path.basename(file[0])
     ext = path.extname(file[0])
+    console.log("OPEN! calling sendFileName")
   }else
   {
     directory = path.dirname(file)
     filename = path.basename(file)
     ext = path.extname(file)
   }
+
+  console.log("preparing to message")
+
   let os = process.platform
+
   if (action === "open") {
+    console.log("messaging renderer")
+    console.log(os)
     mainWindow.webContents.send('data-file-opened', directory, filename, ext, os);
   }else{
     mainWindow.webContents.send('data-file-saved', directory, filename, ext, os);
